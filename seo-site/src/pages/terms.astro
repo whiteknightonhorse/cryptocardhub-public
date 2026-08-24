@@ -1,0 +1,168 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lastReviewed = '2026-05-05';
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'Terms of use', url: `${siteOrigin}/terms/` },
+];
+---
+<BaseLayout
+  title="Terms of use — DefyCard"
+  description="DefyCard terms of use: informational only, affiliate-link consent, intellectual property, acceptable use, jurisdiction, and limitation of liability."
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="legal-page">
+    <h1>Terms of use</h1>
+    <p class="lead">
+      These terms govern your use of <a href="https://defycard.com">defycard.com</a>
+      and any subdomain operated by DefyCard. By loading any page on this
+      site you agree to the terms below. If you do not agree, please leave
+      the site.
+    </p>
+
+    <h2>Informational purposes only</h2>
+    <p>
+      Every article, comparison, calculator, and review on DefyCard is
+      published for informational purposes. Nothing on this site constitutes
+      investment advice, financial advice, tax advice, legal advice, or a
+      recommendation to buy, sell, or hold any digital asset. DefyCard is
+      not a registered investment adviser, broker-dealer, securities
+      exchange, money-services business, or Crypto Asset Service Provider.
+      Decisions you make about a crypto card, an issuer, or any digital
+      asset are your own. You should consult a qualified professional
+      before acting on any information you find here.
+    </p>
+
+    <h2>Capital at risk</h2>
+    <p>
+      Crypto debit and credit cards depend on underlying crypto assets, on
+      issuer custody arrangements, and on third-party settlement networks.
+      Each of those layers carries operational, regulatory, and market risk.
+      Cashback yields, FX fees, country availability, and KYC requirements
+      can change at any time without notice. Past performance does not
+      indicate future results, and a card that fits your needs today may
+      not fit them in twelve months.
+    </p>
+
+    <h2>Affiliate links</h2>
+    <p>
+      DefyCard contains affiliate links. By clicking such a link you
+      acknowledge that DefyCard may earn a commission from the destination
+      issuer if you sign up. Commission does not change the price, terms,
+      or cashback you receive. The
+      <a href="/disclosure/">affiliate disclosure</a> page describes the
+      mechanics in full.
+    </p>
+
+    <h2>Intellectual property</h2>
+    <p>
+      All editorial content (articles, structure, copy, scoring rubric,
+      methodology) on DefyCard is owned by DefyCard or licensed to it. You
+      may quote short excerpts (up to 100 words) for non-commercial use
+      with attribution and a link back to the source page; broader
+      reproduction, syndication, or republication requires written
+      permission. Hero and inline images are licensed via Unsplash subject
+      to the Unsplash License; photographer credits remain with the image.
+    </p>
+
+    <h2>Trademarks</h2>
+    <p>
+      DefyCard and the DefyCard logo are trademarks of DefyCard. References
+      to ether.fi, Crypto.com, RedotPay, Bybit, MetaMask, Gnosis Pay,
+      Coinbase, and other named issuers, networks, or wallets are made for
+      identification purposes only and do not imply endorsement by, or
+      affiliation with, those parties.
+    </p>
+
+    <h2>Acceptable use</h2>
+    <p>
+      You agree not to scrape, mirror, or republish the site at scale; not
+      to attempt to bypass security controls, rate limits, or bot
+      detection; not to use the site for any unlawful purpose; and not to
+      probe or test the vulnerability of any DefyCard system without prior
+      written permission. AI agents and crawlers are welcome subject to the
+      directives in <code>/robots.txt</code> and the AI-readiness
+      conventions documented at <code>/llms.txt</code> and
+      <code>/.well-known/agent-skills/index.json</code>.
+    </p>
+
+    <h2>Limitation of liability</h2>
+    <p>
+      DefyCard is provided “as is” and “as available.” To the fullest extent
+      permitted by law, DefyCard, its operators, and its contributors
+      disclaim all warranties, whether express or implied, including
+      warranties of merchantability, fitness for a particular purpose,
+      non-infringement, and availability. In no event will DefyCard be
+      liable for any indirect, incidental, consequential, or punitive
+      damages arising out of or in connection with your use of the site,
+      even if advised of the possibility of such damages. Where applicable
+      law does not permit such limitations, they apply to the maximum
+      extent allowed.
+    </p>
+
+    <h2>Third-party content</h2>
+    <p>
+      DefyCard links to third-party websites, including card issuers, news
+      outlets, and regulators. We are not responsible for the content,
+      accuracy, or availability of those sites; an external link is not an
+      endorsement of any opinion, product, or service hosted there.
+    </p>
+
+    <h2>Jurisdiction</h2>
+    <p>
+      These terms are governed by the laws of the operator’s domicile,
+      without regard to conflict-of-law principles. Disputes arising out of
+      or relating to these terms or your use of the site are subject to
+      the exclusive jurisdiction of the courts in that domicile, except
+      where local consumer-protection law grants you a non-waivable right
+      to bring suit in your country of residence.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      We may revise these terms. Material revisions will update the “Last
+      reviewed” date at the bottom of this page. Continued use of the site
+      after a revision constitutes acceptance of the revised terms.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions about these terms?
+      <a href="mailto:support@defycard.com">support@defycard.com</a>.
+    </p>
+
+    <p class="page-meta">Last reviewed: {lastReviewed}</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .legal-page h2 {
+    margin-top: 1.8em;
+  }
+  .legal-page p {
+    color: var(--on-surface);
+    margin: 0 0 1em;
+  }
+  .legal-page code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.9em;
+    background: var(--surface-container-low);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--outline-variant);
+  }
+  .page-meta {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+</style>

@@ -1,0 +1,41 @@
+# DefyCard video pipeline — Python deps
+# Pin majors; minors free to upgrade.
+
+# Edge TTS — Microsoft, free
+edge-tts>=7.2.0,<8.0
+
+# Anthropic Claude (writer model = Haiku 4.5)
+anthropic>=0.40.0,<1.0
+
+# YouTube Data API v3
+google-api-python-client>=2.130.0,<3.0
+google-auth>=2.30.0,<3.0
+google-auth-oauthlib>=1.2.0,<2.0
+google-auth-httplib2>=0.2.0,<1.0
+
+# Image / thumbnail
+Pillow>=10.0.0,<12.0
+
+# HTTP
+requests>=2.31.0,<3.0
+
+# Config
+PyYAML>=6.0,<7.0
+python-dotenv>=1.0.0,<2.0
+
+# Whisper word-level alignment (optional but recommended)
+# Heavy install; alternative is whisper.cpp built from source.
+# openai-whisper>=20240930
+
+# Numerical / array ops (if/when we move to PIL-heavy thumbnails)
+# numpy>=1.26,<2.0
+
+# QR on the CTA card (Y54) — the only machine-passable route out of a Short,
+# where the description URL is an unclickable text node. Runtime dep of render.
+qrcode>=7.4,<9.0
+
+# Gate only (tests/test_qr_cta.py): decodes the QR back out of the RENDERED
+# mp4. Checking the source PNG instead would repeat Y52, where a valid .ass
+# file sat beside five videos containing no visible caption. Headless = no GUI
+# libs on the server.
+opencv-python-headless>=4.9,<6.0

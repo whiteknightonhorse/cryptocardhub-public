@@ -1,0 +1,27 @@
+/*
+ * Self-hosted webfonts via Fontsource (npm packages, bundled at build time).
+ * - Plus Jakarta Sans: article H1/H2/H3 (per Stitch article DESIGN.md)
+ * - Manrope: homepage display headings (per Stitch homepage DESIGN.md)
+ * - Inter: body text (both pages)
+ *
+ * Material Symbols Outlined is loaded in BaseLayout.astro via Google Fonts CDN
+ * — too many glyphs to self-host effectively.
+ */
+
+/* Plus Jakarta Sans — used in article template */
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
+
+/* Manrope — used in homepage display headings */
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+
+/* Inter — body text everywhere */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";

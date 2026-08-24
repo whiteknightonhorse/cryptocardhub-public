@@ -1,0 +1,99 @@
+# DefyCard
+
+> Independent, editorial comparison hub for crypto debit and credit cards. We track 11 cards across the US, UK, EU, LATAM, and APAC, publishing fee changes, cashback rates, country availability, and security/custody analysis.
+
+## What this site is
+
+DefyCard publishes long-form, decision-grade affiliate articles about crypto debit and credit cards. Every article carries an FTC affiliate disclosure above the fold, a 6-key "At-a-Glance" snapshot, callout boxes for Signal/Risk/Watch, an FAQ accordion with FAQPage JSON-LD, and 8+ internal links to related guides.
+
+Primary affiliate: ether.fi Cash (`https://www.ether.fi/@defycard`). Secondary partners: Crypto.com, Coinbase, Binance, Bybit, Gnosis Pay, RedotPay, Bleap, Nexo, Wirex, MetaMask Card.
+
+Editorial independence policy: we earn affiliate commissions on some links — never on the editorial scoring. Fee numbers and country gates are sourced from issuer help centres. The one list we re-check against the issuer on a schedule is card availability by jurisdiction — it is published, dated, and machine-readable at <https://defycard.com/geo/availability-matrix/>, which states when each card's list was last confirmed. Nothing else on this site carries a refresh guarantee.
+
+## Audience
+
+Mobile-heavy (≈68%) crypto-card seekers. Phase 1 = English-only (US, UK, IE, AU, NZ, SG, HK, CA, ZA + EU/LATAM/APAC second-language users). Spanish + Portuguese-BR planned for month 6+ once Phase 1 ranks.
+
+## Site map
+
+- Homepage: <https://defycard.com/>
+- Sitemap: <https://defycard.com/sitemap.xml> (also served at /sitemap-index.xml)
+- Card availability by jurisdiction: <https://defycard.com/geo/availability-matrix/>
+- Articles by bucket:
+  - Hub pages — `/hub/<slug>/` (e.g. `/hub/best-crypto-card-2026/`)
+  - Comparisons — `/compare/<slug>/`
+  - Reviews — `/reviews/<slug>/`
+  - How-to guides — `/how-to/<slug>/`
+  - Use cases — `/for/<slug>/`
+  - Calculators — `/tools/<slug>/`
+  - Education — `/learn/<slug>/`
+  - Help/troubleshooting — `/help/<slug>/`
+  - Geo guides — `/geo/<slug>/`
+  - News — `/news/<slug>/`
+  - FAQ — `/faq/<slug>/`
+
+## How to read
+
+- HTML for browsers: every URL above
+- Markdown for AI agents: same URL with `Accept: text/markdown` header (returns the article body without nav, ads, or sticky CTA)
+
+## Crawl policy
+
+See `/robots.txt`. Summary:
+
+- **Indexing**: allowed for all major search and AI search bots (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, CCBot, Google-Extended, etc.)
+- **Training**: opted-out via `Content-Signal: ai-train=no`
+- **Search / answer-engine input**: allowed (`search=yes`, `ai-input=yes`)
+
+## Capabilities NOT available
+
+We are honest about what we don't have:
+
+- No protected APIs → no `/.well-known/openid-configuration` or `/.well-known/oauth-authorization-server`
+- No MCP server → no `/.well-known/mcp/server-card.json`
+- No user accounts, no login, no checkout flow
+- No backend search; agents query the published sitemap
+
+## Capabilities available
+
+- `/.well-known/api-catalog` — RFC 9727 service discovery (lists describedby + sitemap)
+- `/.well-known/agent-skills/index.json` — site-facing skills (search-articles, browse-by-bucket, fetch-article)
+- WebMCP `navigator.modelContext.provideContext()` — 3 client-side tools when supported (Chromium 132+ behind flag)
+- Markdown response on `Accept: text/markdown`
+- HTTP `Link:` headers (RFC 8288) on every response — point to api-catalog, sitemap, llms.txt
+
+## Editorial scope
+
+What we cover:
+
+- Cashback / rewards mechanics (fixed-rate, tiered, asset-back)
+- Custody models (custodial vs non-custodial / on-chain)
+- Fee structures (issuance, ATM, FX, monthly, hidden spread)
+- Country availability + KYC requirements
+- Tax implications (US/UK/EU/CA/AU)
+- Compliance (MiCA, GENIUS Act, FCA, FTC affiliate disclosure)
+- Practical setup (Apple Pay / Google Pay, top-up, withdrawal)
+
+What we do NOT cover:
+
+- Investment advice, "guaranteed returns" — banned per `write-article` skill §1.2
+- Specific token-price predictions
+- Pump/dump or speculative trading content
+
+## Compliance posture
+
+- FTC 16 CFR Part 255: affiliate disclosure on every monetised page above the fold + footer long-form
+- Affiliate links carry `rel="sponsored noopener"`
+- Country-restriction warnings on geo pages (cross-checked against issuer eligibility lists)
+
+## Contact
+
+Editorial / corrections: maintained by the DefyCard editorial team via the GitHub issue queue (private).
+
+## Inventory
+
+<!--INVENTORY-->
+This block is generated at build time by seo-site/scripts/build-markdown.js.
+If you are reading this sentence on the live site, the build step did not run
+and the numbers below are absent rather than wrong.
+<!--/INVENTORY-->

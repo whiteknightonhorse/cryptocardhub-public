@@ -1,0 +1,55 @@
+{
+  "$schema": "topic-pool-v1",
+  "version": "2026-05-05",
+  "source": "competitor-analysis/SKILL.md §4.9",
+  "refresh_policy_days": 90,
+  "topics": [
+    {"id": 1,  "class": "TOFU", "primary": "best crypto card",            "title": "Why I closed my bank account in 2026."},
+    {"id": 2,  "class": "TOFU", "primary": "spend crypto",                "title": "Stop selling your crypto. Spend it."},
+    {"id": 3,  "class": "TOFU", "primary": "bitcoin payments",            "title": "POV: Bitcoin paid for my groceries today."},
+    {"id": 4,  "class": "TOFU", "primary": "crypto card challenge",       "title": "I tried paying for everything in crypto for 30 days. Here's what happened."},
+    {"id": 5,  "class": "TOFU", "primary": "crypto card cashback",        "title": "If your card doesn't pay you to use it, you're getting robbed."},
+    {"id": 6,  "class": "TOFU", "primary": "ether.fi cashback",           "title": "How I get paid 3% cashback in ETH on every coffee."},
+    {"id": 7,  "class": "TOFU", "primary": "best crypto card",            "title": "The card your bank doesn't want you to know about."},
+    {"id": 8,  "class": "TOFU", "primary": "crypto contactless payments", "title": "Tap-to-pay with crypto — does it actually work?"},
+    {"id": 9,  "class": "TOFU", "primary": "bank alternatives 2026",      "title": "Watch this before you put your savings in any bank in 2026."},
+    {"id": 10, "class": "TOFU", "primary": "crypto card vs bank card",    "title": "5 things crypto cards do that your Chase card can't."},
+
+    {"id": 11, "class": "MOFU", "primary": "best crypto card 2026",       "title": "ether.fi Cash vs MetaMask Card vs Gnosis Pay — which one wins in 2026?"},
+    {"id": 12, "class": "MOFU", "primary": "non-custodial crypto card",   "title": "Custodial vs self-custodial crypto cards explained in 60 seconds."},
+    {"id": 13, "class": "MOFU", "primary": "best stablecoin card",        "title": "Best crypto card for stablecoin spenders (USDC vs USDT)."},
+    {"id": 14, "class": "MOFU", "primary": "non-custodial crypto card",   "title": "How non-custodial cards work: keys stay yours."},
+    {"id": 15, "class": "MOFU", "primary": "crypto card cashback",        "title": "Crypto card cashback: which one actually pays the most?"},
+    {"id": 16, "class": "MOFU", "primary": "non-custodial crypto card",   "title": "What happens to your money if your exchange shuts down?"},
+    {"id": 17, "class": "MOFU", "primary": "best crypto card region",     "title": "Best crypto card by region: US vs EU vs LATAM vs UK."},
+    {"id": 18, "class": "MOFU", "primary": "crypto credit vs debit",      "title": "Crypto credit card vs crypto debit card — which is better for you?"},
+    {"id": 19, "class": "MOFU", "primary": "yield while spending",        "title": "Yield-while-you-spend: how ether.fi Liquid Vaults actually work."},
+    {"id": 20, "class": "MOFU", "primary": "crypto card fees",            "title": "Crypto card fees explained — what's hidden, what's not."},
+    {"id": 21, "class": "MOFU", "primary": "crypto tax 2026",             "title": "Tax implications: spending crypto vs selling crypto in 2026."},
+    {"id": 22, "class": "MOFU", "primary": "apple pay crypto",            "title": "Apple Pay + crypto — every card that supports it now."},
+    {"id": 23, "class": "MOFU", "primary": "crypto card red flags",       "title": "5 red flags before you sign up for any crypto card."},
+
+    {"id": 24, "class": "BOFU", "primary": "ether.fi cash setup",         "title": "How to set up the ether.fi Cash card in under 5 minutes."},
+    {"id": 25, "class": "BOFU", "primary": "ether.fi unboxing",           "title": "I just got my crypto card — unboxing + first tap."},
+    {"id": 26, "class": "BOFU", "primary": "crypto card top-up",          "title": "Step-by-step: top up your crypto card without losing yield."},
+    {"id": 27, "class": "BOFU", "primary": "ether.fi 30-day cashback",    "title": "My ether.fi Cash dashboard — 30-day cashback reveal."},
+    {"id": 28, "class": "BOFU", "primary": "ether.fi referral code",      "title": "Use my code for 10% cashback + VIP Gold (limited)."},
+    {"id": 29, "class": "BOFU", "primary": "crypto cashback earnings",    "title": "How I earned cashback this month by spending crypto."},
+    {"id": 30, "class": "BOFU", "primary": "crypto card live demo",       "title": "Live demo: crypto card at Starbucks / Apple Store / Uber."},
+    {"id": 31, "class": "BOFU", "primary": "apple pay ether.fi",          "title": "Apple Pay setup: ether.fi Cash in 60 seconds."},
+    {"id": 32, "class": "BOFU", "primary": "ether.fi referral bonus",     "title": "$60 referral bonus US / $40 EU — exactly how to claim it."},
+    {"id": 33, "class": "BOFU", "primary": "crypto card weekly cashback", "title": "Things I bought with crypto this week + cashback I got back."},
+    {"id": 34, "class": "BOFU", "primary": "ether.fi vip tier",           "title": "How to maximize VIP tier on ether.fi Cash."},
+    {"id": 35, "class": "BOFU", "primary": "crypto card $10k spend",      "title": "I spent $10K on the ether.fi Cash card. Here's what I earned."}
+  ],
+  "platform_mix": {
+    "youtube":   {"TOFU": 0.20, "MOFU": 0.40, "BOFU": 0.40},
+    "instagram": {"TOFU": 0.30, "MOFU": 0.35, "BOFU": 0.35},
+    "tiktok":    {"TOFU": 0.40, "MOFU": 0.35, "BOFU": 0.25}
+  },
+  "duration_band_seconds": {
+    "youtube":   {"TOFU": [30, 45], "MOFU": [30, 45], "BOFU": [30, 45]},
+    "instagram": {"TOFU": [7, 15],  "MOFU": [15, 25], "BOFU": [15, 30]},
+    "tiktok":    {"TOFU": [21, 34], "MOFU": [21, 34], "BOFU": [21, 34]}
+  }
+}

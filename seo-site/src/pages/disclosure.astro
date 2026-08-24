@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lastReviewed = '2026-05-05';
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'Affiliate disclosure', url: `${siteOrigin}/disclosure/` },
+];
+---
+<BaseLayout
+  title="Affiliate disclosure — DefyCard"
+  description="DefyCard FTC affiliate disclosure under 16 CFR Part 255: how we earn commissions, why this does not affect scoring, and the editorial firewall."
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="legal-page">
+    <h1>Affiliate disclosure</h1>
+    <p class="lead">
+      DefyCard publishes affiliate-linked reviews and comparisons. This page is
+      our full disclosure under the United States Federal Trade Commission’s
+      Endorsement Guides (16 CFR Part 255). It explains how we earn money,
+      which partners pay us, and the firewall that separates commercial
+      relationships from editorial decisions.
+    </p>
+
+    <h2>Plain-language summary</h2>
+    <p>
+      When you click a link on DefyCard that goes to a card issuer and then
+      sign up for that card, the issuer may pay us a commission. The price,
+      cashback rate, and terms you receive are the same whether you click our
+      link or visit the issuer directly. We do not raise the price you pay,
+      and we do not share personal data with the issuer beyond what their own
+      sign-up flow collects. Affiliate revenue does not change which card
+      ranks first, last, or anywhere in between.
+    </p>
+
+    <h2>Where the disclosure appears</h2>
+    <p>
+      Every page that contains an affiliate link includes a clear and
+      conspicuous disclosure at the top, in the inline lead paragraph, and
+      again in the footer. Affiliate links carry the
+      <code>rel="sponsored noopener"</code> attribute as required by Google’s
+      link-attribute policy, and they open in a new tab so you can compare
+      pages side-by-side without losing your DefyCard context.
+    </p>
+
+    <h2>Who our partners are</h2>
+    <p>
+      Our primary affiliate partners as of 2026 are crypto card issuers with
+      public referral programs, including ether.fi, Crypto.com, RedotPay, and
+      Bybit Card. We do not accept paid placements from issuers without public
+      referral programs, and we do not accept undisclosed sponsorships from
+      any party.
+    </p>
+    <p>
+      We also use Unsplash for hero and inline images, with photographer
+      attribution rendered on every image. The image attribution links carry
+      a UTM parameter so Unsplash can track referral traffic — that is a
+      photographer-credit mechanism, not a paid affiliate link. No commission
+      is earned on Unsplash clicks.
+    </p>
+
+    <h2>How rankings are decided</h2>
+    <p>
+      Rankings reflect the editorial scoring rubric described on our
+      <a href="/about/">about page</a>: five categories scored on a ten-point
+      scale, minimum eight in every category to publish. Affiliate commission
+      rates are not a category. An issuer that pays us nothing can rank above
+      an issuer that pays us a high commission, and frequently does — the
+      cornerstone hub article reflects this directly.
+    </p>
+
+    <h2>What triggers a re-review</h2>
+    <p>
+      A published article is re-evaluated when any of the following happens:
+      the issuer changes a cashback or fee schedule on their help center, a
+      regulator (MiCA, FCA, GENIUS Act, state-level) publishes guidance that
+      alters the card’s legal scope, the issuer adds or removes a country or
+      US state from their availability matrix, or a credible incident report
+      surfaces (KYC outage, custody event, chargeback surge). Re-reviews can
+      improve or worsen a rank; affiliate status alone does not protect a
+      ranking.
+    </p>
+
+    <h2>Sponsored content policy</h2>
+    <p>
+      We do not currently publish sponsored articles. If we ever do, the
+      article will carry a “Sponsored” chip in the hero, the disclosure
+      banner will be replaced with a sponsored-content banner, and the article
+      will be excluded from any “best of” or “top picks” list elsewhere on the
+      site. No such article exists at the time of this writing.
+    </p>
+
+    <h2>Reader rights</h2>
+    <p>
+      You can read every DefyCard article without ever clicking an affiliate
+      link. The sitemap and the article body together carry the same
+      information that an affiliate-funded review does. If you would prefer
+      to support us another way — sending a correction, a tip about an
+      undocumented fee, or a regulatory update — email
+      <a href="mailto:support@defycard.com">support@defycard.com</a> and we
+      will credit the source in the article addendum.
+    </p>
+
+    <h2>Compliance contacts</h2>
+    <p>
+      For FTC, ASA, or other regulator inquiries, write to
+      <a href="mailto:support@defycard.com">support@defycard.com</a> with
+      “Disclosure inquiry” in the subject line. We respond within 24–48 hours
+      and can produce the full audit trail (scoring rubric, sources, and
+      revision history) for any article on request.
+    </p>
+
+    <p class="page-meta">Last reviewed: {lastReviewed}</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .legal-page h2 {
+    margin-top: 1.8em;
+  }
+  .legal-page p {
+    color: var(--on-surface);
+    margin: 0 0 1em;
+  }
+  .legal-page code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.9em;
+    background: var(--surface-container-low);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--outline-variant);
+  }
+  .page-meta {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+</style>

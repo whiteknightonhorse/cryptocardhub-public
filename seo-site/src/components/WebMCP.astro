@@ -1,0 +1,108 @@
+---
+/**
+ * WebMCP — exposes site tools to AI agents via the browser's WebMCP API
+ * (https://webmachinelearning.github.io/webmcp/).
+ *
+ * Three tools registered when the browser supports `navigator.modelContext`:
+ *  - defycard.search       keyword search across the sitemap
+ *  - defycard.getArticle   fetch a specific article URL (HTML or markdown)
+ *  - defycard.listBuckets  return the hardcoded bucket inventory
+ *
+ * Wrapped in a feature check — silent no-op on browsers that don't yet
+ * implement the API (most browsers as of mid-2026; Chrome behind flag).
+ */
+---
+<script is:inline>
+  (function () {
+    if (!('modelContext' in navigator) ||
+        typeof navigator.modelContext.provideContext !== 'function') {
+      return;
+    }
+
+    const SITEMAP_URL = 'https://defycard.com/sitemap-0.xml';
+    const BUCKETS = [
+      'hub', 'compare', 'reviews', 'how-to', 'for',
+      'geo', 'tools', 'learn', 'help', 'news', 'faq',
+    ];
+
+    async function fetchSitemapUrls() {
+      try {
+        const res = await fetch(SITEMAP_URL, { credentials: 'omit' });
+        if (!res.ok) return [];
+        const xml = await res.text();
+        const urls = [];
+        const re = /<loc>([^<]+)<\/loc>/g;
+        let m;
+        while ((m = re.exec(xml)) !== null) urls.push(m[1]);
+        return urls;
+      } catch (_) {
+        return [];
+      }
+    }
+
+    try {
+      navigator.modelContext.provideContext({
+        tools: [
+          {
+            name: 'defycard.search',
+            description: 'Keyword search across DefyCard articles. Returns matching article URLs from the sitemap.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                q: { type: 'string', description: 'Search keyword (case-insensitive substring match)' },
+              },
+              required: ['q'],
+            },
+            execute: async ({ q }) => {
+              if (!q || typeof q !== 'string') return { results: [] };
+              const urls = await fetchSitemapUrls();
+              const needle = q.toLowerCase();
+              const results = urls
+                .filter((u) => u.toLowerCase().includes(needle))
+                .slice(0, 25);
+              return { count: results.length, results };
+            },
+          },
+          {
+            name: 'defycard.getArticle',
+            description: 'Resolve an article URL by bucket + slug. Optional format=markdown returns the URL to fetch with Accept: text/markdown.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                bucket: { type: 'string', enum: BUCKETS },
+                slug: { type: 'string', description: 'URL slug (e.g. "best-crypto-card-2026")' },
+                format: { type: 'string', enum: ['html', 'markdown'], default: 'html' },
+              },
+              required: ['bucket', 'slug'],
+            },
+            execute: async ({ bucket, slug, format }) => {
+              if (!BUCKETS.includes(bucket)) {
+                return { error: 'unknown bucket', validBuckets: BUCKETS };
+              }
+              if (!/^[a-z0-9-]+$/.test(slug)) {
+                return { error: 'invalid slug; expected [a-z0-9-]+' };
+              }
+              const url = `https://defycard.com/${bucket}/${slug}/`;
+              const fmt = format === 'markdown' ? 'markdown' : 'html';
+              return {
+                url,
+                format: fmt,
+                hint: fmt === 'markdown'
+                  ? `fetch ${url} with header "Accept: text/markdown" to receive the markdown body`
+                  : `fetch ${url} for the HTML page`,
+              };
+            },
+          },
+          {
+            name: 'defycard.listBuckets',
+            description: 'Return the inventory of content buckets on DefyCard.',
+            inputSchema: { type: 'object', properties: {} },
+            execute: async () => ({ buckets: BUCKETS, sitemap: SITEMAP_URL }),
+          },
+        ],
+      });
+    } catch (_) {
+      /* WebMCP rejection — silent no-op, do not throw */
+    }
+  })();
+</script>

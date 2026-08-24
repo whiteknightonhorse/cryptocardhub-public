@@ -1,0 +1,228 @@
+---
+/**
+ * /search/ — client-side article search.
+ *
+ * Fetches /sitemap-0.xml on load, parses out <loc> URLs, and filters by
+ * substring against the user's query. Sufficient for ≤200 articles; revisit
+ * with Algolia/Meilisearch when the corpus exceeds that.
+ *
+ * No server, no analytics, no API keys.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Search — DefyCard"
+  description="Search every published DefyCard crypto card guide, single-card review, side-by-side comparison, calculator, and country availability page from one filter."
+  noindex={true}
+  activeNav="cards"
+>
+  <section class="search-page">
+    <h1>Search articles</h1>
+    <p class="lead">
+      Type a keyword to filter every published article on DefyCard. Results update as you type.
+    </p>
+
+    <label for="q" class="visually-hidden">Search query</label>
+    <input
+      id="q"
+      type="search"
+      placeholder="e.g. cashback, ether.fi, no KYC, stablecoin"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+    />
+
+    <p id="status" class="search-status" aria-live="polite"></p>
+
+    <ul id="results" class="search-results"></ul>
+
+    <noscript>
+      <p style="color: var(--on-surface-variant); margin-top: 24px;">
+        Search needs JavaScript. Browse all articles via the
+        <a href="/sitemap-index.xml">sitemap</a> instead.
+      </p>
+    </noscript>
+  </section>
+</BaseLayout>
+
+<style>
+  .search-page {
+    padding-top: 16px;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+  #q {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 1.05rem;
+    font-family: inherit;
+    background: var(--surface-container-low);
+    color: var(--on-surface);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: border-color 120ms ease;
+  }
+  #q:focus {
+    border-color: var(--primary-container);
+  }
+  .search-status {
+    margin: 12px 0 0;
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+    min-height: 1.2em;
+  }
+  .search-results {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 0;
+    display: grid;
+    gap: 4px;
+  }
+  .search-results li {
+    margin: 0;
+  }
+  .search-results a {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-sm, 8px);
+    text-decoration: none;
+    color: var(--on-surface);
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .search-results a:hover,
+  .search-results a:focus-visible {
+    background: var(--surface-container-low);
+    border-color: var(--primary-container);
+  }
+  .search-result-title {
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .search-result-path {
+    font-size: 0.825rem;
+    color: var(--on-surface-variant);
+    font-family: var(--font-mono, ui-monospace, monospace);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    const input = document.getElementById('q');
+    const list = document.getElementById('results');
+    const status = document.getElementById('status');
+    if (!input || !list || !status) return;
+
+    let urls = [];
+    let loaded = false;
+
+    function pathFromUrl(u) {
+      try {
+        const parsed = new URL(u);
+        return parsed.pathname.replace(/\/$/, '') || '/';
+      } catch (_) {
+        return u;
+      }
+    }
+
+    function titleFromPath(path) {
+      const segs = path.split('/').filter(Boolean);
+      const last = segs[segs.length - 1] || 'home';
+      return last
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+
+    function isSafeHttpUrl(u) {
+      try {
+        const p = new URL(u);
+        return p.protocol === 'https:' || p.protocol === 'http:';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function render(items) {
+      // Build via DOM nodes — avoids any innerHTML / XSS surface from URLs.
+      list.textContent = '';
+      const frag = document.createDocumentFragment();
+      items.forEach(function (u) {
+        if (!isSafeHttpUrl(u)) return;
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = u;
+        const path = pathFromUrl(u);
+        const t = document.createElement('span');
+        t.className = 'search-result-title';
+        t.textContent = titleFromPath(path);
+        const p = document.createElement('span');
+        p.className = 'search-result-path';
+        p.textContent = path;
+        a.appendChild(t);
+        a.appendChild(p);
+        li.appendChild(a);
+        frag.appendChild(li);
+      });
+      list.appendChild(frag);
+    }
+
+    function update() {
+      if (!loaded) return;
+      const needle = input.value.trim().toLowerCase();
+      if (!needle) {
+        status.textContent = urls.length + ' articles indexed. Type to filter.';
+        render([]);
+        return;
+      }
+      const matches = urls.filter(function (u) {
+        return u.toLowerCase().indexOf(needle) !== -1;
+      });
+      status.textContent =
+        matches.length === 0
+          ? 'No matches. Try a shorter or different keyword.'
+          : matches.length + ' match' + (matches.length === 1 ? '' : 'es') + '.';
+      render(matches.slice(0, 50));
+    }
+
+    // Pre-fill from ?q= URL parameter so the WebSite SearchAction schema works.
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const initial = params.get('q');
+      if (initial) input.value = initial;
+    } catch (_) { /* old browser — skip */ }
+
+    status.textContent = 'Loading article index…';
+    fetch('/sitemap-0.xml', { credentials: 'omit' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('sitemap fetch failed (' + r.status + ')');
+        return r.text();
+      })
+      .then(function (xml) {
+        // Match <loc>...</loc> defensively (no DOMParser dependency on XML mime).
+        const re = /<loc>([^<]+)<\/loc>/g;
+        const out = [];
+        let m;
+        while ((m = re.exec(xml)) !== null) out.push(m[1]);
+        urls = out;
+        loaded = true;
+        update();
+      })
+      .catch(function (err) {
+        status.textContent = 'Could not load article index: ' + err.message;
+      });
+
+    input.addEventListener('input', update);
+  })();
+</script>

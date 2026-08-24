@@ -1,0 +1,15 @@
+# Y61 — 301s for paths that never existed but are already in external memory.
+#
+# These five URLs were hardcoded into the pSEO writer prompt as "examples of
+# realistic targets" and were then linked from up to 44 pages each. Crawlers
+# (GPTBot, ClaudeBot, Perplexity, Linkup) walk them today and will keep walking
+# them for months after the internal links are repaired, so the links being
+# fixed is not a reason to skip the redirect: one closes production of new
+# hits, the other honours the memory that already exists.
+#
+# Exact-match only. Format: <from-path> <to-path>
+/compare/ether-fi-vs-crypto-com/	/compare/ether-fi-cash-vs-crypto-com/
+/reviews/ether-fi-cash/	/reviews/ether-fi-cash-review/
+/how-to/get-a-crypto-card/	/how-to/how-to-get-a-crypto-card/
+/reviews/crypto-com-card/	/reviews/crypto-com-card-review/
+/reviews/bybit-card/	/reviews/bybit-card-review/

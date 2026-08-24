@@ -1,0 +1,172 @@
+---
+/**
+ * Bucket index page — /<bucket>/
+ *
+ * One Astro template that builds an index for every content bucket via
+ * getStaticPaths. If the bucket has published articles it shows the full
+ * grid (LatestPosts component); otherwise a "Coming soon" card linking
+ * to the populated cornerstone hub article.
+ *
+ * Buckets match config/keywords clusters and the [bucket]/[slug].astro
+ * dynamic article route — adding a bucket here is the only change needed
+ * for the new index URL to ship.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LatestPosts from '../../components/LatestPosts.astro';
+
+interface BucketMeta {
+  title: string;
+  h1: string;
+  lead: string;
+  description: string;
+  navMap: 'cards' | 'reviews' | 'guides' | 'comparison';
+}
+
+const BUCKETS: Record<string, BucketMeta> = {
+  hub: {
+    title: 'Crypto card hubs — DefyCard',
+    h1: 'Crypto card hubs',
+    lead: 'Cornerstone guides that anchor DefyCard’s topical clusters: best-in-class lists, no-fee picks, custody comparisons, and stablecoin-native cards.',
+    description: 'Cornerstone crypto card guides anchoring DefyCard topical clusters: best-in-class lists, no-fee picks, custody comparisons, stablecoin-native cards.',
+    navMap: 'cards',
+  },
+  compare: {
+    title: 'Crypto card comparisons — DefyCard',
+    h1: 'Card-vs-card comparisons',
+    lead: 'Side-by-side breakdowns of crypto debit and credit cards: cashback math, FX fees, custody model, and country availability.',
+    description: 'Side-by-side comparisons of crypto debit and credit cards covering cashback math, FX fees, custody model, country availability, and regulatory posture.',
+    navMap: 'comparison',
+  },
+  reviews: {
+    title: 'Crypto card reviews — DefyCard',
+    h1: 'Card reviews',
+    lead: 'Independent single-card reviews. Each verdict cross-checks the issuer’s help center against fees, regional gates, and the editorial scoring rubric.',
+    description: 'Independent reviews of individual crypto debit and credit cards with sourced fees, custody notes, regional availability, and editorial scoring.',
+    navMap: 'reviews',
+  },
+  'how-to': {
+    title: 'Crypto card how-to guides — DefyCard',
+    h1: 'How-to guides',
+    lead: 'Step-by-step walkthroughs: applying for a crypto card, recovering custody, ordering a physical card, and avoiding the common KYC pitfalls.',
+    description: 'Step-by-step crypto card walkthroughs covering card applications, custody recovery, physical-card ordering, and the most common KYC pitfalls.',
+    navMap: 'guides',
+  },
+  for: {
+    title: 'Crypto cards by use case — DefyCard',
+    h1: 'Cards by use case',
+    lead: 'Use-case briefs that match a card to a specific spending pattern: travel, freelancers, daily groceries, online subscriptions, and beyond.',
+    description: 'Crypto card recommendations tuned to specific spending patterns: international travel, freelancers, daily groceries, online subscriptions, and more.',
+    navMap: 'cards',
+  },
+  geo: {
+    title: 'Crypto cards by country — DefyCard',
+    h1: 'Cards by country',
+    lead: 'Country and US-state guides. We surface the cards that are licensed in your jurisdiction and flag the issuers that are not, with the regulatory caveats spelled out.',
+    description: 'Country-by-country and US state-by-state crypto card availability guides with sourced regulatory notes, licensing flags, and per-issuer caveats.',
+    navMap: 'cards',
+  },
+  tools: {
+    title: 'Crypto card calculators — DefyCard',
+    h1: 'Calculators',
+    lead: 'Lightweight tools to model real-world card economics: cashback breakeven, FX-fee impact, and yield-while-spending versus traditional staking.',
+    description: 'Calculators for crypto card economics: cashback breakeven, FX-fee impact on real spend, and yield-while-spending versus traditional staking returns.',
+    navMap: 'cards',
+  },
+  learn: {
+    title: 'Learn — crypto cards — DefyCard',
+    h1: 'Learn',
+    lead: 'Concept primers for the underlying mechanics: how on-chain settlement works, what custody really means, and why cashback structures vary.',
+    description: 'Educational primers on the crypto card mechanics that actually move money: on-chain settlement, custody models, and why cashback structures vary so widely.',
+    navMap: 'guides',
+  },
+  help: {
+    title: 'Crypto card troubleshooting — DefyCard',
+    h1: 'Troubleshooting',
+    lead: 'Resolution guides for the common operational failure modes: declined transactions, blocked merchants, stuck KYC, and refund handling.',
+    description: 'Troubleshooting guides covering the most common crypto card failures: declined transactions, blocked merchants, stuck KYC, and refund or chargeback handling.',
+    navMap: 'guides',
+  },
+  news: {
+    title: 'Crypto card news — DefyCard',
+    h1: 'News',
+    lead: 'Time-sensitive coverage: regulatory shifts (MiCA, GENIUS, FCA), new card launches, country-availability changes, and incident reports.',
+    description: 'Time-sensitive crypto card coverage: regulatory shifts (MiCA, GENIUS, FCA), card launches, country-availability changes, and per-issuer incident reports.',
+    navMap: 'cards',
+  },
+  faq: {
+    title: 'Crypto card FAQ — DefyCard',
+    h1: 'FAQ',
+    lead: 'Single-question pages covering the most-asked crypto card questions in 2026: KYC, custody, cashback math, and country availability.',
+    description: 'Single-question crypto card FAQ covering the most-asked queries of 2026: KYC, custody, cashback math, country availability, and physical-card shipping.',
+    navMap: 'guides',
+  },
+};
+
+export async function getStaticPaths() {
+  return [
+    'hub', 'compare', 'reviews', 'how-to', 'for',
+    'geo', 'tools', 'learn', 'help', 'news', 'faq',
+  ].map((bucket) => ({ params: { bucket } }));
+}
+
+const { bucket } = Astro.params as { bucket: string };
+const meta = BUCKETS[bucket];
+
+// Type-narrow guard: getStaticPaths controls bucket, but Astro types it as string.
+if (!meta) {
+  throw new Error(`Unknown bucket: ${bucket}`);
+}
+
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: meta.h1, url: `${siteOrigin}/${bucket}/` },
+];
+---
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  activeNav={meta.navMap}
+  breadcrumbs={breadcrumbs}
+>
+  <section class="bucket-index">
+    <h1>{meta.h1}</h1>
+    <p class="lead">{meta.lead}</p>
+
+    <LatestPosts count={999} heading="" bucketFilter={bucket} />
+
+    <div class="bucket-index-fallback">
+      <h2>Looking for something specific?</h2>
+      <p>
+        Start with our cornerstone comparison
+        <a href="/hub/best-crypto-card-2026/">Best crypto cards in 2026</a> or browse
+        every published article via the
+        <a href="/sitemap-index.xml">sitemap</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .bucket-index {
+    padding-top: 16px;
+  }
+  .bucket-index :global(h2:empty) {
+    display: none;
+  }
+  .bucket-index-fallback {
+    margin-top: 56px;
+    padding: 24px;
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+  }
+  .bucket-index-fallback h2 {
+    margin-top: 0;
+    font-size: 1.15rem;
+  }
+  .bucket-index-fallback p {
+    margin: 0;
+    color: var(--on-surface-variant);
+  }
+</style>

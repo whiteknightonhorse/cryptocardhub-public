@@ -1,0 +1,264 @@
+/*
+ * DefyCard token system — Catppuccin Latte/Mocha foundation +
+ * Material-3 surface layer (matches Stitch DESIGN.md hex values 1:1).
+ *
+ * Source of truth: .claude/skills/design-system/SKILL.md
+ *                  Stitch DESIGN.md exports (homepage + article ZIP)
+ *
+ * RULE: This is the ONLY file in the project where raw #hex appears.
+ * Components MUST consume var(--…) only.
+ */
+
+:root {
+  /* ============================================================
+   *   Catppuccin Latte (light theme — default base palette)
+   * ============================================================ */
+  --ctp-base: #eff1f5;
+  --ctp-mantle: #e6e9ef;
+  --ctp-crust: #dce0e8;
+
+  --ctp-text: #4c4f69;
+  --ctp-subtext1: #5c5f77;
+  --ctp-subtext0: #6c6f85;
+
+  --ctp-surface0: #ccd0da;
+  --ctp-surface1: #bcc0cc;
+  --ctp-surface2: #acb0be;
+  --ctp-overlay0: #9ca0b0;
+  --ctp-overlay1: #8c8fa1;
+  --ctp-overlay2: #7c7f93;
+
+  --ctp-blue: #1e66f5;
+  --ctp-lavender: #7287fd;
+  --ctp-mauve: #8839ef;
+  --ctp-green: #40a02b;
+  --ctp-yellow: #df8e1d;
+  --ctp-red: #d20f39;
+  --ctp-peach: #fe640b;
+  --ctp-teal: #179299;
+  --ctp-sky: #04a5e5;
+
+  /* ============================================================
+   *   Material-3 surface layer (Stitch DESIGN.md values)
+   * ============================================================ */
+  --surface: #faf8ff;
+  --surface-dim: #d8d9e5;
+  --surface-bright: #faf8ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f3ff;
+  --surface-container: #ededf9;
+  --surface-container-high: #e7e7f3;
+  --surface-container-highest: #e1e2ee;
+  --surface-variant: #e1e2ee;
+  --surface-tint: #0054d8;
+
+  --on-surface: #191b24;
+  --on-surface-variant: #424655;
+  --inverse-surface: #2e3039;
+  --inverse-on-surface: #eff0fc;
+  --background: #faf8ff;
+  --on-background: #191b24;
+
+  --outline: #737687;
+  --outline-variant: #c3c6d8;
+
+  --primary: #004ecb;
+  --on-primary: #ffffff;
+  --primary-container: #1e66f5;
+  --on-primary-container: #f6f5ff;
+  --inverse-primary: #b3c5ff;
+
+  --secondary: #7923e0;
+  --on-secondary: #ffffff;
+  --secondary-container: #9347fa;
+  --on-secondary-container: #fffbff;
+
+  --tertiary: #364cc0;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #5166da;
+  --on-tertiary-container: #f6f4ff;
+
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+
+  /* ============================================================
+   *   Brand accent shorthands (used in components)
+   * ============================================================ */
+  --color-indigo: #1e66f5;
+  --color-purple: #8839ef;
+
+  /* ============================================================
+   *   Status families
+   * ============================================================ */
+  --status-success: #40a02b;
+  --status-info: #1e66f5;
+  --status-warning: #df8e1d;
+  --status-danger: #d20f39;
+
+  --status-success-dim: color-mix(in srgb, var(--status-success) 15%, transparent);
+  --status-success-border: color-mix(in srgb, var(--status-success) 50%, transparent);
+  --status-info-dim: color-mix(in srgb, var(--status-info) 12%, transparent);
+  --status-info-border: color-mix(in srgb, var(--status-info) 50%, transparent);
+  --status-warning-dim: color-mix(in srgb, var(--status-warning) 18%, transparent);
+  --status-warning-border: color-mix(in srgb, var(--status-warning) 55%, transparent);
+  --status-danger-dim: color-mix(in srgb, var(--status-danger) 15%, transparent);
+  --status-danger-border: color-mix(in srgb, var(--status-danger) 50%, transparent);
+
+  /* ============================================================
+   *   Aliases — bridge old "surface-*" names to MD3 surface tier
+   *   (kept so existing components don't break)
+   * ============================================================ */
+  --surface-background: var(--background);
+  --surface-card: var(--surface-container-lowest);
+  --surface-card-strong: var(--surface-container-low);
+  --surface-inset: var(--surface-container);
+  --surface-border: var(--outline-variant);
+  --surface-border-strong: var(--outline);
+
+  --text-primary: var(--on-surface);
+  --text-secondary: var(--on-surface-variant);
+  --text-tertiary: var(--outline);
+
+  --focus: var(--color-purple);
+  --on-status: var(--on-primary-container);
+
+  /* Gradient + radial accents (kept from earlier visual mood) */
+  --gradient-background:
+    radial-gradient(ellipse 60% 40% at 20% 0%, color-mix(in srgb, var(--color-purple) 6%, transparent), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, color-mix(in srgb, var(--color-indigo) 6%, transparent), transparent),
+    linear-gradient(180deg, var(--background), var(--surface-container-low));
+
+  /* ============================================================
+   *   Shape + elevation
+   * ============================================================ */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--outline) 18%, transparent);
+  --shadow-md: 0 4px 14px color-mix(in srgb, var(--outline) 22%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, var(--outline) 28%, transparent);
+
+  /* ============================================================
+   *   Typography
+   * ============================================================ */
+  --font-display: "Plus Jakarta Sans", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-display-alt: "Manrope", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, "Cascadia Mono", Consolas, monospace;
+}
+
+/* ==============================================================
+ *   Dark theme — Catppuccin Mocha (palette) + MD3 surface (dark)
+ * ============================================================== */
+[data-theme="dark"] {
+  --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825;
+  --ctp-crust: #11111b;
+
+  --ctp-text: #cdd6f4;
+  --ctp-subtext1: #bac2de;
+  --ctp-subtext0: #a6adc8;
+
+  --ctp-surface0: #313244;
+  --ctp-surface1: #45475a;
+  --ctp-surface2: #585b70;
+  --ctp-overlay0: #6c7086;
+  --ctp-overlay1: #7f849c;
+  --ctp-overlay2: #9399b2;
+
+  --ctp-blue: #89b4fa;
+  --ctp-lavender: #b4befe;
+  --ctp-mauve: #cba6f7;
+  --ctp-green: #a6e3a1;
+  --ctp-yellow: #f9e2af;
+  --ctp-red: #f38ba8;
+  --ctp-peach: #fab387;
+  --ctp-teal: #94e2d5;
+  --ctp-sky: #89dceb;
+
+  /* MD3 dark mappings */
+  --surface: #1e1e2e;
+  --surface-dim: #11111b;
+  --surface-bright: #2e3039;
+  --surface-container-lowest: #11111b;
+  --surface-container-low: #181825;
+  --surface-container: #1e1e2e;
+  --surface-container-high: #313244;
+  --surface-container-highest: #45475a;
+  --surface-variant: #45475a;
+  --surface-tint: #b3c5ff;
+
+  --on-surface: #cdd6f4;
+  --on-surface-variant: #bac2de;
+  --inverse-surface: #eff0fc;
+  --inverse-on-surface: #2e3039;
+  --background: #1e1e2e;
+  --on-background: #cdd6f4;
+
+  --outline: #6c7086;
+  --outline-variant: #45475a;
+
+  --primary: #b3c5ff;
+  --on-primary: #00174a;
+  --primary-container: #003ea6;
+  --on-primary-container: #dbe1ff;
+  --inverse-primary: #004ecb;
+
+  --secondary: #d7baff;
+  --on-secondary: #280056;
+  --secondary-container: #6100be;
+  --on-secondary-container: #eddcff;
+
+  --tertiary: #bac3ff;
+  --on-tertiary: #00105b;
+  --tertiary-container: #2038ae;
+  --on-tertiary-container: #dee0ff;
+
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+
+  --color-indigo: #89b4fa;
+  --color-purple: #cba6f7;
+
+  --status-success: #a6e3a1;
+  --status-info: #89b4fa;
+  --status-warning: #f9e2af;
+  --status-danger: #f38ba8;
+
+  --on-status: var(--on-primary-container);
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #000 35%, transparent);
+  --shadow-md: 0 6px 18px color-mix(in srgb, #000 45%, transparent);
+  --shadow-lg: 0 14px 40px color-mix(in srgb, #000 55%, transparent);
+}
+
+/* Auto dark mode for users who haven't set a manual preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --surface: #1e1e2e;
+    --surface-container-lowest: #11111b;
+    --surface-container-low: #181825;
+    --surface-container: #1e1e2e;
+    --surface-container-high: #313244;
+    --surface-container-highest: #45475a;
+    --on-surface: #cdd6f4;
+    --on-surface-variant: #bac2de;
+    --background: #1e1e2e;
+    --on-background: #cdd6f4;
+    --outline: #6c7086;
+    --outline-variant: #45475a;
+    --primary-container: #003ea6;
+    --on-primary-container: #dbe1ff;
+    --color-indigo: #89b4fa;
+    --color-purple: #cba6f7;
+    --status-info: #89b4fa;
+    --status-success: #a6e3a1;
+    --status-warning: #f9e2af;
+    --status-danger: #f38ba8;
+  }
+}

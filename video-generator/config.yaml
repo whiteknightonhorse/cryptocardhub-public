@@ -1,0 +1,97 @@
+# video-generator config
+# Loaded by every pipeline step. Single source of truth for output specs and
+# scheduling parameters. Do not duplicate values in code.
+
+output:
+  resolution:
+    width: 1080
+    height: 1920
+  fps: 30
+  duration:
+    min_seconds: 15
+    max_seconds: 60
+  video:
+    codec: libx264
+    pixel_format: yuv420p
+    crf: 21
+    preset: medium
+  audio:
+    codec: aac
+    bitrate: "128k"
+    sample_rate: 44100
+  container: mp4
+
+tts:
+  provider: edge
+  voices:
+    - en-US-GuyNeural
+    - en-US-JennyNeural
+    - en-GB-RyanNeural
+    - en-US-AriaNeural
+  rotation_state: state/voice_rotation.json
+  rate: "+0%"
+  volume: "+0%"
+
+visuals:
+  provider: pexels
+  preferred_orientation: portrait
+  fallback: pad_and_blur
+
+music:
+  provider: jamendo
+  genres:
+    - upbeat
+    - electronic
+  license_filter: cc-by
+  duck_to_db: -18
+
+captions:
+  engine: whisper.cpp
+  level: word
+  font: assets/fonts/Inter-Bold.ttf
+  size: 72
+  fill: "#FFFFFF"
+  stroke: "#000000"
+  stroke_width: 4
+  position: 0.78  # 78% from top of frame
+
+schedule:
+  videos_per_day: 6
+  window_start_local: "09:00"
+  window_end_local: "21:00"
+  timezone: "America/New_York"
+  min_gap_minutes: 60
+  random_interval:
+    min_hours: 1
+    max_hours: 5
+  schedule_file: state/schedule.json
+  daily_cron: "5 0 * * *"          # 00:05 ET — regenerate slots
+  watcher_cron: "*/10 * * * *"     # every 10 min — check if slot fires
+
+publish:
+  youtube:
+    enabled: true
+    privacy: public
+    category_id: 28           # Science & Technology
+    made_for_kids: false
+  dlvrit:
+    enabled: true
+    routes:
+      instagram: "${DLVRIT_ROUTE_IG}"
+      tiktok: "${DLVRIT_ROUTE_TIKTOK}"
+
+dedup:
+  ledger: state/published.db
+  unique_on:
+    - script_hash
+    - asset_set_hash
+
+logging:
+  dir: ../logs/video
+  level: info
+  redact_keys:
+    - YOUTUBE_REFRESH_TOKEN
+    - DLVRIT_API_KEY
+    - PEXELS_API_KEY
+    - JAMENDO_CLIENT_ID
+    - TG_BOT_TOKEN

@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lastReviewed = '2026-05-05';
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'About', url: `${siteOrigin}/about/` },
+];
+---
+<BaseLayout
+  title="About DefyCard — independent crypto card comparisons"
+  description="DefyCard is an independent crypto debit and credit card comparison hub. We track 11 issuers, score editorially, and refresh fees every 30 days."
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="legal-page">
+    <h1>About DefyCard</h1>
+    <p class="lead">
+      DefyCard is an independent comparison hub for crypto debit and credit cards.
+      We exist because the marketing pages of card issuers, while technically
+      accurate, make it almost impossible to compare them on the things that
+      actually matter to you: cashback that survives the FX fee, custody you
+      retain after the card ships, and country availability that holds for the
+      jurisdiction you spend in.
+    </p>
+
+    <h2>What we do</h2>
+    <p>
+      We track eleven crypto card issuers across five global regions. For each
+      card we maintain an internal record covering cashback structure, foreign
+      exchange spread, top-up rails, custody model, regulatory status, and the
+      country and US-state availability matrix. Our editors cross-check that
+      record against the issuer’s own help center every thirty days and against
+      external sources (MiCA texts, FCA register, GENIUS Act memos, Chainalysis
+      and CryptoDiffer reports) every ninety days.
+    </p>
+
+    <h2>Editorial methodology</h2>
+    <p>
+      Every published article must clear an internal scoring rubric before it
+      goes live. The rubric covers five categories — structural integrity,
+      source quality, neutrality, mechanical correctness, and reader clarity —
+      each scored on a ten-point scale. The minimum publish threshold is
+      eight out of ten in every category; an article that fails any one
+      dimension goes back for revision rather than down a scoring average.
+    </p>
+    <p>
+      We do not publish performance promises. A statically blocked phrase list
+      catches and rejects copy that contains marketing absolutes such as
+      “the only card,” fixed-outcome words such as “will definitely,” and
+      unverifiable adjectives such as “easy.” Numerical claims (cashback
+      percentages, FX percentages, country counts) must cite an issuer help
+      page or an externally archived source by URL; uncited numbers are
+      rejected at the same gate.
+    </p>
+
+    <h2>Refresh cycle</h2>
+    <p>
+      Markets shift faster than evergreen content normally allows. We re-validate
+      market data and fee schedules every thirty days, refresh the country
+      availability matrix every ninety days, and trigger an immediate review
+      whenever an issuer publishes a help-center change, a regulator publishes a
+      new memorandum that affects card scope, or an incident report (chargeback
+      surge, KYC outage, custody event) is filed against a tracked issuer.
+      The “Last reviewed” timestamp at the bottom of each article reflects the
+      most recent of these checks.
+    </p>
+
+    <h2>What we are not</h2>
+    <p>
+      DefyCard is not a Crypto Asset Service Provider. We do not custody funds,
+      operate an exchange, run a wallet, or hold any license to sell financial
+      products. We do not provide investment, tax, or legal advice; nothing on
+      this site is a recommendation to buy, sell, or hold any digital asset.
+      Card issuers, not DefyCard, are responsible for KYC, settlement, and
+      regulatory compliance with respect to any account you open through our
+      links.
+    </p>
+
+    <h2>How we sustain the work</h2>
+    <p>
+      DefyCard earns affiliate commissions when readers sign up for a card
+      through our referral links. Commissions never alter scoring rank, never
+      grant an issuer rewrite rights over a published article, and never gate
+      a critical finding behind a payment. The
+      <a href="/disclosure/">Affiliate Disclosure</a> page explains the
+      mechanics, the partners, and the firewall between revenue and editorial.
+    </p>
+
+    <h2>Editorial independence</h2>
+    <p>
+      No issuer has, or has ever had, prior review of a DefyCard article.
+      Issuers may flag a factual correction after publication; we evaluate the
+      submission against the original source and, if substantiated, edit and
+      timestamp the change. Disagreements over interpretation do not result in
+      retractions; they result in either an addendum that surfaces the
+      issuer’s position, or no change.
+    </p>
+
+    <h2>Reader contact</h2>
+    <p>
+      Found an outdated fee, a broken link, or a regulatory update we missed?
+      Email <a href="mailto:support@defycard.com">support@defycard.com</a>
+      or use the <a href="/contact/">contact page</a>. We answer correction
+      requests within 24–48 hours.
+    </p>
+
+    <p class="page-meta">Last reviewed: {lastReviewed}</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .legal-page h2 {
+    margin-top: 1.8em;
+  }
+  .legal-page p {
+    color: var(--on-surface);
+    margin: 0 0 1em;
+  }
+  .page-meta {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+</style>

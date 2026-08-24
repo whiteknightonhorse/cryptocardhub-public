@@ -1,0 +1,161 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lastReviewed = '2026-05-05';
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'Contact', url: `${siteOrigin}/contact/` },
+];
+---
+<BaseLayout
+  title="Contact — DefyCard"
+  description="Reach the DefyCard editorial team: factual corrections, partnerships, press requests, GDPR or CCPA submissions, and security disclosures. Reply 24-48 hours."
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="legal-page">
+    <h1>Contact</h1>
+    <p class="lead">
+      DefyCard is a small editorial team. The fastest way to reach us is
+      email — we read every message and respond within 24 to 48 hours
+      (longer on weekends and EU public holidays).
+    </p>
+
+    <div class="contact-card">
+      <p class="contact-email">
+        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+        <a href="mailto:support@defycard.com">support@defycard.com</a>
+      </p>
+      <p class="contact-meta">Response time: 24–48 hours, business days.</p>
+    </div>
+
+    <h2>What to email about</h2>
+    <ul>
+      <li>
+        <strong>Correction requests.</strong> An outdated cashback rate, a
+        broken link, a country availability change, a KYC document update —
+        send the article URL and the correct value with a source we can
+        verify (issuer help-center URL, regulator memo, or screenshot).
+        Substantiated corrections are applied within 24 hours.
+      </li>
+      <li>
+        <strong>Press &amp; analyst inquiries.</strong> Comment requests,
+        embargoed briefings, market data sharing — include your deadline
+        and the publication.
+      </li>
+      <li>
+        <strong>Partnership inquiries.</strong> Affiliate program changes,
+        new card launches, regional rollouts — we evaluate every issuer
+        with a public referral program. We do not accept undisclosed
+        sponsorships, paid placements without an affiliate disclosure, or
+        prior-review arrangements.
+      </li>
+      <li>
+        <strong>Privacy requests.</strong> GDPR, CCPA/CPRA, and other
+        equivalent rights. Use the subject line “GDPR request” or “CCPA
+        request” so we route it correctly. See the
+        <a href="/privacy/">privacy policy</a> for what we hold (almost
+        nothing) and how requests are handled.
+      </li>
+      <li>
+        <strong>Disclosure / regulator inquiries.</strong> FTC, ASA, FCA,
+        and equivalent. We can produce the full audit trail (sources,
+        scoring, revisions) for any article on request.
+      </li>
+    </ul>
+
+    <h2>What we cannot help with</h2>
+    <p>
+      DefyCard does not have access to your card, your wallet, your KYC
+      submission, or your transaction history with any issuer. We cannot
+      reset a password, unlock an account, expedite a physical-card
+      shipment, dispute a charge, or release a frozen balance. For any of
+      those, contact your card issuer’s support directly. Their official
+      support channels are listed in our individual card reviews.
+    </p>
+    <p>
+      We also do not provide investment, tax, or legal advice. If you need
+      such advice, please consult a qualified professional licensed in
+      your jurisdiction.
+    </p>
+
+    <h2>Security disclosures</h2>
+    <p>
+      If you believe you have found a security issue affecting
+      <code>defycard.com</code>, please email
+      <a href="mailto:support@defycard.com">support@defycard.com</a> with
+      “Security” in the subject line. Do not file a public issue or
+      disclose the finding before we have had a chance to confirm and
+      remediate. We aim to acknowledge security reports within one
+      business day.
+    </p>
+
+    <h2>Postal contact</h2>
+    <p>
+      We operate online. There is no walk-in office. Postal inquiries are
+      not the right channel — please email instead.
+    </p>
+
+    <p class="page-meta">Last reviewed: {lastReviewed}</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .legal-page h2 {
+    margin-top: 1.8em;
+  }
+  .legal-page p {
+    color: var(--on-surface);
+    margin: 0 0 1em;
+  }
+  .legal-page ul {
+    margin: 0 0 1em;
+    padding-left: 1.4em;
+  }
+  .legal-page li {
+    margin-bottom: 0.6em;
+  }
+  .legal-page code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.9em;
+    background: var(--surface-container-low);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--outline-variant);
+  }
+  .contact-card {
+    margin: 24px 0 8px;
+    padding: 20px 22px;
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+  }
+  .contact-email {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+  .contact-email a {
+    color: var(--status-info);
+  }
+  .contact-meta {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+  .page-meta {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+</style>

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://agentskills.io/schemas/v0.2.0/index.json",
+  "name": "defycard.com",
+  "description": "Site-facing skills for AI agents on DefyCard \u2014 independent crypto-card comparison hub. Read-only; no auth, no protected APIs, no MCP server.",
+  "version": "0.1.0",
+  "updated": "2026-05-05",
+  "skills": [
+    {
+      "name": "search-articles",
+      "type": "search",
+      "description": "Keyword search across DefyCard's published articles. The skill reads /sitemap-0.xml, filters URLs by substring or regex, and returns ranked matches.",
+      "url": "https://defycard.com/sitemap-0.xml",
+      "method": "GET",
+      "input": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Keyword query"
+          }
+        },
+        "required": [
+          "q"
+        ]
+      },
+      "sha256": "sha256:be2546537c903521c9cbee19c0796280d11405a99b75ff580e9d2654e9e815df"
+    },
+    {
+      "name": "browse-by-bucket",
+      "type": "navigate",
+      "description": "List articles by content bucket (hub, compare, reviews, how-to, geo, tools, learn, help, faq, news, for). Sourced from the sitemap.",
+      "url": "https://defycard.com/sitemap-index.xml",
+      "method": "GET",
+      "input": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "enum": [
+              "hub",
+              "compare",
+              "reviews",
+              "how-to",
+              "for",
+              "geo",
+              "tools",
+              "learn",
+              "help",
+              "news",
+              "faq"
+            ]
+          }
+        },
+        "required": [
+          "bucket"
+        ]
+      },
+      "sha256": "sha256:3bd66254790b09f75e00722f63cb78e15ed740d0cf7a3ae4d51cd258f2685b34"
+    },
+    {
+      "name": "fetch-article",
+      "type": "fetch",
+      "description": "Fetch the full article body in HTML or Markdown by slug. Use Accept: text/markdown for the markdown form (no nav, no ads).",
+      "url": "https://defycard.com/{bucket}/{slug}/",
+      "method": "GET",
+      "input": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "html",
+              "markdown"
+            ],
+            "default": "html"
+          }
+        },
+        "required": [
+          "bucket",
+          "slug"
+        ]
+      },
+      "headers": {
+        "Accept": "text/markdown when format=markdown, text/html otherwise"
+      },
+      "sha256": "sha256:c8800a6a29e7e919645e5d065c67f3f7395834f847d670de3e70e70d9cae0fd0:template"
+    }
+  ],
+  "absent": {
+    "oauth-discovery": "No protected APIs on this domain. /.well-known/openid-configuration intentionally omitted (publishing fake OIDC endpoints would mislead agents).",
+    "mcp-server-card": "No MCP server runs on defycard.com. /.well-known/mcp/server-card.json intentionally omitted.",
+    "oauth-protected-resource": "No protected resources. /.well-known/oauth-protected-resource intentionally omitted."
+  }
+}

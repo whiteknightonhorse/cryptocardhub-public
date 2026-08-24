@@ -1,0 +1,103 @@
+{
+  "$schema": "banned-words-v1",
+  "version": "2026-05-05",
+  "source": [
+    "competitor-analysis/SKILL.md §8.3 (FTC enforcement era 2026)",
+    "write-article/SKILL.md §1.2 (statically blocked phrase list)",
+    "polymarket video-generator4/SKILL.md §3.1 (banned-words regex)",
+    "polymarket ai-debates/SKILL.md §10.2 (banned vocab per-token)"
+  ],
+  "fail_safe": "block_and_regenerate",
+  "case_sensitive": false,
+  "match_mode": "word_boundary_regex",
+  "banned_phrases": {
+    "marketing_absolutes": [
+      "guaranteed cashback",
+      "guaranteed return",
+      "guaranteed yield",
+      "guaranteed profit",
+      "risk-free",
+      "risk free",
+      "easy money",
+      "free money",
+      "the only card",
+      "the best card",
+      "will definitely",
+      "proven strategy",
+      "no risk",
+      "100% sure",
+      "100 percent sure",
+      "can't lose",
+      "cannot lose",
+      "sure thing",
+      "sure bet",
+      "fool-proof",
+      "foolproof"
+    ],
+    "investment_advice_red_flags": [
+      "investment advice",
+      "buy signal",
+      "sell signal",
+      "trade signal",
+      "this is financial advice",
+      "you should buy",
+      "you should sell"
+    ],
+    "gambling_vocab": [
+      "bet",
+      "betting",
+      "wager",
+      "wagering",
+      "gamble",
+      "gambling",
+      "sportsbook",
+      "odds on",
+      "place your bet",
+      "put money on"
+    ],
+    "regulatory_compliance_traps": [
+      "FDIC insured",
+      "SIPC insured",
+      "SEC approved",
+      "regulated by the SEC",
+      "regulated like a bank"
+    ]
+  },
+  "approved_alternatives": {
+    "guaranteed cashback": "up to N% cashback per the issuer's published rate",
+    "risk-free":           "transparent fees, see issuer help center",
+    "risk free":           "transparent fees, see issuer help center",
+    "easy money":          "straightforward signup",
+    "the only card":       "one of the strongest options",
+    "the best card":       "a top pick for {use_case}",
+    "will definitely":     "is published to",
+    "no risk":             "limited risk per the issuer's terms",
+    "100% sure":           "verified per issuer help center",
+    "bet":                 "position",
+    "betting":             "trading",
+    "buy signal":          "research entry",
+    "sell signal":         "research exit",
+    "investment advice":   "informational research"
+  },
+  "banned_topics": [
+    "violence",
+    "terrorism",
+    "sexual_content",
+    "self_harm",
+    "illegal_activity",
+    "drug_instructions",
+    "hate_speech",
+    "personal_data",
+    "medical_advice",
+    "political_agitation",
+    "celebrity_deaths"
+  ],
+  "tiktok_specific_bans": [
+    "wait for it",
+    "you won't believe",
+    "this changed my life forever"
+  ],
+  "youtube_specific_bans": [
+    "what if I told you"
+  ]
+}

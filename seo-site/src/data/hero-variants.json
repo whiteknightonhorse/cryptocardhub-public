@@ -1,0 +1,34 @@
+{
+  "$schema": "hero-variants-v1",
+  "purpose": "Homepage hero lead paragraph — rotates monthly so the prose stays fresh for SEO freshness signals + the page never feels stale to repeat visitors.",
+  "rotation": "Index = (year * 12 + monthIndex0) % variants.length. Same year+month always picks the same variant (build is idempotent). Each new month picks the next slot.",
+  "rules": [
+    "2 sentences, 30-50 words total — keep above-the-fold real estate tight.",
+    "Mention 11 cards somewhere (factual baseline).",
+    "No banned phrases per write-article/SKILL.md §1.2 — no 'guaranteed', 'risk-free', 'easy money', 'the only card', 'will definitely', 'proven', 'no risk', '100% sure'.",
+    "Sales-y but professional — sounds like a trusted comparison editor, not a hype reel.",
+    "Vary the framing each variant: cashback, fees, custody, country availability, yield-while-spending, tax efficiency, travel, daily spend, security, fee transparency, refresh cadence."
+  ],
+  "variants": [
+    "Our editorial team analyzed 11 top crypto debit cards, evaluating fees, cashback rewards, staking requirements, and supported assets to find the best options for everyday spending.",
+    "We compared 11 leading crypto debit cards on cashback rates, foreign-exchange fees, custody model, and country availability — so you can pick the one that actually fits the way you spend.",
+    "Eleven crypto debit cards, one ranking. We tested fees, rewards, custody, and regional access to surface the strongest pick for your wallet this month.",
+    "From self-custody DeFi cards to traditional Visa-backed picks, we ranked 11 crypto debit cards on the four metrics that actually move the needle: cashback, fees, custody, and country support.",
+    "Eleven cards, eleven different trade-offs. Our 30-day comparison weighs cashback, foreign-exchange fees, custody, and country availability so you can match a card to how you actually spend.",
+    "We tracked 11 crypto debit cards across cashback rates, hidden fees, KYC requirements, and supported assets. The result: a clear, fees-first ranking you can act on today.",
+    "Yield while you spend or simple cashback on every coffee — we benchmarked 11 crypto debit cards on the trade-offs that decide which one fits your portfolio.",
+    "Eleven crypto cards. One independent test. Our editorial team rated them on cashback transparency, fee schedules, custody model, and where they actually ship.",
+    "We re-validated 11 crypto debit cards this month — fee schedules verified, country lists checked against issuer help centers, and cashback math run on real spend.",
+    "If your card pays you nothing to use it, you are leaving money on the table. We compared 11 crypto debit cards on cashback, fees, and country support to fix that.",
+    "Some crypto cards keep your keys, some hand them to an exchange. We ranked 11 of them on custody, cashback rates, fees, and country availability to help you choose.",
+    "Eleven crypto debit cards tested against the same four-criteria rubric: cashback, foreign-exchange fees, custody model, and country availability. Read the verdicts that survived.",
+    "Travel-friendly, fee-light, yield-bearing — every crypto card claims something. We measured 11 of them against actual numbers on cashback, FX, custody, and country reach.",
+    "We refresh card data every 30 days. This month's ranking covers 11 crypto debit cards, scored on cashback rates, fees, custody, and where they are licensed to operate.",
+    "Eleven crypto debit cards, ranked by an editorial team that holds them. Cashback claimed, fees paid, custody understood — your decision shortcut starts here.",
+    "Crypto debit cards have changed. We tested 11 of the current generation across cashback structures, FX spreads, KYC depth, and supported assets so you do not have to.",
+    "We pulled 11 crypto debit cards through a four-criteria rubric: cashback, FX fees, custody, and country availability. The strongest pick for everyday spending sits at the top.",
+    "From stablecoin-only cards to ETH-backed yield cards, we benchmarked 11 options on the metrics that decide who actually wins for your spending pattern.",
+    "Eleven crypto cards. Four criteria that matter. Our team verified fees against issuer help centers and ranked the lineup so the right card surfaces for your situation.",
+    "We tested 11 crypto debit cards on what readers actually ask about: cashback math, hidden fees, custody trust, and country support. The winners — and the watch-outs — are below."
+  ]
+}

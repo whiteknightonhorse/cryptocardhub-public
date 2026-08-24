@@ -1,0 +1,17 @@
+# The last eight, by hand, each anchored on raw source bytes.
+# Three distinct causes, none of them "invalid markdown":
+#   * emphasis inside a link LABEL splits the text node (Fable's named ceiling)
+#   * `www.ether.fi` inside a label is GFM-autolinked, making a link in a link
+#   * `~$20 ... ~$240` pairs into STRIKETHROUGH and <del> eats the emphasis
+#   * a snapshot bullet is split on its FIRST colon into key/value, cutting a
+#     `**...**` pair in half — so the colon must live inside the emphasis
+[**0% FX on USD and EUR**](<<AFFILIATE_URL>>)	[0% FX on USD and EUR](<<AFFILIATE_URL>>)
+[Sign up now and earn up to **3 %** on every purchase.](<<AFFILIATE_URL>>)	[Sign up now and earn up to 3 % on every purchase.](<<AFFILIATE_URL>>)
+[Claim up to **3 %** cashback with ether.fi and keep full control of your assets.](<<AFFILIATE_URL>>)	[Claim up to 3 % cashback with ether.fi and keep full control of your assets.](<<AFFILIATE_URL>>)
+[If you fit **none** of these profiles, ether.fi Cash is a better self-custody card](<<AFFILIATE_URL>>)	[If you fit none of these profiles, ether.fi Cash is a better self-custody card](<<AFFILIATE_URL>>)
+[www.ether.fi](<<AFFILIATE_URL>>)	[the ether.fi web app](<<AFFILIATE_URL>>)
+**Best option for GA: Crypto.com**	**Best option for GA:** Crypto.com
+interest + ~$20	interest + about $20
+= **~$240/year**	= **about $240/year**
+(~$200)	(about $200)
+= **~$1,760/year**	= **about $1,760/year**

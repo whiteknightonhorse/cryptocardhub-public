@@ -1,0 +1,25 @@
+{
+  "platform": "tiktok",
+  "cover_frame_seconds": 0.5,
+  "cover_overlay": {
+    "ftc_burn_in_window_sec": [0.0, 6.0],
+    "hook_overlay_window_sec": [0.0, 1.5],
+    "hook_text": {"font": "Anton-Regular.ttf", "size": 100, "fill": "#FFD700", "stroke": "#000000", "stroke_px": 6, "y_pct": 35}
+  },
+  "captions": {
+    "font": "Anton-Regular.ttf",
+    "size_range": [72, 92],
+    "fill": "#FFFFFF",
+    "stroke": "#000000",
+    "stroke_px": 6,
+    "y_pct": 75,
+    "highlight_fill": "#F7C204",
+    "highlight_keywords_regex": "^(\\d+%?|\\$[\\d.]+[MmKkBb]?|YES|NO|NEVER|ALWAYS|NEWS|BREAKING|SHOCK|CRASH|SPIKE|BOOM|NEW|FIRST|LAST|ONLY|EVERY|NOBODY|EVERYONE|FREE|EARN|YIELD|CASHBACK|TAP)$"
+  },
+  "scene_cut_max_sec": 3.0,
+  "first_second_invariant": {
+    "frame_1_must_have": ["hard_cut", "bold_text_overlay", "audio_sting"],
+    "audio_sting_t_sec": [0.0, 0.4]
+  },
+  "tts_rate_override_us_female": "+0%"
+}

@@ -1,0 +1,236 @@
+---
+/**
+ * /videos/ — gallery of every published DefyCard short.
+ *
+ * Sources `videos` content collection (synced from YT publish_log via
+ * scripts/sync-yt-videos.py before each build). Each card links to
+ * /videos/<id>/ for the full embed + JSON-LD page.
+ */
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths, Page } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+/**
+ * PAGE_SIZE is the law this page is judged by (tests/test_videos_pagination).
+ * 206 cards in one document was 150 KB and grew with every upload; discovery
+ * for machines never went through here anyway — of 598 AI fetches of /videos/*
+ * only 9 hit this index, the rest went to sitemap-videos.xml and the
+ * individual /videos/<id>/ pages. So paginating is a human/Googlebot fix and
+ * costs the answer engines nothing.
+ */
+export const PAGE_SIZE = 20;
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const all = await getCollection('videos');
+  const videos = all
+    .map((e) => e.data)
+    .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
+  return paginate(videos, { pageSize: PAGE_SIZE });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<any> };
+const videos = page.data;
+
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'Videos', url: `${siteOrigin}/videos/` },
+];
+
+function shortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+  });
+}
+---
+<BaseLayout
+  title={page.currentPage === 1
+    ? 'DefyCard Videos — crypto cards, travel, finance shorts'
+    : `DefyCard Videos — page ${page.currentPage}`}
+  description="Every published DefyCard short — crypto card explainers, travel hacks, and finance one-minute breakdowns. New videos added daily."
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <section class="videos-index">
+    <h1>Videos</h1>
+    <p class="lead">
+      Short-form explainers from the DefyCard team — crypto card decisions, travel and money hacks,
+      and the occasional rant. New videos drop daily.
+    </p>
+
+    {videos.length === 0 ? (
+      <div class="videos-empty">
+        <p>Videos will appear here as they are published. Check back soon.</p>
+      </div>
+    ) : (
+      <div class="videos-grid">
+        {videos.map((v) => (
+          <a class="video-card" href={`/videos/${v.id}/`}>
+            <div class="video-thumb">
+              <img
+                src={v.thumbnail_url}
+                alt={v.title}
+                loading="lazy"
+                decoding="async"
+                width="480"
+                height="360"
+              />
+              <span class="video-chip">{v.topic_class}</span>
+            </div>
+            <div class="video-body">
+              <h3>{v.title}</h3>
+              <p class="video-meta">{shortDate(v.published_at)} · {v.topic_category}</p>
+              <p class="video-desc">{v.description}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+
+    {page.lastPage > 1 && (
+      <nav class="videos-pager" aria-label="Videos pagination">
+        {page.url.prev ? (
+          <a class="pager-step" href={page.url.prev} rel="prev">← Newer</a>
+        ) : (
+          <span class="pager-step is-off">← Newer</span>
+        )}
+
+        <ol class="pager-nums">
+          {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((n) => (
+            <li>
+              {n === page.currentPage ? (
+                <span class="pager-num is-current" aria-current="page">{n}</span>
+              ) : (
+                <a class="pager-num" href={n === 1 ? '/videos/' : `/videos/${n}/`}>{n}</a>
+              )}
+            </li>
+          ))}
+        </ol>
+
+        {page.url.next ? (
+          <a class="pager-step" href={page.url.next} rel="next">Older →</a>
+        ) : (
+          <span class="pager-step is-off">Older →</span>
+        )}
+      </nav>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .videos-index {
+    padding-top: 16px;
+  }
+  .videos-pager {
+    margin: 40px 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .pager-nums {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+  .pager-num,
+  .pager-step {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.95rem;
+  }
+  .pager-num.is-current {
+    background: var(--surface-container-low);
+    font-weight: 600;
+  }
+  .pager-step.is-off {
+    opacity: 0.4;
+  }
+  .videos-grid {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .video-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  .video-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+  }
+  .video-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--surface-container);
+  }
+  .video-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .video-chip {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+  }
+  .video-body {
+    padding: 14px 16px 16px;
+  }
+  .video-body h3 {
+    margin: 0 0 6px;
+    font-size: 1.02rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .video-meta {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    color: var(--on-surface-variant);
+  }
+  .video-desc {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: var(--on-surface-variant);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .videos-empty {
+    margin-top: 32px;
+    padding: 36px 24px;
+    border: 1px dashed var(--outline);
+    border-radius: var(--radius-md);
+    text-align: center;
+    color: var(--on-surface-variant);
+  }
+</style>

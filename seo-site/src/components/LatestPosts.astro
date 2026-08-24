@@ -1,0 +1,109 @@
+---
+/**
+ * LatestPosts — homepage feed.
+ *
+ * Image-card layout matching Stitch homepage "Latest Reviews & Analysis":
+ *   ┌────────────────────┐
+ *   │ <img>  + REVIEW    │ ← thumb 160px, label chip top-left
+ *   ├────────────────────┤
+ *   │ Article title      │ ← H3 (2-line clamp)
+ *   │ excerpt 3-line clmp│
+ *   └────────────────────┘
+ *
+ * Sources newest pSEO entries by `generated_at`. Drives PageRank from
+ * homepage to all 30/day generated articles.
+ */
+import { getCollection } from 'astro:content';
+
+export interface Props {
+  count?: number;
+  heading?: string;
+  bucketFilter?: string;
+  /**
+   * Готовый срез записей. Когда он передан, компонент НЕ выбирает и НЕ сортирует сам —
+   * он только рисует. Нужен постраничному списку /articles/, который обязан владеть
+   * разбиением, но не должен заводить вторую копию разметки карточки: одна вёрстка на
+   * две поверхности, иначе они разойдутся ровно тогда, когда кто-то поправит одну.
+   */
+  entries?: any[];
+}
+
+const {
+  count = 4,
+  heading = 'Latest Reviews & Analysis',
+  bucketFilter,
+  entries,
+} = Astro.props;
+
+const bucketLabel: Record<string, string> = {
+  hub: 'GUIDE',
+  compare: 'COMPARE',
+  reviews: 'REVIEW',
+  geo: 'REGION',
+  tools: 'TOOL',
+  'how-to': 'GUIDE',
+  for: 'USE CASE',
+  learn: 'LEARN',
+  help: 'TROUBLESHOOT',
+  news: 'NEWS',
+  faq: 'FAQ',
+};
+
+let latest = entries;
+if (!latest) {
+  const all = await getCollection('pseo');
+  const filtered = bucketFilter
+    ? all.filter((e) => e.data.bucket === bucketFilter)
+    : all;
+  latest = filtered
+    .slice()
+    .sort((a, b) => {
+      const ta = Date.parse(a.data.generated_at) || 0;
+      const tb = Date.parse(b.data.generated_at) || 0;
+      return tb - ta;
+    })
+    .slice(0, count);
+}
+
+function firstImage(images: any): { src: string; alt: string } | null {
+  if (!Array.isArray(images) || images.length === 0) return null;
+  return { src: images[0].src, alt: images[0].alt || '' };
+}
+
+function excerpt(s: string, max = 110): string {
+  if (!s) return '';
+  if (s.length <= max) return s;
+  return s.slice(0, max).replace(/\s+\S*$/, '').trim() + '…';
+}
+---
+<h2 set:html={heading} />
+{latest.length > 0 ? (
+  <div class="latest-grid">
+    {latest.map((e) => {
+      const img = firstImage(e.data.images);
+      const chip = bucketLabel[e.data.bucket] || e.data.bucket.toUpperCase();
+      return (
+        <a class="latest-card" href={`/${e.data.bucket}/${e.data.slug}/`}>
+          <div class="latest-thumb">
+            {img ? (
+              <img src={img.src} alt={img.alt} loading="lazy" decoding="async" />
+            ) : (
+              <div class="latest-thumb-empty">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 48px;">credit_card</span>
+              </div>
+            )}
+            <span class="latest-chip">{chip}</span>
+          </div>
+          <div class="latest-body">
+            <h3 class="latest-h3">{e.data.h1}</h3>
+            <p class="latest-desc">{excerpt(e.data.description, 130)}</p>
+          </div>
+        </a>
+      );
+    })}
+  </div>
+) : (
+  <p style="color: var(--on-surface-variant); padding: 24px; text-align: center; background: var(--surface-container-low); border: 1px dashed var(--outline-variant); border-radius: var(--radius-md);">
+    Articles will appear here as they are published. Check back soon.
+  </p>
+)}

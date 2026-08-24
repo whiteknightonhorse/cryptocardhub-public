@@ -1,0 +1,29 @@
+{
+  "platform": "youtube",
+  "thumbnail": {
+    "size": [1280, 720],
+    "background": {
+      "source": "pexels_landscape",
+      "scale_to_cover": true,
+      "focal_point_zoom": 1.04,
+      "bias": "top_third"
+    },
+    "gradient_bottom": {"alpha_peak": 220, "height_pct": 30},
+    "line_1": {"font": "Anton-Regular.ttf", "size": 104, "fill": "#FFFFFF", "stroke": "#000000", "stroke_px": 7},
+    "line_2": {"font": "Anton-Regular.ttf", "size": 62, "fill": "#1e66f5", "stroke": "#000000", "stroke_px": 6},
+    "tag_ribbon": {"position": "top_right", "color_bg": "#FF1744", "color_fg": "#FFFFFF", "default_text": "URGENT"},
+    "brand_strip": {"position": "bottom", "height": 36, "color_bg": "#000000", "color_fg": "#FFFFFF", "text": "defycard.com  ·  @defycard"},
+    "jpeg_quality_ladder": [88, 82, 75, 68],
+    "max_size_bytes": 2000000
+  },
+  "tag_ribbon_per_topic_class": {
+    "TOFU": {"text": "WATCH", "color_bg": "#FF6B35"},
+    "MOFU": {"text": "COMPARE", "color_bg": "#1e66f5"},
+    "BOFU": {"text": "SIGNUP", "color_bg": "#00C49F"}
+  },
+  "title_emoji_prefix": {
+    "TOFU": "📈",
+    "MOFU": "🔍",
+    "BOFU": "💳"
+  }
+}

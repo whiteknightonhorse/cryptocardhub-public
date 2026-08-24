@@ -1,0 +1,179 @@
+---
+/**
+ * /geo/availability-matrix/ — AEO-1.
+ *
+ * WHY THIS PAGE EXISTS
+ * The single most-cited and highest-converting object on this site is an
+ * honest "this card is not available where you live, here is what you can
+ * actually get" answer: 6 of the 10 clicks assistants have ever sent us landed
+ * on /geo/best-crypto-card-india/ and .../turkey/. This page is that answer in
+ * one place, machine-readable, dated, and attributed to the issuer.
+ *
+ * THE TEMPLATE STATES NO FACTS. Every country, every verdict and every date
+ * comes from config/availability.yaml via lib/availability.mjs. Cards without
+ * a `verified` date are absent (not "unknown" — absent). The per-card note is
+ * computed in the library, not branched on here, so the page cannot quietly
+ * stop admitting that its data is old.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  publishedCards, jurisdictions, cellFor, geoSlugFor,
+  availabilityNote, STALE_AFTER_DAYS,
+} from '../../lib/availability.mjs';
+import { primaryPartnerFor, partnerUrl, PARTNERS } from '../../lib/affiliates.mjs';
+
+const cards = publishedCards();
+const { countries, usStates } = jurisdictions(cards);
+const today = new Date();
+const notes = Object.fromEntries(cards.map((c) => [c.key, availabilityNote(c, today)]));
+
+// CTA partner resolves the same way every other page does — no direct URLs.
+const partner = primaryPartnerFor({ slug: 'availability-matrix' });
+const affiliateUrl = partnerUrl(partner);
+
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'By country', url: `${siteOrigin}/geo/` },
+  { name: 'Card availability matrix', url: `${siteOrigin}/geo/availability-matrix/` },
+];
+
+const title = 'Crypto Card Availability by Country — Matrix';
+const description =
+  'Which crypto cards can actually be issued in your country or US state, '
+  + 'card by card, with the date each list was last checked against the issuer.';
+
+function verdict(card, name, kind) {
+  const v = cellFor(card, name, kind);
+  if (v === null) return 'Not stated';
+  return v ? 'Available' : 'Not available';
+}
+---
+<BaseLayout
+  title={title}
+  description={description}
+  activeNav="cards"
+  ogType="article"
+  breadcrumbs={breadcrumbs}
+  affiliatePartner={partner}
+>
+  <article>
+    <section class="article-hero">
+      <h1>Crypto card availability by country</h1>
+      <p class="lead">
+        DefyCard publishes affiliate-linked reviews; we may earn a commission when you
+        sign up through our links. A card you cannot be issued is worth nothing, so this
+        table states availability per card and per jurisdiction, sourced from each
+        issuer&rsquo;s own help centre and dated. Where a card is unavailable we link the
+        guide that names the alternatives.
+      </p>
+    </section>
+
+    {cards.length === 0 && (
+      <section class="callout-section">
+        <p>
+          No card list has been verified against its issuer yet, so there is nothing
+          honest to publish here. This page shows a card only after its availability
+          list has been checked against the issuer&rsquo;s own page.
+        </p>
+      </section>
+    )}
+
+    {cards.length > 0 && (
+      <section class="availability-matrix">
+        <h2>Sources and last check</h2>
+        <ul>
+          {cards.map((c) => (
+            <li data-card={c.key} data-verified={c.verified}>
+              <strong>{c.name}</strong>{' — '}
+              <span class="availability-note">{notes[c.key]}</span>{' · '}
+              {c.source?.url
+                ? <a href={c.source.url} rel="nofollow noopener" target="_blank">{c.source.title || 'issuer source'}</a>
+                : <span>source not recorded</span>}
+            </li>
+          ))}
+        </ul>
+        <p class="page-meta">
+          Lists are re-checked against the issuer monthly. Past {STALE_AFTER_DAYS} days
+          without a successful check a card is shown as overdue rather than as current.
+        </p>
+
+        <h2>By country</h2>
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th scope="col">Country</th>
+              {cards.map((c) => <th scope="col">{c.name}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {countries.map((name) => (
+              <tr>
+                <th scope="row">{name}</th>
+                {cards.map((c) => (
+                  <td data-card={c.key} data-jurisdiction={name}>
+                    {verdict(c, name, 'country')}
+                    {cellFor(c, name, 'country') === false && geoSlugFor(name) && (
+                      <>{' — '}<a href={`/geo/${geoSlugFor(name)}/`}>alternatives for {name}</a></>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {usStates.length > 0 && (
+          <>
+            <h2>By US state</h2>
+            <p>
+              States not listed below are supported by every card in this table. Issuers
+              publish blocked-state lists, not allow-lists, so an absent state means
+              &ldquo;not blocked&rdquo;.
+            </p>
+            <table class="matrix">
+              <thead>
+                <tr>
+                  <th scope="col">US state</th>
+                  {cards.map((c) => <th scope="col">{c.name}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {usStates.map((name) => (
+                  <tr>
+                    <th scope="row">{name}</th>
+                    {cards.map((c) => (
+                      <td data-card={c.key} data-jurisdiction={name}>{verdict(c, name, 'state')}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </section>
+    )}
+
+    <section class="callout-section">
+      <h2>How to read this table</h2>
+      <ul>
+        <li><strong>Available</strong> — the issuer does not list your jurisdiction as restricted. Approval still depends on KYC.</li>
+        <li><strong>Not available</strong> — the issuer names your jurisdiction as restricted. Applying will not work.</li>
+        <li><strong>Not stated</strong> — the issuer publishes no list we could check. We do not guess.</li>
+      </ul>
+    </section>
+
+    <section class="article-cta article-cta--primary">
+      <a class="cta" href={affiliateUrl} rel="sponsored noopener" target="_blank">
+        Check eligibility with {PARTNERS[partner]?.name || partner} <span aria-hidden="true">→</span>
+      </a>
+      <p class="article-cta-fineprint">Terms apply. Capital at risk.</p>
+    </section>
+
+    <p class="page-meta">
+      Source of truth: <code>config/availability.yaml</code>, verified against each
+      issuer&rsquo;s help centre. Corrections are applied by a human editor, never
+      automatically.
+    </p>
+  </article>
+</BaseLayout>

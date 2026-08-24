@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lastReviewed = '2026-05-06';
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'Privacy policy', url: `${siteOrigin}/privacy/` },
+];
+---
+<BaseLayout
+  title="Privacy policy — DefyCard"
+  description="DefyCard's privacy policy: what we collect (almost nothing), how cookies and third parties work, and how to exercise your GDPR or CCPA rights."
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="legal-page">
+    <h1>Privacy policy</h1>
+    <p class="lead">
+      DefyCard is a content site, not an account-based product. We do not
+      operate user accounts, and we collect almost no information about you.
+      This policy explains exactly what we do collect, what third parties
+      receive when you load a page, and how to exercise your rights under
+      the GDPR (European Union, United Kingdom) and the CCPA/CPRA
+      (California, United States).
+    </p>
+
+    <h2>What DefyCard itself collects</h2>
+    <p>
+      We do not run a custom analytics product. The only first-party data we
+      retain is what an Nginx web server logs by default for every HTTP
+      request: timestamp, IP address, user agent, requested path, response
+      status, and bytes served. These access logs are retained for thirty
+      days for security and abuse-prevention purposes, then automatically
+      rotated and discarded. They are not exported, sold, or correlated with
+      any other source.
+    </p>
+    <p>
+      The site contains no login form, no newsletter form, no comment form,
+      and no first-party tracking pixel. Loading any page does not place
+      persistent identifiers on your device from the DefyCard origin itself.
+      However, see the Google Analytics + Cookies sections below for what
+      third parties may set when you load a page.
+    </p>
+
+    <h2>Third parties that receive a request when you load a page</h2>
+    <ul>
+      <li>
+        <strong>Google Analytics 4</strong>
+        (<code>www.googletagmanager.com</code>,
+        <code>www.google-analytics.com</code>, property
+        <code>G-JLRZD59902</code>) — measures aggregate page views,
+        approximate location (country / region only), device class, and
+        referrer source so we can see which articles readers find useful.
+        See the dedicated section below.
+      </li>
+      <li>
+        <strong>Google Fonts</strong> (<code>fonts.googleapis.com</code>,
+        <code>fonts.gstatic.com</code>) — serves the Material Symbols icon
+        font. Google’s privacy notice covers what they log.
+      </li>
+      <li>
+        <strong>Unsplash</strong> (<code>images.unsplash.com</code>) — serves
+        article hero and inline images. Unsplash logs image requests for
+        photographer attribution and CDN analytics.
+      </li>
+      <li>
+        <strong>Affiliate destinations</strong> — when you click a sponsored
+        link, the destination issuer (ether.fi, Crypto.com, RedotPay, Bybit,
+        and similar) receives the click and may set their own cookies on
+        their own domain.
+      </li>
+    </ul>
+    <p>
+      We do not run Meta Pixel, Hotjar, FullStory, or any other
+      session-replay or behavioural-recording tool. We do not run a
+      third-party CDN that sits between you and our origin. The
+      <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, and
+      <code>Strict-Transport-Security</code> headers are set on every
+      response.
+    </p>
+
+    <h2>Google Analytics 4</h2>
+    <p>
+      DefyCard uses Google Analytics 4 (GA4), property
+      <code>G-JLRZD59902</code>. GA4 collects:
+    </p>
+    <ul>
+      <li>The page URL you visited and how long you spent on it.</li>
+      <li>Approximate geography (country and region only — GA4 does not
+      store full IP addresses; the last octet of IPv4 is dropped before
+      processing).</li>
+      <li>Device class (desktop / mobile / tablet), browser, operating
+      system.</li>
+      <li>Referrer source (the site you arrived from, if any).</li>
+      <li>Anonymised event data such as scroll depth and outbound link
+      clicks (Enhanced Measurement).</li>
+    </ul>
+    <p>
+      GA4 sets first-party cookies on the <code>defycard.com</code> domain
+      under the names <code>_ga</code> and <code>_ga_JLRZD59902</code> with
+      a default 2-year expiry. These cookies contain a randomly generated
+      client identifier — they do <em>not</em> contain your name, email,
+      or any account-linked information.
+    </p>
+    <p>
+      <strong>How to opt out:</strong>
+    </p>
+    <ul>
+      <li>Install the official
+        <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener">Google Analytics Opt-out Browser Add-on</a>.
+      </li>
+      <li>Use a privacy-focused browser (Brave, Firefox with strict tracking
+        protection) or a content blocker (uBlock Origin); GA4 will be
+        blocked outright.</li>
+      <li>Send a Global Privacy Control (GPC) header — Mozilla Firefox and
+        DuckDuckGo enable this by default for users in CCPA/CPRA scope.</li>
+      <li>Email <a href="mailto:support@defycard.com">support@defycard.com</a>
+        with "Privacy request" in the subject line and we will manually
+        exclude your client identifier from our GA4 reporting.</li>
+    </ul>
+    <p>
+      We do not sell GA4 data to third parties, do not link it to any other
+      identifier, and do not use it for personalised advertising. Google's
+      own retention is configured for 14 months, after which event-level
+      data is automatically deleted.
+    </p>
+
+    <h2>Cookies</h2>
+    <p>
+      DefyCard sets one client-side preference using
+      <code>localStorage</code>: your dark/light theme choice, stored under
+      the key <code>theme</code> with the value <code>dark</code> or
+      <code>light</code>. This is a preference flag, not a tracker; it is not
+      a cookie, never leaves your browser, and is not sent in any HTTP
+      request. Clearing site data in your browser removes it.
+    </p>
+    <p>
+      Google Analytics sets the cookies described above. No other cookies
+      are set by DefyCard or by any other third-party script we load.
+    </p>
+
+    <h2>Affiliate links</h2>
+    <p>
+      When you click an affiliate link on DefyCard, the destination issuer
+      may attach a referral code and set their own cookies on their own
+      domain. This is what allows them to pay us a commission. We do not
+      receive personally identifiable information from this flow — only
+      aggregate referral counts. The
+      <a href="/disclosure/">affiliate disclosure</a> explains the mechanics
+      in detail.
+    </p>
+
+    <h2>Your rights under the GDPR</h2>
+    <p>
+      If you are in the European Union, the United Kingdom, or another
+      jurisdiction that grants equivalent rights, you have the right to
+      access, correct, delete, restrict, or port any personal data we hold
+      about you. Because we hold no account-linked data and our access logs
+      are unindexed, we typically have nothing tied to a specific person —
+      but we will confirm in writing within 30 days.
+    </p>
+    <p>
+      To file a request, email
+      <a href="mailto:support@defycard.com">support@defycard.com</a> with
+      “GDPR request” in the subject line. We may ask for the IP address and
+      approximate timestamp of a recent visit so we can locate matching
+      access-log lines, if any, before deletion.
+    </p>
+
+    <h2>Your rights under the CCPA/CPRA</h2>
+    <p>
+      If you are a California resident, you have the right to know what
+      personal information we collect, to delete that information, and to
+      opt out of any sale or sharing of it. DefyCard does not sell or share
+      personal information; affiliate referral counts do not constitute a
+      sale of personal information under the CPRA, because no identifier
+      tied to you crosses the boundary. To submit a CCPA request, email
+      <a href="mailto:support@defycard.com">support@defycard.com</a> with
+      “CCPA request” in the subject line.
+    </p>
+
+    <h2>Children</h2>
+    <p>
+      DefyCard is not directed at children under 16. We do not knowingly
+      collect data from children. If you believe we have inadvertently
+      received such data, email us and we will delete it.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      Material changes to this policy will be reflected in the “Last
+      reviewed” timestamp at the bottom of this page and noted in the
+      <a href="/news/">news</a> section. We do not retroactively change
+      what we collected; new collection only applies after the change date.
+    </p>
+
+    <p class="page-meta">Last reviewed: {lastReviewed}</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .legal-page h2 {
+    margin-top: 1.8em;
+  }
+  .legal-page p {
+    color: var(--on-surface);
+    margin: 0 0 1em;
+  }
+  .legal-page ul {
+    margin: 0 0 1em;
+    padding-left: 1.4em;
+  }
+  .legal-page li {
+    margin-bottom: 0.5em;
+  }
+  .legal-page code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.9em;
+    background: var(--surface-container-low);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--outline-variant);
+  }
+  .page-meta {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+</style>

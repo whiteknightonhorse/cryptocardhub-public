@@ -1,0 +1,345 @@
+---
+/**
+ * Dynamic pSEO article renderer — translates Stitch article-template design
+ * into Astro. Every URL of the form /<bucket>/<slug>/ is generated from
+ * src/content/pseo/<slug>.md via getStaticPaths.
+ *
+ * Sections (matching Stitch zip):
+ *   1. Article hero (16:9 image + H1 + lead with FTC + inline affiliate link)
+ *   2. At-a-Glance snapshot card (6 KPI rows in 2-col grid)
+ *   3. Article body (Content from markdown — H2s, callouts, embedded images)
+ *   4. What to Watch (status-info border-left card)
+ *   5. The Bottom Line (secondary border-left card)
+ *   6. Primary affiliate CTA (large pill)
+ *   7. FAQ accordion (chevron rotate)
+ *   8. Related Guides (curated)
+ *   9. More from this section (bento grid)
+ *  10. Last reviewed timestamp
+ */
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import BucketSiblings from '../../components/BucketSiblings.astro';
+import { primaryPartnerFor, partnerUrl, resolveAffiliate, mdField } from '../../lib/affiliates.mjs';
+import { dateModifiedFor } from '../../lib/freshness.mjs';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pseo');
+  return pages.map((entry) => ({
+    params: { bucket: entry.data.bucket, slug: entry.data.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+// Cross-collection link to videos: any video whose target_pseo_slug points
+// at this article gets embedded at the top. The sync script (scripts/
+// sync-yt-videos.py) populates target_pseo_slug from topic-pool hints +
+// keyword overlap with primary_keyword. VIRAL videos that don't match a
+// crypto-card article never set target_pseo_slug and live only on /videos/.
+const allVideos = await getCollection('videos');
+const articleVideos = allVideos
+  .map((v) => v.data)
+  .filter((v) => v.target_pseo_slug === `${entry.data.bucket}/${entry.data.slug}`)
+  .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
+  .slice(0, 1); // top 1 most-recent — keep article focused
+const heroVideo = articleVideos[0] || null;
+
+// Y50 P0-1: the CTA partner is a property of the PAGE, not of the site. Geo
+// pages for jurisdictions where ether.fi is unavailable (config/availability.yaml)
+// route to the fallback partner — otherwise every CTA here sent the reader to a
+// card they cannot be issued.
+const partner = primaryPartnerFor(entry.data);
+const affiliateUrl = partnerUrl(partner);
+
+// Defensive substitutions (generator usually does this at gen time)
+const intro = resolveAffiliate(entry.data.intro_paragraph || '', partner);
+
+const snapshot = entry.data.snapshot_bullets || [];
+const watchList = entry.data.what_to_watch || entry.data.stakes_bullets || [];
+const bottomLine = entry.data.bottom_line || [];
+const faq = entry.data.faq || [];
+const images = entry.data.images || [];
+const relatedClusters = entry.data.related_clusters || [];
+const schemaArticle = entry.data.schema_article;
+const schemaFaq = entry.data.schema_faq;
+
+// Pick first image as hero (rest are inline via embedded <figure> in body markdown)
+const heroImage = images.length > 0 ? images[0] : null;
+
+// Active nav highlight based on bucket
+const navMap: Record<string, 'cards' | 'reviews' | 'guides' | 'comparison'> = {
+  reviews: 'reviews',
+  compare: 'comparison',
+  'how-to': 'guides',
+  learn: 'guides',
+  help: 'guides',
+  faq: 'guides',
+  hub: 'cards',
+  geo: 'cards',
+  tools: 'cards',
+  for: 'cards',
+  news: 'cards',
+};
+const activeNav = navMap[entry.data.bucket] || 'cards';
+
+/**
+ * Parse a snapshot bullet line like "**Cashback:** up to 3 %" → {key, value}.
+ * Falls back to a single-cell row if the pattern doesn't match.
+ */
+function parseSnapshotBullet(line: string): { key: string; value: string } {
+  const m = line.match(/^\*\*([^*]+):\*\*\s*(.+)$/);
+  if (m) return { key: m[1].trim(), value: m[2].trim() };
+  // Plain "Key: value" without bold
+  const m2 = line.match(/^([^:]+):\s*(.+)$/);
+  if (m2) return { key: m2[1].trim(), value: m2[2].trim() };
+  return { key: '', value: line };
+}
+
+const snapshotRows = snapshot.map(parseSnapshotBullet);
+
+const lastReviewed = new Date(entry.data.generated_at).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+
+// Display name per bucket (used for breadcrumb middle segment)
+const bucketDisplayName: Record<string, string> = {
+  hub: 'Hubs', compare: 'Comparisons', reviews: 'Reviews',
+  'how-to': 'How-to', for: 'Use cases', geo: 'By country',
+  tools: 'Calculators', learn: 'Learn', help: 'Troubleshooting',
+  news: 'News', faq: 'FAQ',
+};
+
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+
+// BreadcrumbList: Home → <Bucket> → <Article H1>  (per seo2026 §5.6)
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  {
+    name: bucketDisplayName[entry.data.bucket] || entry.data.bucket,
+    url: `${siteOrigin}/${entry.data.bucket}/`,
+  },
+  {
+    name: entry.data.h1,
+    url: `${siteOrigin}/${entry.data.bucket}/${entry.data.slug}/`,
+  },
+];
+
+// Enrich Article schema with required + recommended properties (per seo2026 §5.1)
+// AEO-5: dateModified comes from the same source as the sitemap lastmod — the
+// page's own generated_at, bumped only when the facts behind it were actually
+// re-verified. It is never the build time, so a redeploy does not claim that
+// every article on the site was just revised.
+const enrichedArticle = schemaArticle
+  ? {
+      ...schemaArticle,
+      dateModified:
+        dateModifiedFor(entry.data.bucket, entry.data.slug,
+                        (schemaArticle as any).datePublished)
+        || (schemaArticle as any).dateModified
+        || (schemaArticle as any).datePublished,
+      image: heroImage?.src ? [heroImage.src] : (schemaArticle as any).image,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `${siteOrigin}/${entry.data.bucket}/${entry.data.slug}/`,
+      },
+      publisher: (schemaArticle as any).publisher || {
+        '@type': 'Organization',
+        '@id': `${siteOrigin}/#org`,
+        name: 'DefyCard',
+        logo: {
+          '@type': 'ImageObject',
+          url: `${siteOrigin}/favicon.svg`,
+        },
+      },
+    }
+  : null;
+---
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  ogImage={heroImage?.src}
+  ogType="article"
+  activeNav={activeNav}
+  breadcrumbs={breadcrumbs}
+  affiliatePartner={partner}
+>
+  <article>
+    <!-- 1. ARTICLE HERO -->
+    <section class="article-hero">
+      {heroImage && (
+        <figure class="article-hero-image">
+          <img src={heroImage.src} alt={heroImage.alt} loading="eager" decoding="async" />
+          {/* No <figcaption> — visible Unsplash credit links bleed traffic
+              off-site. Unsplash UTM-tagged source URL on the <img> satisfies
+              referral-tracking ToS. Operator policy 2026-05-07. */}
+        </figure>
+      )}
+      <h1>{entry.data.h1}</h1>
+      {entry.data.bucket === 'news' && entry.data.news_published_at && (
+        <p class="news-meta">
+          <time datetime={entry.data.news_published_at}>
+            {new Date(entry.data.news_published_at).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'short', day: 'numeric',
+            })}
+          </time>
+          {entry.data.source_name && entry.data.source_url && (
+            <>
+              {' · Source: '}
+              <a href={entry.data.source_url} target="_blank" rel="nofollow noopener">
+                {entry.data.source_name}
+              </a>
+            </>
+          )}
+        </p>
+      )}
+      <p class="lead" set:html={mdField(intro)}></p>
+    </section>
+
+    {/* 1.5 ARTICLE-LINKED VIDEO — appears only when a published YT short
+        targets this slug (target_pseo_slug match in videos collection).
+        Critical for Google Video Sitemap eligibility: the embed MUST be
+        on a real, indexable page; just listing in the sitemap isn't
+        enough. JSON-LD VideoObject below feeds the rich-result. */}
+    {heroVideo && (
+      <section class="article-video">
+        <h2>Watch: {heroVideo.title}</h2>
+        <div class="article-video-embed">
+          <iframe
+            src={`${heroVideo.embed_url}?rel=0&modestbranding=1`}
+            title={heroVideo.title}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          />
+        </div>
+        <p class="article-video-cta">
+          <a href={`/videos/${heroVideo.id}/`}>Open the full video page →</a>
+        </p>
+        <script type="application/ld+json" set:html={JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'VideoObject',
+          name: heroVideo.title,
+          description: heroVideo.description,
+          thumbnailUrl: [heroVideo.thumbnail_url],
+          uploadDate: heroVideo.published_at,
+          contentUrl: heroVideo.youtube_url,
+          embedUrl: heroVideo.embed_url,
+          ...(heroVideo.duration_s ? { duration: `PT${Math.round(heroVideo.duration_s)}S` } : {}),
+          publisher: {
+            '@type': 'Organization',
+            name: 'DefyCard',
+          },
+        })} />
+      </section>
+    )}
+
+    <!-- 2. AT-A-GLANCE SNAPSHOT -->
+    {snapshotRows.length > 0 && (
+      <section class="article-snapshot">
+        <h2>At-a-Glance</h2>
+        <ul>
+          {snapshotRows.map((row) => (
+            <li>
+              {row.key && <span class="snapshot-key" set:html={mdField(resolveAffiliate(row.key, partner)) + ":"} />}
+              <span class="snapshot-value" set:html={mdField(resolveAffiliate(row.value, partner))} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- 3. ARTICLE BODY -->
+    <section class="article-body">
+      <Content components={{}} />
+    </section>
+
+    <!-- 4. WHAT TO WATCH -->
+    {watchList.length > 0 && (
+      <section class="callout-section">
+        <h2>What to Watch</h2>
+        <ul>
+          {watchList.map((s) => <li set:html={mdField(resolveAffiliate(s, partner))} />)}
+        </ul>
+      </section>
+    )}
+
+    <!-- 5. THE BOTTOM LINE -->
+    {bottomLine.length > 0 && (
+      <section class="callout-section is-bottom-line">
+        <h2>The Bottom Line</h2>
+        <ul>
+          {bottomLine.map((s) => (
+            <li set:html={mdField(resolveAffiliate(s, partner))} />
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- 6. PRIMARY AFFILIATE CTA -->
+    <section class="article-cta article-cta--primary">
+      <a class="cta" href={affiliateUrl} rel="sponsored noopener" target="_blank">
+        Get your DefyCard <span aria-hidden="true">→</span>
+      </a>
+      <p class="article-cta-fineprint">Terms apply. Capital at risk.</p>
+    </section>
+
+    <!-- 7. FAQ ACCORDION -->
+    {faq.length > 0 && (
+      <section class="article-faq">
+        <h2>Frequently Asked Questions</h2>
+        {faq.map((item) => (
+          <details>
+            <summary>
+              <span set:html={mdField(resolveAffiliate(item.q, partner))} />
+              <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+            </summary>
+            <div set:html={mdField(resolveAffiliate(item.a, partner))} />
+          </details>
+        ))}
+      </section>
+    )}
+
+    <!-- 8. RELATED GUIDES -->
+    {relatedClusters.length > 0 && (
+      <RelatedLinks
+        slugs={relatedClusters}
+        exclude={entry.data.slug}
+        heading="Related Guides"
+        max={5}
+      />
+    )}
+
+    <!-- 9. MORE FROM THIS SECTION -->
+    <BucketSiblings
+      bucket={entry.data.bucket}
+      excludeSlug={entry.data.slug}
+      count={5}
+    />
+
+    {/* AEO-1: every geo page points at the one dated, per-card availability
+        table. Geo pages are where assistants land, and "can I even get this
+        card here" is the question they land with. */}
+    {entry.data.bucket === 'geo' && entry.data.slug !== 'availability-matrix' && (
+      <p class="page-meta">
+        See the dated{' '}
+        <a href="/geo/availability-matrix/">crypto card availability matrix</a>{' '}
+        for every card and jurisdiction we track.
+      </p>
+    )}
+
+    <!-- 10. LAST REVIEWED -->
+    <p class="page-meta">Last reviewed: {lastReviewed}</p>
+  </article>
+
+  {enrichedArticle && (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(enrichedArticle)} />
+  )}
+  {schemaFaq && (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schemaFaq)} />
+  )}
+</BaseLayout>

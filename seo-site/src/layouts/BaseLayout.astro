@@ -1,0 +1,411 @@
+---
+/**
+ * BaseLayout — wraps every DefyCard page.
+ *
+ * Translates the Stitch homepage + article designs into a single Astro shell:
+ *  - Sticky backdrop-blur header with brand + nav + theme toggle + search icon
+ *  - FTC disclosure banner immediately below header (every page)
+ *  - <main> content area (narrow-column reading width)
+ *  - Site footer with full disclosure + 6-link nav
+ *  - Sticky mobile-only affiliate CTA pinned to viewport bottom
+ *
+ * Per design-system + write-article skills: tokens-only, English-only,
+ * theme decision before first paint to prevent FOUC.
+ */
+import '../styles/tokens.css';
+import '../styles/fonts.css';
+import '../styles/global.css';
+import WebMCP from '../components/WebMCP.astro';
+import { partnerUrl, DEFAULT_PARTNER, PARTNER_HOST_MAP } from '../lib/affiliates.mjs';
+
+export interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  noindex?: boolean;
+  showDisclosure?: boolean;
+  /** Optional OG image URL (defaults to a brand-fallback if not set) */
+  ogImage?: string;
+  /** activeNav lets us highlight Cards / Reviews / Guides / Comparison / Videos in the header */
+  activeNav?: 'cards' | 'reviews' | 'guides' | 'comparison' | 'videos';
+  /** OpenGraph type — 'website' for homepage + bucket index + legal; 'article' for articles */
+  ogType?: 'website' | 'article' | 'profile';
+  /**
+   * BreadcrumbList schema chain. Pass [{name, url}, ...] from each consumer
+   * (article / bucket-index / legal). Homepage omits this prop.
+   */
+  breadcrumbs?: { name: string; url: string }[];
+  /**
+   * Article schema overrides — only used when ogType === 'article'. Each
+   * consumer page can pass these to fully customize the per-page Article
+   * JSON-LD; otherwise we emit the global Organization + WebSite schema only.
+   */
+  articleSchema?: Record<string, unknown>;
+  /**
+   * Y50 P0-1: affiliate program the sticky CTA points at. Pages set this from
+   * their own frontmatter / config/availability.yaml; unset keeps the default
+   * program. Without it the sticky bar sent EVERY page — including geo pages
+   * for jurisdictions where ether.fi is unavailable — to ether.fi.
+   */
+  affiliatePartner?: string;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  noindex = false,
+  showDisclosure = true,
+  ogImage,
+  activeNav,
+  ogType = 'website',
+  breadcrumbs,
+  articleSchema,
+  affiliatePartner = DEFAULT_PARTNER,
+} = Astro.props;
+
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const canonicalUrl = canonical || new URL(Astro.url.pathname, siteOrigin).toString();
+const affiliateUrl = partnerUrl(affiliatePartner);
+const twitterHandle = import.meta.env.PUBLIC_TWITTER_HANDLE || '';
+const year = new Date().getFullYear();
+
+// Google Analytics 4 — env-driven so dev/preview can override or disable.
+// Default ID is the production property (G-JLRZD59902). Set PUBLIC_GA_MEASUREMENT_ID=off to disable.
+const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID ?? 'G-JLRZD59902';
+const gaEnabled = !!gaId && gaId !== 'off' && !import.meta.env.DEV;
+
+/**
+ * Global @graph emitted on every page (per seo2026 §5.7 + §5.8).
+ * Organization + WebSite + SearchAction. The /search/ page accepts ?q= so
+ * Google can wire the SearchAction to a real internal search.
+ */
+const globalGraph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${siteOrigin}/#org`,
+      name: 'DefyCard',
+      url: siteOrigin,
+      logo: `${siteOrigin}/favicon.svg`,
+      sameAs: [],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteOrigin}/#website`,
+      url: siteOrigin,
+      name: 'DefyCard',
+      description:
+        'Independent reviews and side-by-side comparisons of crypto debit and credit cards.',
+      publisher: { '@id': `${siteOrigin}/#org` },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${siteOrigin}/search/?q={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
+};
+
+const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbs.map((b, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: b.name,
+    item: b.url,
+  })),
+} : null;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {gaEnabled && (
+      <Fragment>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline set:html={`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${gaId}');
+        `}></script>
+      </Fragment>
+    )}
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <meta name="author" content="DefyCard Editorial" />
+
+    <!-- OpenGraph + Twitter card -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="DefyCard" />
+    <meta property="og:type" content={ogType} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+    {twitterHandle && <meta name="twitter:site" content={twitterHandle} />}
+    {twitterHandle && <meta name="twitter:creator" content={twitterHandle} />}
+
+    <!-- Global Organization + WebSite + SearchAction (per seo2026 §5.7-§5.8) -->
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(globalGraph)} />
+    {breadcrumbSchema && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+    )}
+    {articleSchema && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+    )}
+
+    <!-- Material Symbols Outlined (icon font) — Google Fonts CDN -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+    />
+
+    <!-- Theme decision before first paint to prevent flash -->
+    <script is:inline>
+      (function () {
+        try {
+          const stored = localStorage.getItem('theme');
+          // Only set data-theme if the user has an explicit stored choice;
+          // otherwise leave it empty so tokens.css @media (prefers-color-scheme)
+          // picks the OS default. Setting it explicitly only when stored
+          // ensures a stored 'light' on a dark-OS machine wins.
+          if (stored === 'dark' || stored === 'light') {
+            document.documentElement.dataset.theme = stored;
+          }
+        } catch (_) {
+          /* localStorage unavailable — fall back to media query via tokens.css */
+        }
+      })();
+    </script>
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <!-- 1. SITE HEADER -->
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="/">DefyCard</a>
+        <nav>
+          <a href="/" aria-current={activeNav === 'cards' ? 'page' : undefined}>Cards</a>
+          <a href="/reviews/" aria-current={activeNav === 'reviews' ? 'page' : undefined}>Reviews</a>
+          <a href="/how-to/" aria-current={activeNav === 'guides' ? 'page' : undefined}>Guides</a>
+          <a href="/compare/" aria-current={activeNav === 'comparison' ? 'page' : undefined}>Comparison</a>
+          <a href="/videos/" aria-current={activeNav === 'videos' ? 'page' : undefined}>Videos</a>
+          <div class="header-tools">
+            <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark theme">
+              <span class="material-symbols-outlined" style="font-size: 20px;" aria-hidden="true">contrast</span>
+            </button>
+            <a class="icon-btn" href="/search/" aria-label="Search articles">
+              <span class="material-symbols-outlined" style="font-size: 20px;" aria-hidden="true">search</span>
+            </a>
+          </div>
+        </nav>
+        <button class="mobile-menu-btn" type="button" aria-label="Open menu">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. FTC DISCLOSURE BANNER -->
+    {showDisclosure && (
+      <div class="ftc-banner" role="note">
+        <p>
+          <strong>Disclosure:</strong> This page contains affiliate links. We may earn a
+          commission when you sign up through them. This does not affect our editorial reviews.
+        </p>
+      </div>
+    )}
+
+    <!-- 3. MAIN CONTENT -->
+    <main>
+      <slot />
+    </main>
+
+    <!-- 4. SITE FOOTER -->
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <p class="footer-disclosure">
+          This page contains affiliate links. We may earn a commission when you sign up
+          through them. This does not affect our editorial reviews. The information provided
+          on this website does not constitute investment advice, financial advice, trading
+          advice, or any other sort of advice and you should not treat any of the website&apos;s
+          content as such.
+        </p>
+        <nav>
+          <a href="/about/">About</a>
+          <a href="/disclosure/">FTC Disclosure</a>
+          <a href="/privacy/">Privacy</a>
+          <a href="/terms/">Terms</a>
+          <a href="/contact/">Contact</a>
+          <a href="/sitemap-index.xml">Sitemap</a>
+        </nav>
+        <div class="copyright">
+          &copy; {year} DefyCard. Editorial crypto debit card comparisons. Content is for informational purposes only.
+        </div>
+      </div>
+    </footer>
+
+    <!-- 5. STICKY MOBILE CTA (≤768px only) -->
+    <aside class="affiliate-sticky-bar" aria-label="Get your DefyCard">
+      <a href={affiliateUrl} rel="sponsored noopener" target="_blank">
+        Get your DefyCard
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+      </a>
+    </aside>
+
+    <!-- 6. WebMCP — exposes site tools to AI agents (no-op in unsupported browsers) -->
+    <WebMCP />
+
+    <!-- Theme toggle handler (only loads after first paint, no FOUC) -->
+    <script>
+      const btn = document.getElementById('theme-toggle');
+      if (btn) {
+        // Explicit 'light' beats @media (prefers-color-scheme: dark) — never delete.
+        function currentTheme() {
+          const ds = document.documentElement.dataset.theme;
+          if (ds === 'dark' || ds === 'light') return ds;
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        btn.addEventListener('click', () => {
+          const next = currentTheme() === 'dark' ? 'light' : 'dark';
+          document.documentElement.dataset.theme = next;
+          try { localStorage.setItem('theme', next); } catch (_) {}
+        });
+      }
+    </script>
+
+    <!--
+      Affiliate-click tracker — fires GA4 event 'register_click' on every link
+      click landing on ANY partner host. Single delegated listener on document, so:
+        - works for static links AND dynamically-injected ones
+        - no per-button HTML change required
+        - covers sticky mobile CTA, hero CTA, body inline links, pinned CTAs
+      `transport_type: 'beacon'` ensures the event flushes even when the click
+      navigates same-window (most CTAs use target=_blank, but defensive).
+
+      Y50 P0-1: the host list used to be the single literal 'ether.fi/@defycard',
+      so every click on any other partner was invisible — the moment geo pages
+      started linking Crypto.com those conversions would have gone uncounted.
+      The map is generated from config/affiliates.yaml at build time, so adding
+      a program to that file is enough to track it. `partner` names which one
+      was clicked; `event_label` keeps the full href as before.
+    -->
+    <script is:inline define:vars={{ partnerHostMap: PARTNER_HOST_MAP }}>
+      document.addEventListener('click', function (e) {
+        var link = e.target && e.target.closest ? e.target.closest('a') : null;
+        if (!link) return;
+        var href = link.getAttribute('href') || '';
+        if (!href) return;
+        var partner = null;
+        for (var host in partnerHostMap) {
+          if (href.indexOf(host) !== -1) { partner = partnerHostMap[host]; break; }
+        }
+        if (!partner) return;
+        if (typeof gtag !== 'function') return;
+        gtag('event', 'register_click', {
+          event_category: 'engagement',
+          event_label: href,
+          partner: partner,
+          transport_type: 'beacon'
+        });
+      });
+    </script>
+
+    <!--
+      CTA-view tracker — событие 'cta_view', 2026-08-18, по постановлению Fable.
+
+      ЗАЧЕМ. Конверсия в register_click считалась по грязному знаменателю; по вовлечённым
+      не-direct сессиям она 7.7 % (16 из 209), а не 1.3 %. Но ни одно измерение не отличало
+      «до кнопки не доходят» от «доходят и не жмут» — а это два разных лечения: первое про
+      размещение, второе про формулировку и предложение. Косвенный признак был: событий
+      scroll 118 при 1290 просмотрах, то есть до низа доходит меньше десятой части, а первый
+      реферальный блок на части страниц сидит в середине текста.
+
+      УСТРОЙСТВО. Тот же PARTNER_HOST_MAP, что у кликового слушателя — одна карта хостов на
+      оба прибора, иначе они однажды разойдутся и воронка станет несравнимой. Событие
+      срабатывает ОДИН раз на страницу (не на ссылку): вопрос стоит «дошёл ли читатель до
+      реферального шага», а не «сколько там ссылок». Порог 50 % площади и 1 секунда видимости
+      — мимолётный проброс мимо кнопки при быстрой прокрутке не считается показом.
+
+      Наблюдатель отключается после первого срабатывания: прибор не должен стоить читателю
+      больше, чем измеряет.
+    -->
+    <script is:inline define:vars={{ partnerHostMap: PARTNER_HOST_MAP }}>
+      (function () {
+        if (typeof IntersectionObserver !== 'function') return;
+        var fired = false;
+        var timer = null;
+
+        function partnerOf(href) {
+          for (var host in partnerHostMap) {
+            if (href.indexOf(host) !== -1) return partnerHostMap[host];
+          }
+          return null;
+        }
+
+        function collect() {
+          var out = [];
+          var links = document.querySelectorAll('a[href]');
+          for (var i = 0; i < links.length; i++) {
+            var href = links[i].getAttribute('href') || '';
+            if (href && partnerOf(href)) out.push(links[i]);
+          }
+          return out;
+        }
+
+        function start() {
+          var targets = collect();
+          if (!targets.length) return;
+
+          var io = new IntersectionObserver(function (entries) {
+            var visible = false;
+            for (var i = 0; i < entries.length; i++) {
+              if (entries[i].isIntersecting) { visible = true; break; }
+            }
+            if (!visible) {
+              if (timer) { clearTimeout(timer); timer = null; }
+              return;
+            }
+            if (fired || timer) return;
+            timer = setTimeout(function () {
+              if (fired) return;
+              fired = true;
+              io.disconnect();
+              if (typeof gtag !== 'function') return;
+              var first = targets[0].getAttribute('href') || '';
+              gtag('event', 'cta_view', {
+                event_category: 'engagement',
+                event_label: first,
+                partner: partnerOf(first),
+                cta_count: targets.length,
+                transport_type: 'beacon'
+              });
+            }, 1000);
+          }, { threshold: 0.5 });
+
+          for (var j = 0; j < targets.length; j++) io.observe(targets[j]);
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', start);
+        } else {
+          start();
+        }
+      })();
+    </script>
+  </body>
+</html>

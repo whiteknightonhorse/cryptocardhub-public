@@ -1,0 +1,38 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://defycard.com/",
+      "service-doc": [
+        {
+          "href": "https://defycard.com/llms.txt",
+          "type": "text/markdown",
+          "title": "DefyCard — site overview for LLMs"
+        },
+        {
+          "href": "https://defycard.com/llms-full.txt",
+          "type": "text/markdown",
+          "title": "DefyCard — full article inventory for LLMs"
+        }
+      ],
+      "service-meta": [
+        {
+          "href": "https://defycard.com/sitemap-index.xml",
+          "type": "application/xml",
+          "title": "Sitemap index"
+        },
+        {
+          "href": "https://defycard.com/robots.txt",
+          "type": "text/plain",
+          "title": "Crawl rules + Content-Signal preferences"
+        }
+      ],
+      "describedby": [
+        {
+          "href": "https://defycard.com/.well-known/agent-skills/index.json",
+          "type": "application/json",
+          "title": "Agent Skills discovery index"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+---
+/**
+ * AffiliateButton — primary CTA wrapper.
+ *
+ * Used by: index.astro hero featured card (variant="primary"),
+ * by [bucket]/[slug].astro for the inline mid-article CTA, and
+ * by any future hand-curated page that needs an affiliate button.
+ *
+ * Council-audit invariant: rel="sponsored noopener" MUST appear on every
+ * <a> emitted by this component. Removing it triggers Google's link-scheme
+ * policy at 3,200-page scale (manual-action penalty risk).
+ *
+ * Body-markdown anchors emitted by pseo-generate.py are NOT processed by
+ * this component — they carry their own rel attribute baked at gen time.
+ */
+export interface Props {
+  text?: string;
+  variant?: 'primary' | 'secondary';
+  url?: string;
+  fullWidth?: boolean;
+}
+
+const fallbackUrl = import.meta.env.PUBLIC_ETHERFI_REF_URL || 'https://www.ether.fi/@defycard';
+const {
+  text = 'Get your DefyCard →',
+  variant = 'primary',
+  url = fallbackUrl,
+  fullWidth = false,
+} = Astro.props;
+---
+<p class={`article-cta ${fullWidth ? 'article-cta--primary' : ''}`}>
+  <a class={`cta cta--${variant}`} href={url} rel="sponsored noopener" target="_blank">
+    {text}
+  </a>
+</p>

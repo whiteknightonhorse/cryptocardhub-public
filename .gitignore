@@ -1,0 +1,13 @@
+.env
+*.db
+*.sqlite*
+state/
+logs/
+backups/
+node_modules/
+dist/
+__pycache__/
+*.pyc
+venv/
+.claude/
+CLAUDE.md

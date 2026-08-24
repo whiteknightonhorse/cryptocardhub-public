@@ -1,0 +1,112 @@
+---
+/**
+ * /articles/ — постраничный список ВСЕХ опубликованных статей, новые сверху.
+ *
+ * Было: одна страница с count={999} — все 555 статей одним документом, бесконечная
+ * прокрутка вниз. Тот же дефект, что закрыли на /videos/ (206 карточек = 150 КБ и росло
+ * с каждой публикацией), и лечится он тем же приёмом и тем же размером страницы.
+ *
+ * PAGE_SIZE — закон этой страницы, по нему её и судит tests/test_articles_pagination.
+ * Двадцать взяты не на глаз: столько же у /videos/, а одна цифра на две поверхности —
+ * это то, что не разъедется при следующей правке.
+ *
+ * Страница 1 остаётся по адресу /articles/ (Astro отдаёт первую страницу без номера),
+ * поэтому ни одна внешняя ссылка и ни одна запись в карте сайта не ломается.
+ */
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths, Page } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LatestPosts from '../../components/LatestPosts.astro';
+
+export const PAGE_SIZE = 20;
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const all = await getCollection('pseo');
+  const articles = all
+    .slice()
+    .sort((a, b) => {
+      const ta = Date.parse(a.data.generated_at) || 0;
+      const tb = Date.parse(b.data.generated_at) || 0;
+      return tb - ta;
+    });
+  return paginate(articles, { pageSize: PAGE_SIZE });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<any> };
+
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'All articles', url: `${siteOrigin}/articles/` },
+];
+---
+<BaseLayout
+  title={page.currentPage === 1
+    ? 'All articles — DefyCard'
+    : `All articles — page ${page.currentPage} — DefyCard`}
+  description={page.currentPage === 1
+    ? 'Every published DefyCard article: card reviews, side-by-side comparisons, how-to guides, country availability, and crypto card calculators. Newest first.'
+    : `DefyCard articles, page ${page.currentPage} of ${page.lastPage}: reviews, comparisons, how-to guides and country availability, newest first.`}
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <section class="articles-index">
+    <h1>{page.currentPage === 1 ? 'All articles' : `All articles — page ${page.currentPage}`}</h1>
+    <p class="lead">
+      Every published DefyCard piece in one place — reviews, comparisons, how-to walkthroughs,
+      country guides, and calculators — sorted by publish date.
+      <span class="count">Showing {page.start + 1}–{page.end + 1} of {page.total}.</span>
+    </p>
+
+    <LatestPosts entries={page.data} heading="" />
+
+    {page.lastPage > 1 && (
+      <nav class="articles-pager" aria-label="Articles pagination">
+        {page.url.prev ? (
+          <a class="pager-step" href={page.url.prev} rel="prev">← Newer</a>
+        ) : (
+          <span class="pager-step is-disabled">← Newer</span>
+        )}
+
+        <ol class="pager-nums">
+          {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((n) => (
+            <li>
+              {n === page.currentPage ? (
+                <span class="pager-num is-current" aria-current="page">{n}</span>
+              ) : (
+                <a class="pager-num" href={n === 1 ? '/articles/' : `/articles/${n}/`}>{n}</a>
+              )}
+            </li>
+          ))}
+        </ol>
+
+        {page.url.next ? (
+          <a class="pager-step" href={page.url.next} rel="next">Older →</a>
+        ) : (
+          <span class="pager-step is-disabled">Older →</span>
+        )}
+      </nav>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .articles-index { padding-top: 16px; }
+  .articles-index :global(h2:empty) { display: none; }
+  .lead .count { display: block; margin-top: 6px; opacity: .75; font-size: .92em; }
+
+  .articles-pager {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    margin: 32px 0 8px; padding-top: 20px; border-top: 1px solid rgba(128,128,128,.25);
+  }
+  .pager-step { text-decoration: none; font-weight: 600; padding: 6px 12px; border-radius: 8px; }
+  .pager-step.is-disabled { opacity: .35; pointer-events: none; }
+  .pager-nums { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+  .pager-nums li { margin: 0; }
+  .pager-num {
+    display: inline-block; min-width: 34px; text-align: center;
+    padding: 6px 8px; border-radius: 8px; text-decoration: none;
+    border: 1px solid rgba(128,128,128,.28);
+  }
+  .pager-num.is-current { font-weight: 700; border-color: currentColor; }
+</style>

@@ -1,0 +1,747 @@
+{
+ "_source": "video-generator/state/published.db publish_log (status=ok), snapshot 2026-08-11",
+ "publications": 213,
+ "unique_topics": 65,
+ "repeats": [
+  {
+   "channel": "youtube",
+   "topic_id": 113,
+   "gap_days": 0.0018
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 3,
+   "gap_days": 8.0628
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 27,
+   "gap_days": 7.0145
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 28,
+   "gap_days": 10.2501
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 8,
+   "gap_days": 8.9923
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 18,
+   "gap_days": 13.0418
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 25,
+   "gap_days": 13.1853
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 220,
+   "gap_days": 7.9511
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 133,
+   "gap_days": 11.9655
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 113,
+   "gap_days": 18.3019
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 112,
+   "gap_days": 13.9782
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 110,
+   "gap_days": 20.3255
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 26,
+   "gap_days": 14.7287
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 115,
+   "gap_days": 13.049
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 221,
+   "gap_days": 16.9168
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 29,
+   "gap_days": 12.9858
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 220,
+   "gap_days": 8.0073
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 32,
+   "gap_days": 20.0349
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 8,
+   "gap_days": 10.993
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 16,
+   "gap_days": 22.0553
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 133,
+   "gap_days": 10.0279
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 12,
+   "gap_days": 26.7639
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 11,
+   "gap_days": 22.014
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 30,
+   "gap_days": 24.896
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 113,
+   "gap_days": 12.0208
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 112,
+   "gap_days": 12.0631
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 221,
+   "gap_days": 9.1253
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 22,
+   "gap_days": 22.9233
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 28,
+   "gap_days": 17.9935
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 27,
+   "gap_days": 18.9999
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 29,
+   "gap_days": 10.0701
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 135,
+   "gap_days": 31.0592
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 13,
+   "gap_days": 19.0208
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 25,
+   "gap_days": 18.8954
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 110,
+   "gap_days": 15.111
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 133,
+   "gap_days": 8.9439
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 5,
+   "gap_days": 30.7861
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 21,
+   "gap_days": 35.1252
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 223,
+   "gap_days": 32.7436
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 3,
+   "gap_days": 25.0622
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 30,
+   "gap_days": 9.9101
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 19,
+   "gap_days": 8.1129
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 1,
+   "gap_days": 15.9914
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 134,
+   "gap_days": 27.0689
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 115,
+   "gap_days": 19.946
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 26,
+   "gap_days": 20.0627
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 25,
+   "gap_days": 7.0209
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 28,
+   "gap_days": 10.0067
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 220,
+   "gap_days": 18.0555
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 22,
+   "gap_days": 11.0766
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 112,
+   "gap_days": 13.9176
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 133,
+   "gap_days": 8.0487
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 14,
+   "gap_days": 20.3403
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 12,
+   "gap_days": 17.9858
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 18,
+   "gap_days": 30.0839
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 135,
+   "gap_days": 12.7257
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 32,
+   "gap_days": 20.9949
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 13,
+   "gap_days": 13.9874
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 33,
+   "gap_days": 42.0713
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 1,
+   "gap_days": 8.9938
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 25,
+   "gap_days": 7.0913
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 27,
+   "gap_days": 16.9791
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 5,
+   "gap_days": 13.1449
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 26,
+   "gap_days": 12.2727
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 19,
+   "gap_days": 14.2216
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 21,
+   "gap_days": 16.9378
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 16,
+   "gap_days": 27.0839
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 12,
+   "gap_days": 9.0008
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 111,
+   "gap_days": 50.9953
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 29,
+   "gap_days": 22.9191
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 222,
+   "gap_days": 36.022
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 31,
+   "gap_days": 46.0079
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 22,
+   "gap_days": 14.0243
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 14,
+   "gap_days": 12.5647
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 13,
+   "gap_days": 10.0569
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 17,
+   "gap_days": 57.161
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 11,
+   "gap_days": 31.0009
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 9,
+   "gap_days": 47.869
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 221,
+   "gap_days": 29.0079
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 28,
+   "gap_days": 18.9258
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 21,
+   "gap_days": 7.1052
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 1,
+   "gap_days": 12.9933
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 25,
+   "gap_days": 13.0016
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 15,
+   "gap_days": 38.932
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 30,
+   "gap_days": 24.1199
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 8,
+   "gap_days": 37.8786
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 3,
+   "gap_days": 25.9869
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 4,
+   "gap_days": 57.8828
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 6,
+   "gap_days": 54.0221
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 135,
+   "gap_days": 19.2965
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 225,
+   "gap_days": 19.0213
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 22,
+   "gap_days": 9.9163
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 17,
+   "gap_days": 8.0841
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 26,
+   "gap_days": 14.7009
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 32,
+   "gap_days": 21.1255
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 220,
+   "gap_days": 26.0232
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 131,
+   "gap_days": 59.0288
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 115,
+   "gap_days": 28.9853
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 14,
+   "gap_days": 12.9851
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 10,
+   "gap_days": 35.1323
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 21,
+   "gap_days": 10.8887
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 18,
+   "gap_days": 25.9604
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 113,
+   "gap_days": 43.022
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 16,
+   "gap_days": 18.9858
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 23,
+   "gap_days": 45.0087
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 35,
+   "gap_days": 51.0365
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 22,
+   "gap_days": 7.9715
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 4,
+   "gap_days": 10.1176
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 134,
+   "gap_days": 35.9828
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 27,
+   "gap_days": 27.0041
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 32,
+   "gap_days": 8.9723
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 221,
+   "gap_days": 17.8822
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 115,
+   "gap_days": 8.1465
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 110,
+   "gap_days": 43.8348
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 26,
+   "gap_days": 11.0635
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 225,
+   "gap_days": 13.9574
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 2,
+   "gap_days": 68.0707
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 220,
+   "gap_days": 11.9362
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 30,
+   "gap_days": 17.9512
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 20,
+   "gap_days": 11.9515
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 31,
+   "gap_days": 25.0895
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 25,
+   "gap_days": 20.9497
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 24,
+   "gap_days": 37.675
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 33,
+   "gap_days": 35.9096
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 133,
+   "gap_days": 40.0237
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 7,
+   "gap_days": 62.9516
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 23,
+   "gap_days": 11.1046
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 35,
+   "gap_days": 11.8941
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 134,
+   "gap_days": 10.0033
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 4,
+   "gap_days": 11.8676
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 135,
+   "gap_days": 21.0474
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 32,
+   "gap_days": 10.9633
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 29,
+   "gap_days": 32.1085
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 112,
+   "gap_days": 44.9576
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 13,
+   "gap_days": 31.0048
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 27,
+   "gap_days": 12.9818
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 2,
+   "gap_days": 9.9995
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 28,
+   "gap_days": 30.0882
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 31,
+   "gap_days": 9.9155
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 15,
+   "gap_days": 29.1094
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 24,
+   "gap_days": 9.8955
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 33,
+   "gap_days": 9.0394
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 224,
+   "gap_days": 85.9448
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 114,
+   "gap_days": 18.0179
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 221,
+   "gap_days": 17.0057
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 220,
+   "gap_days": 14.124
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 25,
+   "gap_days": 12.9856
+  },
+  {
+   "channel": "youtube",
+   "topic_id": 34,
+   "gap_days": 91.2222
+  }
+ ]
+}

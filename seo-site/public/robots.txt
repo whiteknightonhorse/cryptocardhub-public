@@ -1,0 +1,99 @@
+# =============================================================================
+# robots.txt — defycard.com
+#
+# Crawl rules per RFC 9309 + AI-crawler User-agent registry +
+# Content-Signal preferences (contentsignals.org / draft-romm-aipref).
+#
+# Single source of truth. Mirrors Google Search Console policy + the
+# allow-AI-search but no-AI-train stance per /llms.txt.
+# =============================================================================
+
+# ---------------- Generic crawlers -------------------------------------------
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /_*
+
+# Sitemap. Both names serve the same <sitemapindex>: crawlers ask for the
+# conventional /sitemap.xml (ClaudeBot did so 243 times in 15 days and got a
+# 404 every time) while our build emits /sitemap-index.xml.
+Sitemap: https://defycard.com/sitemap.xml
+Sitemap: https://defycard.com/sitemap-index.xml
+
+# ---------------- AI crawlers — explicit allow for SEARCH/RAG ----------------
+# We allow AI agents to fetch pages for live search and answer-engine RAG.
+# Training is opted out via Content-Signal below.
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+# Claude-SearchBot is Anthropic's SEARCH indexer (support.claude.com/en/articles/
+# 8896518): blocking it "may reduce visibility" in Claude's answers. It was
+# already permitted by the `*` group, but it has never once visited us — so make
+# the permission explicit and remove the question. Claude-User is the
+# answer-time fetcher and is the agent our citability instrument counts.
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+# Bytespider has been associated with aggressive scraping and unclear
+# attribution. Block until policy changes.
+User-agent: Bytespider
+Disallow: /
+
+# ---------------- Content-Signal preferences ---------------------------------
+# Per https://contentsignals.org and draft-romm-aipref-contentsignals:
+#   ai-train  — use of content for model training            → no
+#   search    — use of content for live search/answer        → yes
+#   ai-input  — use as runtime input for an AI agent's reply → yes
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+
+# ---------------- Pointers for AI agents -------------------------------------
+# See /llms.txt for a Markdown overview of the site and its content scope.
+# See /.well-known/api-catalog for service discovery (RFC 9727).
+# See /.well-known/agent-skills/index.json for site-facing skills.
+#
+# We DO NOT publish OAuth/OIDC discovery endpoints because there are no
+# protected APIs on this domain. We DO NOT publish an MCP Server Card
+# because no MCP server runs here.

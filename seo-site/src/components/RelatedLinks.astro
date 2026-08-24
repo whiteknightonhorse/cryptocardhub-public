@@ -1,0 +1,62 @@
+---
+/**
+ * RelatedLinks — curated internal links to other pSEO pages.
+ *
+ * Matches Stitch article "Related Guides" block:
+ *   ┌────────────────────────────────────┐
+ *   │  Article title          BUCKET-CAPS │ ← row, border-bottom
+ *   │  Article title 2       OTHER-CAPS  │
+ *   │  ...                                │
+ *   └────────────────────────────────────┘
+ *
+ * Looks up each slug in the pseo collection — drops dead refs (no 404s).
+ */
+import { getCollection } from 'astro:content';
+
+export interface Props {
+  slugs: string[];
+  heading?: string;
+  max?: number;
+  exclude?: string;
+}
+
+const { slugs, heading = 'Related Guides', max = 5, exclude } = Astro.props;
+
+const bucketLabel: Record<string, string> = {
+  hub: 'GUIDE',
+  compare: 'COMPARE',
+  reviews: 'REVIEW',
+  geo: 'REGION',
+  tools: 'TOOL',
+  'how-to': 'GUIDE',
+  for: 'USE CASE',
+  learn: 'LEARN',
+  help: 'HELP',
+  news: 'NEWS',
+  faq: 'FAQ',
+};
+
+const all = await getCollection('pseo');
+const bySlug = new Map(all.map((e) => [e.data.slug, e]));
+
+const resolved = (slugs || [])
+  .filter((s) => s && s !== exclude)
+  .map((s) => bySlug.get(s))
+  .filter((e): e is NonNullable<typeof e> => Boolean(e))
+  .slice(0, max);
+---
+{resolved.length > 0 && (
+  <section class="related-links" aria-labelledby="related-heading">
+    <h2 id="related-heading">{heading}</h2>
+    <ul>
+      {resolved.map((e) => (
+        <li>
+          <a href={`/${e.data.bucket}/${e.data.slug}/`}>
+            <span>{e.data.h1}</span>
+            <span class="related-bucket">{bucketLabel[e.data.bucket] || e.data.bucket.toUpperCase()}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

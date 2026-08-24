@@ -1,0 +1,105 @@
+# DefyCard — Full LLM Brief
+
+> Independent comparison hub for crypto debit and credit cards. This `llms-full.txt` enumerates every published article so AI agents can build a complete picture of the corpus without crawling.
+
+For brand context, see `/llms.txt` (shorter overview). This file is updated on every deploy.
+
+## All published articles
+
+(Sourced from `/sitemap-0.xml` at last build.)
+
+### Hub pages (`/hub/<slug>/`)
+
+- [Best Crypto Cards in 2026: Complete Comparison Guide](https://defycard.com/hub/best-crypto-card-2026/) — Compare the best crypto cards in 2026: ether.fi Cash for staking rewards, RedotPay for volume, Crypto.com for features.
+- [Best Crypto Debit Card](https://defycard.com/hub/best-crypto-debit-card/) — Crypto debit-card comparison with fee structures, custody models, and cashback math.
+- [Best Crypto Credit Card](https://defycard.com/hub/best-crypto-credit-card/) — Best crypto credit cards 2026 — secured vs unsecured, rewards tiers, regulatory posture.
+- [Crypto Card Comparison](https://defycard.com/hub/crypto-card-comparison/) — Side-by-side comparison of major crypto cards with country availability matrix.
+- [Best Stablecoin Card](https://defycard.com/hub/best-stablecoin-card/) — USDC/USDT-native cards: settlement rails, FX fees, stablecoin acceptance.
+- [Crypto Card with Cashback](https://defycard.com/hub/crypto-card-with-cashback/) — Cashback structures explained — fixed vs tiered vs asset-back; how to maximise.
+- [Crypto Debit Card No Fees](https://defycard.com/hub/crypto-debit-card-no-fees/) — Cards with 0% issuance, 0% FX on USD/EUR, transparent ATM fee structure.
+- [Crypto Card No KYC](https://defycard.com/hub/crypto-card-no-kyc/) — KYC-light card options + regulatory caveats. Informational only — we don't recommend unlicensed products.
+- [Non-Custodial Crypto Card](https://defycard.com/hub/non-custodial-crypto-card/) — Self-custody model explained: ether.fi, Gnosis Pay, MetaMask Card. Trade-offs.
+- [DeFi Crypto Card](https://defycard.com/hub/defi-crypto-card/) — DeFi-native cards that link to wallets directly — pros, cons, fee mechanics.
+
+## Bucket structure
+
+Future articles will live under these prefixes (currently sparsely populated):
+
+| Prefix | Purpose | Target page count |
+|---|---|---|
+| `/hub/` | Topic-cluster anchors | 12 |
+| `/compare/` | "X vs Y" comparisons | 200 |
+| `/reviews/` | Single-card reviews | 40 |
+| `/how-to/` | Step-by-step tutorials | 300 |
+| `/for/` | Use-case ("for travel", "for freelancers", etc.) | 400 |
+| `/tools/` | Calculators (cashback, breakeven, FX) | 20 |
+| `/learn/` | "What is X" educational | 60 |
+| `/help/` | Troubleshooting | 50 |
+| `/geo/` | Country / state guides | 250 |
+| `/news/` | Time-sensitive updates | 30 |
+| `/faq/` | Single-question FAQ pages | 50 |
+
+Total target: **~3,200 pages** at full Phase 3 rollout (year 2+).
+
+## How articles are structured
+
+Every generated article (per the internal `write-article` skill) contains:
+
+1. Hero image (16:9, Unsplash, face-cropped)
+2. H1 + lead paragraph with FTC disclosure inline + first inline affiliate link
+3. At-a-Glance snapshot — 6-row 2-column KPI grid (cashback, FX fee, issuance, custody, country availability, last-verified)
+4. Body sections (H2/H3) with callouts (`**Signal:**`, `**Risk:**`, `**Key metric:**`, `**Why it matters:**`, `**Watch:**`, `**Alternative:**`)
+5. Inline images at safe section breaks
+6. Mid-article affiliate CTA (full-width button)
+7. "What to Watch" section — 3-5 observable bullets
+8. "Bottom Line" — 3-4 wrap-up bullets including "If you fit X profile…" framing
+9. Primary affiliate CTA (large pill)
+10. FAQ accordion (4-6 questions, FAQPage JSON-LD)
+11. Related Guides (curated internal links, dead-link-safe)
+12. More from this section (auto-shuffled bento grid)
+13. Last-reviewed timestamp + Article JSON-LD
+
+## Methodology
+
+- **Editorial scoring**: 5-category internal QA at minimum 8.0/10 (structural / source / neutrality / mechanics / clarity)
+- **Banned phrases** are statically blocked: "guaranteed cashback", "risk-free", "easy money", "the only card", "will definitely", etc.
+- **Refresh cycle**: market data + fees re-validated every 30 days; country list every 90 days
+- **Sources**: issuer help centres (ether.fi, Crypto.com, Coinbase, etc.), MiCA / GENIUS / FCA texts, Chainalysis / CryptoDiffer / The Block reports
+
+## Search and discovery
+
+- **Sitemap**: `https://defycard.com/sitemap-index.xml` (≥1 sub-sitemap, ≥10 URLs at launch)
+- **Markdown**: every URL responds to `Accept: text/markdown` with the body alone
+- **WebMCP tools** (browser-only, when supported):
+  - `defycard.search({q})` — keyword search across the sitemap
+  - `defycard.getArticle({slug, format})` — return article URL in HTML or markdown
+  - `defycard.listBuckets()` — return bucket inventory
+
+## Compliance + jurisdiction
+
+- ether.fi Cash card is **NOT recommended** to readers in: Belarus, Bangladesh, China, Cuba, Estonia, Finland, Hungary, India, Iraq, Israel, Nepal, Netherlands, North Korea, Philippines, Russia, Syria, Turkey, Ukraine, Venezuela, Vietnam — and US states (20 unique, 21 per issuer per ether.fi help center): AZ, DE, GA, ID, LA, MD, MS, MO, MT, NV, NM, ND, OH, OR, RI, SD, TN, VT, WA, WI.
+- For these jurisdictions we surface alternatives (Crypto.com / Bybit / RedotPay) per the editorial gate.
+
+## Trust signals
+
+- All numerical claims (cashback %, fees) sourced + cited
+- No hallucinated URLs (every link verified live during build)
+- Hero + inline images licensed via Unsplash with photographer credit
+- HTTPS only (Let's Encrypt, auto-renewing)
+- HSTS, X-Content-Type-Options, Referrer-Policy headers
+- FAQPage + Article JSON-LD valid against schema.org
+
+## What this domain is NOT
+
+Honest delineation:
+
+- ❌ Not a CASP / not licensed to sell financial products
+- ❌ Not a custodian, exchange, or wallet
+- ❌ No protected API, no auth flow, no user accounts
+- ❌ No MCP server, no agent gateway
+- ❌ No Russian / Chinese / Arabic / Hindi content (Phase 1 = EN only)
+
+We make no claim of capability we don't have.
+
+---
+Last updated: 2026-05-05

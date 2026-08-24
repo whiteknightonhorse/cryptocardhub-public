@@ -1,0 +1,16 @@
+---
+/**
+ * Disclosure — kept as a thin wrapper for backward compatibility.
+ *
+ * The actual FTC banner now lives in BaseLayout.astro (`.ftc-banner`)
+ * because it must appear above the fold on every page. This component
+ * is no longer used directly but kept to avoid import errors in any
+ * older pages that still reference it.
+ */
+---
+<aside class="ftc-banner" role="note" aria-label="Affiliate disclosure">
+  <p>
+    <strong>Disclosure:</strong> This page contains affiliate links. We may earn a commission
+    when you sign up through them. This does not affect our editorial reviews.
+  </p>
+</aside>
