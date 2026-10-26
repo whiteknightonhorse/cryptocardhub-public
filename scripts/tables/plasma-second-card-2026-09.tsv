@@ -1,0 +1,28 @@
+# plasma-second-card-2026-09.tsv — T-0142-09 (ruling-2, row T-0142-09)
+#
+# slug<TAB>line. Applied by scripts/corpus_edit.py --watch-table, which
+# appends `line` to that page's `what_to_watch` frontmatter array via
+# append_what_to_watch (JSON, never regex). One row per page: the 10 US
+# state/city pages on Plasma One's own 31-state allow-list (help 14703938,
+# config/availability.yaml cards.plasma) plus `usa`, worded for "one of
+# Plasma One's 31 supported US states" instead of a single state name.
+#
+# Money figures (2 %, 0.1 %, $10) are the literal numbers in
+# config/facts/plasma.yaml (plasma.rate.cashback_lite_first500,
+# plasma.rate.cashback_lite_over500, plasma.fee.card_lite) — ruling-2's own
+# "Что нельзя печатать" list (no "free card", no "up to 4 %", no "180+
+# countries", no "6 % yield") is honored: this line names none of them.
+#
+# ether.fi stays each page's primary CTA (Spain control law, G12) — this is
+# a SECOND card, appended to what_to_watch, never the primary CTA block.
+best-crypto-card-california	**Second card in California:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-colorado	**Second card in Colorado:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-florida	**Second card in Florida:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-illinois	**Second card in Illinois:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-new-york	**Second card in New York:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-new-york-city	**Second card in New York City:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-pennsylvania	**Second card in Pennsylvania:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-texas	**Second card in Texas:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-wyoming	**Second card in Wyoming:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+crypto-card-hawaii	**Second card in Hawaii:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.
+best-crypto-card-usa	**Second card in one of Plasma One's 31 supported US states:** [Plasma One](<<AFFILIATE_URL:plasma>>) is a stablecoin Visa card with 2 % cashback on your first $500 of monthly spend (0.1 % after); a $10 deposit or fee applies by region, and sign-up is invite-only — our link carries the invite code.

@@ -20,7 +20,7 @@ from typing import Any
 
 from . import (_config, captions, compliance, dedup, fetch_music, fetch_topic,
                fetch_visuals, hashtag_strategy, render, schedule,
-               telegram_preview, tts_edge, write_script)
+               telegram_preview, tts_edge, tts_eleven, write_script)
 from .publish import youtube as pub_yt
 from .publish import instagram as pub_ig
 from .publish import tiktok as pub_tt
@@ -251,8 +251,14 @@ def run_pipeline(platform: str, *, dry_run: bool = False,
         return _run_after_topic(platform, topic, out_dir, dry_run=dry_run)
     except Exception as exc:                                    # noqa: BLE001
         try:
+            # T-0140: a NoVisualsError whose cause is a page property (the query
+            # is fixed by the page's own frontmatter, so a retry in 36h repeats
+            # the same paid TTS synth for the same zero) cools for 14 days
+            # instead of 36h — see dedup.record_topic_failure/_PAGE_PROPERTY_TTL_HOURS.
+            page_property = getattr(exc, "cause", None) in fetch_visuals.PAGE_PROPERTY_CAUSES
             dedup.record_topic_failure(topic["id"], platform,
-                                       f"{type(exc).__name__}: {exc}")
+                                       f"{type(exc).__name__}: {exc}",
+                                       page_property=page_property)
             print(f"[main] тема {topic['id']} помечена упавшей — "
                   f"следующий слот её пропустит ({_FAILURE_NOTE})")
         except Exception as inner:                              # noqa: BLE001
@@ -271,10 +277,35 @@ def _run_after_topic(platform: str, topic: dict[str, Any], out_dir: Path, *,
     script = write_script.write(topic, dry_run=dry_run)
     (out_dir / "script.json").write_text(json.dumps(script, indent=2), encoding="utf-8")
 
-    # 3. tts_edge
+    # 2b. G35 fact-gate — VG_MODE=h1 only (D7's step order: script -> gate ->
+    # voice). Other pools are not written from facts.yaml, so nothing to check.
+    if topic.get("pool") == "h1":
+        write_script.check_facts_gate(script)
+
+    # 3. tts_edge / tts_eleven — TTS_PROVIDER selects the backend (E-19)
     voice_path = out_dir / "voice.mp3"
-    voice_meta = tts_edge.synthesize(
+    _tts_mod = tts_eleven if _config.tts_provider() == "elevenlabs" else tts_edge
+    voice_meta = _tts_mod.synthesize(
         script["voiceover"], platform, voice_path, dry_run=dry_run)
+
+    # 3b. G39 (T-0142-02): render() silently clamps to max_seconds (Y49:
+    # duration = min(max_seconds, tts+0.5)) — a script whose narration already
+    # overruns the Shorts cap must refuse HERE, before fetch_visuals/
+    # fetch_music/render spend real cost on a video that will just get cut
+    # down to a different length than the one it was written for. Third gate
+    # on the same law: pattern_selector.select() filters the creative tuple by
+    # the topic's duration_band, write_script.max_words ceilings the script —
+    # this one measures the real TTS artifact ffprobe already trusts render()
+    # to measure, so no gate here is fooled by a formula that agrees with
+    # itself.
+    tts_seconds = render.probe_duration(voice_path)
+    if tts_seconds + 0.5 > render.SHORTS_MAX_SECONDS:
+        raise RuntimeError(
+            f"topic {topic['id']}: narration is {tts_seconds:.1f}s — tts+0.5s "
+            f"exceeds the {render.SHORTS_MAX_SECONDS:.0f}s Shorts cap. render() "
+            f"would silently truncate it; refusing instead of publishing a "
+            f"video shorter than its own script."
+        )
 
     # 4. fetch_visuals
     media = fetch_visuals.fetch(
@@ -318,6 +349,18 @@ def _run_after_topic(platform: str, topic: dict[str, Any], out_dir: Path, *,
         platform=platform,
     )
     render.render(**_render_kw)
+
+    # G39 (T-0142-02): law measured on the real rendered artifact via ffprobe,
+    # not the formula render() itself computes from — a formula-only check
+    # cannot catch a bug that lives exactly where the formula lives (Y49).
+    _final_duration = render.probe_duration(final_path)
+    _expected_duration = min(render.SHORTS_MAX_SECONDS, tts_seconds + 0.5)
+    if abs(_final_duration - _expected_duration) > 0.1:
+        raise RuntimeError(
+            f"topic {topic['id']}: rendered {_final_duration:.2f}s, expected "
+            f"{_expected_duration:.2f}s (min({render.SHORTS_MAX_SECONDS:.0f}, "
+            f"tts+0.5)) — Y49 duration invariant broken"
+        )
 
     # 6b. DefyCard NEW DESIGN — HTML caption-overlay (50 rotating styles) over the
     #     captionless render + a rotating custom preview thumbnail. Best-effort.
@@ -414,6 +457,7 @@ def _run_after_topic(platform: str, topic: dict[str, Any], out_dir: Path, *,
             transport="direct" if platform == "youtube" else "dlvrit",
             external_id=external_id,
             status="ok" if "error" not in str(publish_result).lower() else "partial",
+            notes="h1" if topic.get("pool") == "h1" else "",
         )
 
         # Pattern-selector → publish-count + per-video pattern attribution
@@ -468,8 +512,17 @@ def main() -> int:
             run_pipeline(args.platform, dry_run=args.dry_run, seed=args.seed)
             schedule.mark_fired(slot["slot_id"])
         except Exception as e:
-            telegram_preview.alert(f"[publish-failure] {args.platform}: {e}",
-                                   dry_run=args.dry_run)
+            reason = f"{type(e).__name__}: {str(e)[:200]}"
+            # T-0144: one alert per (slot, cause) — the slot retries every tick
+            # by design (T-0140 Q2), the operator must not be paged every tick.
+            # ponytail: mutes consecutive identical causes only; A/B/A alternation still alerts.
+            if schedule.mark_failed(slot["slot_id"], reason):
+                telegram_preview.alert(
+                    f"[publish-failure] {args.platform}: {e}\n"
+                    f"slot {slot['slot_id']} retries every tick; identical repeats muted",
+                    dry_run=args.dry_run)
+            else:
+                print(f"[main] {slot['slot_id']}: same failure as last tick — alert muted")
             raise
         return 0
 

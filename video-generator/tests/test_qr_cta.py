@@ -25,6 +25,7 @@ from pipeline import main as pipeline_main, render
 # gates run against (`ledger` redirects the dedup DB into tmp_path, `catalog`
 # redirects the content dir and silences the news/viral rolls).
 from tests.test_pseo_topics import _write_page, catalog, ledger  # noqa: F401
+from tests.conftest import write_stub_media
 
 # The laws as literals — not read back from the code under test (Y49).
 EXPECTED_MEDIUM = "utm_medium=qr"
@@ -191,7 +192,14 @@ def test_the_wiring_delivers_the_page_to_the_renderer(ledger, catalog, tmp_path,
         "voiceover": "words", "body": "b.", "cta": "c",
         "thumbnail_hook": "CHEAPEST | WE CHECKED",
     })
-    monkeypatch.setattr(tts_edge, "synthesize", lambda *a, **k: {"voice": "v"})
+    # T-0142-02 (G39): main.py now ffprobes voice_path right after synth, so
+    # the mock must leave a real audio file behind, not just a return value.
+    # Force the edge provider regardless of a live TTS_PROVIDER=elevenlabs in
+    # the real .env — otherwise main.py routes to the unmocked
+    # tts_eleven.synthesize instead of this one.
+    monkeypatch.setattr(pipeline_main._config, "tts_provider", lambda: "edge")
+    monkeypatch.setattr(tts_edge, "synthesize",
+                         lambda voiceover, platform, out_path, **k: _silence(out_path, 2.0) and {"voice": "v"})
     monkeypatch.setattr(fetch_visuals, "fetch", lambda *a, **k: [{"path": "x"}])
     monkeypatch.setattr(fetch_music, "fetch", lambda *a, **k: {"track": "m"})
     monkeypatch.setattr(captions, "align", lambda *a, **k: [{"word": "words"}])
@@ -199,7 +207,14 @@ def test_the_wiring_delivers_the_page_to_the_renderer(ledger, catalog, tmp_path,
     monkeypatch.setattr(pub_yt, "upload", lambda **k: {"url": "u"})
 
     seen: dict = {}
-    monkeypatch.setattr(pipeline_main.render, "render", lambda **k: seen.update(k))
+
+    def _fake_render(**k):
+        seen.update(k)
+        # T-0142-02 (G39): main.py ffprobes the rendered final.mp4 right after
+        # render() returns, so the stub must leave a real file at out_path.
+        write_stub_media(k["out_path"], 2.5)
+
+    monkeypatch.setattr(pipeline_main.render, "render", _fake_render)
 
     pipeline_main.run_pipeline("youtube", dry_run=True, seed=1)
 

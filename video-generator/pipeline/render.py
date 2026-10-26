@@ -40,6 +40,11 @@ _CTA_MARGIN_PX = 40
 _CTA_FONTSIZE_MAX = 88
 _CTA_FONTSIZE_MIN = 34
 
+# T-0142-02: the Shorts output spec's hard cap — 60 s, per CLAUDE.md. Named so
+# main.py's pre-TTS/post-render gates (G39) read the SAME number `render()`
+# clamps to below, instead of a second 60.0 literal that could drift from it.
+SHORTS_MAX_SECONDS = 60.0
+
 
 def _is_video(path: str) -> bool:
     return path.lower().endswith((".mp4", ".mov", ".webm", ".mkv"))
@@ -78,7 +83,7 @@ def _qr_png(payload: str, out: Path, px: int) -> Path:
     return out
 
 
-def _ffprobe_duration(path: Path) -> float:
+def probe_duration(path: Path) -> float:
     out = subprocess.check_output(
         ["ffprobe", "-v", "quiet", "-print_format", "json",
          "-show_format", str(path)], timeout=20,
@@ -142,7 +147,7 @@ def render(*, voiceover_path: Path, music_path: Path,
            qr_payload: str | None = None,
            cta_seconds: float = 6.0,
            font_path: str | None = None,
-           max_seconds: float = 60.0,
+           max_seconds: float = SHORTS_MAX_SECONDS,
            burn_captions: bool = True) -> Path:
     """Render the final mp4. Returns out_path.
 
@@ -178,7 +183,7 @@ def render(*, voiceover_path: Path, music_path: Path,
     # Voice-video duration sync (Y49 2026-08-11). Speech sets the length:
     # 0.5 s of tail, 60 s hard cap (output spec). `target_seconds` is advisory
     # only — it may not stretch the video past the voiceover any more.
-    tts_dur = _ffprobe_duration(voiceover_path)
+    tts_dur = probe_duration(voiceover_path)
     duration = min(max_seconds, tts_dur + 0.5)
 
     n = len(clips)

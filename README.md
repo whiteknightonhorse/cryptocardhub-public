@@ -7,6 +7,8 @@ YouTube/TikTok/Instagram, and generates programmatic SEO pages for the site.
 This repository is a **published subset** of a larger private working tree. It carries the code and
 the templates; it does not carry state, logs, credentials, or the operator's working notes.
 
+This snapshot is refreshed every Monday 07:00 UTC from the private repository, and again right after any change to fee/price data (config/rates.yaml, seo-site/src/data/). Each commit message names the private source commit.
+
 ## What is here
 
 | path | what it is |

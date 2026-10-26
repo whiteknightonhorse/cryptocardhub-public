@@ -1,0 +1,101 @@
+# affiliate-2026-09.tsv — E-09: SCR / rolling / 10 %–25 % → what is actually verified
+#
+# old<TAB>new. Literal raw bytes, applied by scripts/corpus_edit.py in BOTH
+# serializations (prose and JSON-escaped frontmatter). Longest entries first
+# within a page so a shorter one cannot eat part of a sentence a longer one
+# was written for.
+#
+# WHY
+# ---
+# `ether.fi/affiliates` (read 2026-09-14) states payout in USDC on the 15th of
+# the month. The gitbook T&C still says SCR, continuously. Two issuer surfaces
+# disagree, so the payout fact is `disputed` and the corpus may assert NEITHER
+# — not "SCR", not "rolling", not "within 1–2 business days", and not the
+# invented "$10 bonus lands two days later". What the corpus may say is where
+# the reader can look it up.
+# The one affiliate number both surfaces agree on is the physical-card
+# commission: 20/20/20/25 %, i.e. "20–25 % (tiered)". The skill's "10 %–25 %"
+# is stale and is corrected here, not deleted.
+#
+# Deliberately NOT in this table (measured, then left alone):
+#   · "rolling 90-day" tier maintenance — TRUE (10+ referrals in the last 90
+#     days to hold Tier 2). how-to-refer-friend-ether-fi, when-do-referral-…,
+#     how-to-use-crypto-card-for-subscriptions.
+#   · Visa's "rolling limit of disputes" (crypto-card-refund-not-received),
+#     "rolling 30-day window" spend caps, "MiCA is rolling out" — different
+#     word, different claim.
+#   · RedotPay / Kast / Binance / Nexo / Crypto.com rolling windows — other
+#     issuers' facts, not ours to restate from ether.fi's page.
+
+# ── when-do-referral-bonuses-and-commissions-arrive-in-my (printed 2026-09-14 05:18)
+Unlike affiliate programs that batch payments monthly, ether.fi Cash uses a **rolling payout system**. This means the moment your referred friend hits their $100 qualifying spend threshold, the payout clock starts ticking. You don't wait for a specific date on the calendar; you don't fill out a withdrawal form monthly. Commissions flow continuously to your ether.fi account as your referral uses their card.	The moment your referred friend hits their $100 qualifying spend threshold, your payout eligibility is locked in. The schedule those commissions are then paid on is stated on the ether.fi affiliates page and nowhere else — check the current payout schedule there (verified 2026-09-14) rather than trusting a third-party summary of it.
+**Risk:** SCR is a cryptocurrency and subject to volatility. If you plan to convert to fiat (USD, EUR, etc.), the exchange rate at the time of conversion affects your net payouts. A $10 commission earned when SCR is at $0.50/token is worth $5; if it drops to $0.25/token before you convert, you get $2.50 instead.	**Risk:** If the payout asset is a volatile cryptocurrency rather than a stablecoin, the exchange rate at the moment you convert to fiat (USD, EUR, etc.) affects your net payouts — a commission can lose half its value between being earned and being converted. Confirm the current payout asset on the ether.fi affiliates page (verified 2026-09-14).
+**Signal:** If your friend spends $200 their first week, you typically see a new-member bonus ($10–$20 depending on your affiliate tier) hit your account within 1–2 business days, followed by recurring commissions on every transaction. This immediate feedback loop keeps motivated partners engaged.	**Signal:** If your friend spends $200 their first week, the new-member bonus ($10–$20 depending on your affiliate tier) is triggered, followed by recurring commissions on every transaction. The bonus is paid out per the ether.fi affiliates page; check the current payout schedule (verified 2026-09-14).
+Not immediately, but within 1–2 business days typically. Payouts are rolling, so as soon as your referral hits the $100 threshold, the system processes their new-member bonus and begins recurring commissions. The exact timing depends on ether.fi's internal payment processing.	The affiliates page is the only surface that states the payout schedule, so check it there (verified 2026-09-14). What is fixed is the trigger, not the date: crossing the $100 threshold is what releases your referral's new-member bonus and starts the recurring commissions.
+ether.fi Cash's rolling payout model—where commissions flow continuously as your referral spends, rather than batching—directly addresses a friction point in affiliate programs: waiting weeks or months to see revenue from a successful recruit.	Payout cadence is the friction point in affiliate programs — waiting weeks or months to see revenue from a successful recruit — and it is the one term you should read on ether.fi's own affiliates page rather than in a write-up like this one (verified 2026-09-14).
+Payout currency (SCR) adds a layer of complexity for affiliates planning fiat exits; conversion to stablecoin is an additional step subject to exchange fees, reducing net revenue if not accounted for in margin planning.	Payout currency adds a layer of complexity for affiliates planning fiat exits; if the payout asset is not already a stablecoin, converting it is an additional step subject to exchange fees, reducing net revenue if not accounted for in margin planning.
+The psychology matters: an affiliate who sees a $10 bonus land in their ether.fi account two days after referring a friend is motivated to build on that momentum; one who must wait until month-end or later may lose urgency and shift focus.	The psychology matters: an affiliate who sees a $10 bonus land in their ether.fi account soon after referring a friend is motivated to build on that momentum; one who waits longer may lose urgency and shift focus.
+**SCR exchange volatility:** If you hold payouts in SCR before converting to stablecoin, monitor the rate. Converting during market peaks vs. troughs can swing your net take-home by 10–25%.	**Payout-asset volatility:** If the payout asset is not a stablecoin and you hold it before converting, monitor the rate. Converting during market peaks versus troughs can swing your net take-home materially.
+Commissions are **paid directly to your ether.fi account in SCR** (or another supported asset per program terms). No separate payout account, no intermediary.	Commissions are **paid directly to your ether.fi account**, in the asset and on the schedule stated on the ether.fi affiliates page (verified 2026-09-14). No separate payout account, no intermediary.
+Referral commissions arrive **rolling**, within 1–2 business days of your friend's $100 qualifying spend, not held or batched to a fixed payout date.	Referral commissions are paid out per the ether.fi affiliates page; check the current payout schedule there (verified 2026-09-14) before you quote a date to anyone.
+Referral commissions arrive **rolling**, not batched—you see money flow to your account as your referrals spend, typically within 2 business days of their qualifying purchase.	Referral commissions flow to your account as your referrals spend; the schedule they are paid out on is stated on the ether.fi affiliates page (verified 2026-09-14), so read it there before you quote a date.
+your referral bonuses and commissions don't wait for a monthly payment cycle—they arrive on a rolling basis as your friend spends, starting within days of their first qualifying purchase.	your referral bonuses and commissions are paid out per the ether.fi affiliates page — check the current payout schedule there (verified 2026-09-14).
+- **Currency exposure:** If you accumulate a large balance in SCR before converting, monitor the exchange rate. Converting during market strength versus weakness can swing your net payout by 10–20%.	- **Currency exposure:** If you accumulate a large balance in a volatile payout asset before converting, monitor the exchange rate. Converting during market strength versus weakness can swing your net payout materially.
+Understand payout timing, the rolling payment model, and how long rewards last for your referrals.	Understand payout timing, where the payout terms are actually stated, and how long rewards last for your referrals.
+Yes, your ether.fi account dashboard shows rolling balances and commission history.	Yes, your ether.fi account dashboard shows your balance and commission history.
+you have a crypto-interested audience and want transparent, rolling revenue—[how to refer friends to ether.fi]	you have a crypto-interested audience and want a recurring revenue stream—[how to refer friends to ether.fi]
+[ether.fi's rolling payout model](<<AFFILIATE_URL>>) is attractive because you see immediate results and don't wait for batch cycles.	[ether.fi's referral program](<<AFFILIATE_URL>>) is attractive because commissions recur for up to 12 months per referral.
+**Payout model:** Rolling, not batched; commissions arrive continuously as your referral spends	**Payout model:** paid out per the ether.fi affiliates page; check the current payout schedule (verified 2026-09-14)
+**Payout currency:** SCR or other supported assets to your ether.fi account	**Payout currency:** as stated on the ether.fi affiliates page (verified 2026-09-14)
+**Bonus timing:** New-member bonus ($10–$20) arrives within 1–2 business days of qualifying spend	**Bonus timing:** New-member bonus ($10–$20) is released by the $100 qualifying spend; paid out per the affiliates page (verified 2026-09-14)
+- **Currency:** SCR or other supported assets per program	- **Currency:** as stated on the ether.fi affiliates page (verified 2026-09-14)
+- **Day X+N+2:** New-member bonus arrives in your account	- **After that:** New-member bonus is paid out on the affiliates page's stated schedule
+## How Rolling Payouts Actually Work	## How Referral Payouts Actually Work
+
+# ── what-happens-if-my-referred-friend-signs-up-but-never (printed 2026-09-14 08:48)
+A: Payouts are typically in SCR or another asset per the current program terms. Check your account settings or contact support to see if other currencies are available in your region.	A: The payout asset is stated on the ether.fi affiliates page (verified 2026-09-14). Check your account settings or contact support to see if other currencies are available in your region.
+Payouts are typically in SCR or the asset specified in current program terms.	The payout asset is stated on the ether.fi affiliates page (verified 2026-09-14).
+If they order a physical card (not just virtual), you earn 10%–25% of the card issuance fee. For a Luxe card ($100 fee), that's $10–$25 extra.	If they order a physical card (not just virtual), you earn 20–25 % (tiered) of the card issuance fee. For a Luxe card ($100 fee), that's $20–$25 extra.
+**Payout currency**: SCR or another supported asset	**Payout currency**: as stated on the ether.fi affiliates page (verified 2026-09-14)
+**Q: Can I get paid in a different currency besides SCR?**	**Q: Can I get paid in a different currency?**
+
+# ── how-to-refer-friend-ether-fi (41 fetches/week, #1 content page)
+# The "24–48 hours / ~5th–10th / within 30 days" schedule is the same disputed
+# payout fact as "1–2 business days", one page to the left. Y53's rule: grep
+# every producer of the claim, not only the one the report names.
+plus sign-up bonuses ($10–$20) and physical-card commissions (10%–25% tiered).	plus sign-up bonuses ($10–$20) and physical-card commissions of 20–25 % (tiered).
+A: Sign-up and high-spender bonuses ($10–$25 total) post within 24–48 hours of your friend hitting $100 spend. Recurring monthly commissions (0.1%–0.3% of their spending) arrive ~5th–10th of the next month. Physical card order commissions settle within 30 days.	A: Sign-up and high-spender bonuses ($10–$25 total) are released by your friend hitting $100 spend, and recurring commissions (0.1%–0.3% of their spending) accrue from then on. The schedule all of it is paid out on is stated on the ether.fi affiliates page (verified 2026-09-14) — read it there, not here.
+Sign-up and high-spender bonuses ($10–$25) post within 24–48 hours of your friend reaching $100 spend. Monthly recurring commissions (0.1%–0.3% of their card spending) arrive ~5th–10th of the next month. Physical card order commissions settle within 30 days.	Sign-up and high-spender bonuses ($10–$25) are released by your friend reaching $100 spend, and recurring commissions (0.1%–0.3% of their card spending) accrue from then on. The schedule all of it is paid out on is stated on the ether.fi affiliates page (verified 2026-09-14) — read it there, not here.
+- Sign-up bonuses appear within 24–48 hours of the $100 milestone.	- Sign-up bonuses are released by the $100 milestone; the payout schedule is stated on the ether.fi affiliates page (verified 2026-09-14).
+- Monthly recurring commissions post ~5th–10th of the next month.	- Recurring commissions are paid out on the schedule stated on that same affiliates page.
+Commission payouts ~5th–10th of the month — verify recurring earnings post correctly; flag missing amounts immediately	Commission payouts — check the schedule on the ether.fi affiliates page (verified 2026-09-14), verify recurring earnings post correctly, flag missing amounts immediately
+
+# ── crypto-card-for-steam
+Cashback is credited to your ether.fi wallet in USDC or SCR (ether.fi's protocol token) on a rolling basis after each purchase.	Cashback is credited to your ether.fi wallet; the payout asset and schedule are stated on ether.fi's affiliates page (verified 2026-09-14).
+Cashback is credited to your ether.fi wallet in USDC or SCR on a rolling basis.	Cashback is credited to your ether.fi wallet; see ether.fi's affiliates page for the payout asset and schedule (verified 2026-09-14).
+**Watch:** ether.fi's cashback is paid in USDC/SCR (ether.fi's protocol token), not fiat.	**Watch:** ether.fi's cashback is paid in crypto, not fiat; the exact asset is stated on ether.fi's affiliates page (verified 2026-09-14).
+ether.fi processes cashback on a rolling basis—every purchase triggers the 3% reward.	Every purchase triggers the 3% reward; the schedule it is paid on is stated on ether.fi's affiliates page (verified 2026-09-14).
+- **3% cashback in USDC/SCR:** Paid to your ether.fi wallet on a rolling basis.	- **3% cashback:** Paid to your ether.fi wallet on the schedule stated on ether.fi's affiliates page (verified 2026-09-14).
+
+# ── crypto-card-comparison
+A: ether.fi and RedotPay accrue rolling (no monthly batching). Crypto.com batches monthly. ether.fi has a slight edge — cashback starts accruing on day 1 of a referral's spend, not month-end.	A: Crypto.com batches monthly. For ether.fi the payout schedule is stated on its affiliates page (verified 2026-09-14); what is certain is that referral cashback starts accruing on day 1 of a referral's spend.
+ether.fi and RedotPay accrue rolling, no batching. Crypto.com batches monthly. ether.fi edges ahead — cashback starts day 1 of referral spend, not month-end.	Crypto.com batches monthly. For ether.fi the payout schedule is stated on its affiliates page (verified 2026-09-14); referral cashback starts accruing on day 1 of referral spend.
+ether.fi and RedotPay accrue rolling. ether.fi edges ahead — cashback starts day 1 of referral spend, not month-end.	For ether.fi the payout schedule is stated on its affiliates page (verified 2026-09-14); referral cashback starts accruing on day 1 of referral spend.
+- Duration: Cashback accrues rolling for 12 months after a referral's first $100 spend.	- Duration: Cashback accrues for 12 months after a referral's first $100 spend.
+
+# ── single-claim pages
+Ether.fi Cash offers **up to 3% cashback** on all purchases, paid rolling to your wallet.	Ether.fi Cash offers **up to 3% cashback** on all purchases, paid to your wallet on the schedule stated on ether.fi's affiliates page (verified 2026-09-14).
+4. **Watch for the cashback deposit** into your ether.fi account (rolling, tied to each transaction).	4. **Watch for the cashback deposit** into your ether.fi account (tied to each transaction; the payout schedule is stated on ether.fi's affiliates page, verified 2026-09-14).
+**Key metric:** Ether.fi's rolling model = lower per-transaction payout, but unlimited duration.	**Key metric:** Ether.fi = lower per-transaction payout, but unlimited duration.
+**Key metric:** Rolling payouts mean you see **real-time cashback accumulation**. Spend $100 → see the reward post in seconds. No quarterly delays. No approval gates.	**Key metric:** Cashback accrues per transaction. The schedule it is actually paid out on is stated on ether.fi's affiliates page (verified 2026-09-14), so read it there before planning around a date.
+**Risk**: ether.fi cashback is paid in ETH on a rolling basis, not instantly. Expect settlement within hours; during network congestion, up to 24 hours.	**Risk**: ether.fi cashback is not instant. The payout asset and schedule are stated on ether.fi's affiliates page (verified 2026-09-14); on-chain settlement can additionally take up to 24 hours during network congestion.
+That **$60** is paid in SCR (ether.fi's native settlement asset) or another supported crypto and lands in your ether.fi account monthly.	That **$60** lands in your ether.fi account in the asset and on the schedule stated on ether.fi's affiliates page (verified 2026-09-14).
+**Crypto Asset Volatility:** ETH, SCR, and other crypto assets are volatile.	**Crypto Asset Volatility:** ETH and other crypto assets are volatile.
+Cashback earned in SCR is also subject to price changes.	Cashback paid in a crypto asset is also subject to price changes.
+Cashback is paid in crypto (SCR or partner assets)	Cashback is paid in crypto; the payout asset is stated on ether.fi's affiliates page (verified 2026-09-14)
+- Cashback earned in SCR or other supported assets	- Cashback paid in the asset stated on ether.fi's affiliates page (verified 2026-09-14)
+- **Standard cashback:** up to 3 % on all purchases (paid in SCR or equivalent).	- **Standard cashback:** up to 3 % on all purchases, paid in the asset stated on ether.fi's affiliates page (verified 2026-09-14).
+- Cashback is paid in **SCR** (ether.fi's settlement token) or equivalent stablecoins.	- Cashback is paid in the asset stated on ether.fi's affiliates page (verified 2026-09-14).
+- You can immediately swap SCR → Naira via P2P or DEX.	- You can immediately swap that asset → Naira via P2P or DEX.
+- **Payout:** Monthly in USDC / SCR	- **Payout:** as stated on the ether.fi affiliates page (verified 2026-09-14)
+or governance tokens (SCR, GNO)	or governance tokens such as GNO

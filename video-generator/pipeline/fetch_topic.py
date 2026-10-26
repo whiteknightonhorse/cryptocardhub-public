@@ -26,6 +26,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from . import _config, compliance, dedup
 
 _POOL_PATH = _config.root() / "templates" / "topic_pool.json"
@@ -172,6 +174,9 @@ def _pick_finance(platform: str, rng: random.Random) -> dict[str, Any] | None:
     for t in candidates:
         if dedup.topic_used_recently(t["id"], platform):
             continue
+        # T-0140 (ruling-1): same cooldown as _pick_pseo:370 — a failed slot cools off.
+        if dedup.topic_failed_recently(t["id"], platform):
+            continue
         if not compliance.topic_safe(t):
             continue
         return _enrich_finance(t, platform)
@@ -179,6 +184,9 @@ def _pick_finance(platform: str, rng: random.Random) -> dict[str, Any] | None:
     # Fallback: any class, not used in 7d
     for t in rng.sample(pool, len(pool)):
         if dedup.topic_used_recently(t["id"], platform):
+            continue
+        # T-0140 (ruling-1): same cooldown as _pick_pseo:370 — a failed slot cools off.
+        if dedup.topic_failed_recently(t["id"], platform):
             continue
         if not compliance.topic_safe(t):
             continue
@@ -219,6 +227,9 @@ def _pick_viral(platform: str, rng: random.Random) -> dict[str, Any] | None:
 
     for t in candidates:
         if dedup.topic_used_recently(t["id"], platform):
+            continue
+        # T-0140 (ruling-1): same cooldown as _pick_pseo:370 — a failed slot cools off.
+        if dedup.topic_failed_recently(t["id"], platform):
             continue
         if not compliance.topic_safe(t):
             continue
@@ -285,6 +296,9 @@ def _pick_news(platform: str, rng: random.Random) -> dict[str, Any] | None:
     news catalog is empty — supply is thin by design, this is not an error."""
     for a in _news_articles():
         if dedup.topic_used_recently(a["id"], platform):
+            continue
+        # T-0140 (ruling-1): same cooldown as _pick_pseo:370 — a failed slot cools off.
+        if dedup.topic_failed_recently(a["id"], platform):
             continue
         if not compliance.topic_safe(a):
             continue
@@ -386,6 +400,25 @@ def pick(platform: str, seed: int | None = None) -> dict[str, Any]:
     """
     rng = random.Random(seed)
 
+    # E-20: VG_MODE=h1 replaces the whole selector — the channel's strategy
+    # narrows to filmed-from-a-hot-page only, not one more source in the mix.
+    if _config.vg_mode() == "h1":
+        topic = _pick_h1(platform, rng)
+        if topic is None:
+            n_pass = len(_h1_candidates(platform))
+            why = (
+                f"{n_pass} hot pages pass the fetch/partner/no-video filters but every one "
+                f"is cooling in the topic_failure ledger or fails compliance — check the "
+                f"ledger and the failure that cooled them BEFORE waiting for the cadence"
+                if n_pass else
+                f"every candidate in logs/aeo/targets-*.json's hot list is below "
+                f"{_H1_MIN_VERIFIED} verified fetches, lacks a confirmed primary_partner: "
+                f"etherfi, or already has a video. Run aeo-aggregate.py --targets, or wait "
+                f"for the cadence"
+            )
+            raise RuntimeError(f"VG_MODE=h1: no eligible hot etherfi page for {platform} — {why}.")
+        return topic
+
     # Y49 P1-3 — fresh news first when the roll says so and material exists.
     if rng.random() < _news_ratio():
         topic = _pick_news(platform, rng)
@@ -480,6 +513,126 @@ def _enrich_news(article: dict[str, Any], platform: str) -> dict[str, Any]:
     art["published_at_iso"] = article["published_at"].isoformat()
     enriched = _enrich_finance({**art, "class": "MOFU"}, platform)
     enriched["pool"] = "news"
+    return enriched
+
+
+# --- E-20 (VG_MODE=h1): hot etherfi pSEO pages as the video topic ----------
+# Source is the AEO instrument's own weekly output (logs/aeo/targets-<week>.json,
+# `hot` list — verified agent fetches per published page, aeo-aggregate.py
+# --targets), not a second measurement. Filters, in order: verified fetches
+# floor, resolved partner == etherfi (the SAME three-rule law the page itself
+# renders under — see `_h1_primary_partner` — not a stricter frontmatter-only
+# re-derivation), and no video already made for that page (permanent,
+# dedup.topic_ever_published — unlike the 21-day rotation every other source
+# in this file uses).
+_H1_MIN_VERIFIED = 5
+_AEO_DIR = _config.root().parent / "logs" / "aeo"
+_AVAILABILITY_PATH = _config.root().parent / "config" / "availability.yaml"
+
+
+def _slug_for_path(path: str) -> str | None:
+    slug = path.strip("/").split("/")[-1] if path else ""
+    return slug or None
+
+
+def _h1_targets_path() -> Path | None:
+    """Latest `logs/aeo/targets-*.json`, or None if the AEO instrument has
+    never run --targets."""
+    if not _AEO_DIR.is_dir():
+        return None
+    files = sorted(_AEO_DIR.glob("targets-*.json"))
+    return files[-1] if files else None
+
+
+def _h1_primary_partner(slug: str) -> str | None:
+    """The partner `slug`'s page actually resolves its CTAs to — the SAME
+    three-rule law `affiliates.mjs:primaryPartnerFor` and
+    `pseo-generate.py:primary_partner_for` already implement (Y50), transplanted
+    here rather than re-derived: explicit `primary_partner` frontmatter wins;
+    else a geo slug the issuer can't serve (`unavailable_slugs` in
+    availability.yaml) routes to the fallback partner; else the default is
+    etherfi. Returns None only if the page itself doesn't exist (not a real
+    topic, excluded regardless of partner).
+
+    A frontmatter-only reading (declared-or-unconfirmed) is a STRICTER law
+    than the one the page renders under, and on this corpus that emptied the
+    H1 queue from 6 real candidates to 2 (w4-20.ruling-2) — only 36 of 574
+    pages declare `primary_partner` explicitly; the rest render as etherfi via
+    the default and must be counted as etherfi here too."""
+    path = _CONTENT_DIR / f"{slug}.md"
+    if not path.is_file():
+        return None
+    try:
+        head = path.read_text(encoding="utf-8").split("---", 2)
+    except OSError:
+        return None
+    declared: str | None = None
+    if len(head) >= 3:
+        for line in head[1].splitlines():
+            m = re.match(r"^primary_partner: (.*)$", line)
+            if m:
+                try:
+                    declared = json.loads(m.group(1))
+                except json.JSONDecodeError:
+                    declared = None
+                break
+    if declared:
+        return declared
+    avail = yaml.safe_load(_AVAILABILITY_PATH.read_text(encoding="utf-8"))
+    if slug in set(avail.get("unavailable_slugs") or []):
+        return avail["etherfi"]["fallback_partner"]
+    return "etherfi"
+
+
+def _h1_candidates(platform: str) -> list[dict[str, Any]]:
+    """Ordered H1 topic candidates, most agent-fetched first."""
+    path = _h1_targets_path()
+    if path is None:
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    hot = sorted(
+        (h for h in (data.get("hot") or []) if isinstance(h, dict)),
+        key=lambda h: (-int(h.get("fetches", 0) or 0), str(h.get("path", ""))),
+    )
+    pages_by_slug = {p["slug"]: p for p in _pseo_pages()}
+    out: list[dict[str, Any]] = []
+    for h in hot:
+        fetches = int(h.get("fetches", 0) or 0)
+        if fetches < _H1_MIN_VERIFIED:
+            continue
+        slug = _slug_for_path(str(h.get("path") or ""))
+        if not slug or _h1_primary_partner(slug) != "etherfi":
+            continue
+        page = pages_by_slug.get(slug)
+        if page is None:
+            continue  # frontmatter unreadable / not a real topic (Y53)
+        topic_id = _pseo_id(slug)
+        if dedup.topic_ever_published(topic_id, platform):
+            continue
+        out.append({**page, "id": topic_id, "fetches": fetches})
+    return out
+
+
+def _pick_h1(platform: str, rng: random.Random) -> dict[str, Any] | None:
+    for p in _h1_candidates(platform):
+        # T-0140 (ruling-1): the same cooldown _pick_pseo:370 already applies —
+        # a failed slot must cool off or the selector re-offers it every tick.
+        if dedup.topic_failed_recently(p["id"], platform):
+            continue
+        if not compliance.topic_safe(p):
+            continue
+        return _enrich_h1(p, platform)
+    return None
+
+
+def _enrich_h1(page: dict[str, Any], platform: str) -> dict[str, Any]:
+    """A hot page rides the finance MOFU band, same as a regular catalog
+    topic — H1 is a different SOURCE, not a different render shape."""
+    enriched = _enrich_finance({**page, "class": "MOFU"}, platform)
+    enriched["pool"] = "h1"
     return enriched
 
 

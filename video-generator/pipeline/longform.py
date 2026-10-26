@@ -334,6 +334,11 @@ def render_one(slug: str, *, dry_run: bool = False,
     (d / "script.json").write_text(json.dumps(script, indent=2), encoding="utf-8")
 
     voice_path = d / "voice.mp3"
+    # Always Edge, never TTS_PROVIDER (T-0139 Q4): NARRATION_WORDS_PER_SECOND
+    # and the [185, 260]s gate above were measured on this exact Edge voice —
+    # E-19's ElevenLabs swap was never re-measured against them, and the
+    # shared ElevenLabs quota (41502 chars/mo) has no room for long-form's
+    # ~2800 chars/video next to the Shorts pipeline it already carries.
     voice_meta = tts_edge.synthesize(
         script["voiceover"], "youtube", voice_path, voice=PILOT_VOICE,
         dry_run=dry_run,
@@ -593,8 +598,23 @@ def publish_one(slug: str, *, day: str | None = None, dry_run: bool = False) -> 
     return result
 
 
+# T-0139 ruling-1 Q2: bounds ElevenLabs/render cost when several queued pages
+# in a row fail the post-render expired-claim check; pre-render (compliance,
+# thin-page) rejections are free and do not count against it.
+MAX_RENDERS_PER_RUN = 3
+
+
 def publish_next(*, dry_run: bool = False) -> dict[str, Any]:
-    """Publish the next queued slug, at most one per UTC day."""
+    """Publish the next queued slug that clears its own gates, at most one per
+    UTC day.
+
+    A candidate can fail two page-level gates — compliance (before any
+    synthesis, free) or an expired claim (after render, real cost already
+    spent) — and neither is a reason to kill the run; try the next candidate
+    instead (T-0139 ruling-1 Q2). Any other failure (TTS, render, upload,
+    network) is the machine's problem, not the page's, and still stops the
+    run as before.
+    """
     if published_today():
         _note(action="skip", reason="already_published_today")
         return {"skipped": "already_published_today"}
@@ -606,11 +626,33 @@ def publish_next(*, dry_run: bool = False) -> dict[str, Any]:
             "with scripts/longform-queue.py; a silent no-op here would look "
             "exactly like a healthy quiet day"
         )
-    slug = candidates[0]
     day = date.today().isoformat()
-    if not (out_dir(slug, day) / "summary.json").is_file():
-        render_one(slug, dry_run=dry_run, day=day)
-    return publish_one(slug, day=day, dry_run=dry_run)
+    renders_used = 0
+    skipped: list[tuple[str, str]] = []
+    for slug in candidates:
+        d = out_dir(slug, day)
+        if not (d / "summary.json").is_file():
+            if renders_used >= MAX_RENDERS_PER_RUN:
+                break
+            try:
+                render_one(slug, dry_run=dry_run, day=day)
+            except (compliance.ComplianceError, ValueError) as e:
+                _note(action="skip", slug=slug, reason=type(e).__name__,
+                      detail=str(e)[:200])
+                skipped.append((slug, type(e).__name__))
+                continue
+            renders_used += 1
+        try:
+            refuse_expired_claims(d, slug)
+        except RuntimeError as e:
+            _note(action="skip", slug=slug, reason="refuse_expired_claims",
+                  detail=str(e)[:200])
+            skipped.append((slug, "refuse_expired_claims"))
+            continue
+        return publish_one(slug, day=day, dry_run=dry_run)
+    raise RuntimeError(
+        f"no candidate published after {len(skipped)} skip(s): {skipped}"
+    )
 
 
 def main() -> int:

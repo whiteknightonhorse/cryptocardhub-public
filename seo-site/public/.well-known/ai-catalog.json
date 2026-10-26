@@ -1,0 +1,45 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "DefyCard",
+    "identifier": "did:web:defycard.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:defycard.com:skills:index",
+      "displayName": "DefyCard Agent Skills Index",
+      "type": "application/json",
+      "url": "https://defycard.com/.well-known/agent-skills/index.json",
+      "description": "Agent Skills index describing how an agent can search, browse by content bucket, and fetch full article text from DefyCard, an independent crypto-card comparison hub.",
+      "representativeQueries": [
+        "Find a machine-readable skills index for a crypto-card content site",
+        "Learn how an agent can search and fetch articles from a card comparison hub",
+        "Discover site-facing tools exposed for AI agents without an API key"
+      ]
+    },
+    {
+      "identifier": "urn:air:defycard.com:docs:llms",
+      "displayName": "DefyCard llms.txt",
+      "type": "text/markdown",
+      "url": "https://defycard.com/llms.txt",
+      "description": "Markdown overview of DefyCard for large language models, covering site scope, content buckets, and which capabilities are not available on the site.",
+      "representativeQueries": [
+        "Get a markdown summary of a crypto-card comparison site for an LLM",
+        "Understand the scope and content buckets of an affiliate card hub",
+        "Check what capabilities a site does not support before querying it"
+      ]
+    },
+    {
+      "identifier": "urn:air:defycard.com:discovery:api-catalog",
+      "displayName": "DefyCard API Catalog",
+      "type": "application/linkset+json",
+      "url": "https://defycard.com/.well-known/api-catalog",
+      "description": "Service-discovery linkset pointing agents to DefyCard's llms.txt, sitemap, robots.txt, and Agent Skills index for self-description of the site.",
+      "representativeQueries": [
+        "Find the service discovery document for a content site",
+        "Locate machine-readable pointers to a site's sitemap and skills index",
+        "Discover self-description links for an affiliate content hub"
+      ]
+    }
+  ]
+}

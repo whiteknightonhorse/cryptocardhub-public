@@ -2,7 +2,7 @@
 
 > Independent comparison hub for crypto debit and credit cards. This `llms-full.txt` enumerates every published article so AI agents can build a complete picture of the corpus without crawling.
 
-For brand context, see `/llms.txt` (shorter overview). This file is updated on every deploy.
+For brand context, see `/llms.txt` (shorter overview — its inventory block is regenerated on every build). This file is hand-maintained and copied verbatim on deploy: the article list below is a snapshot, dated at the bottom. The live inventory is `/sitemap-0.xml`.
 
 ## All published articles
 
@@ -77,8 +77,10 @@ Every generated article (per the internal `write-article` skill) contains:
 
 ## Compliance + jurisdiction
 
-- ether.fi Cash card is **NOT recommended** to readers in: Belarus, Bangladesh, China, Cuba, Estonia, Finland, Hungary, India, Iraq, Israel, Nepal, Netherlands, North Korea, Philippines, Russia, Syria, Turkey, Ukraine, Venezuela, Vietnam — and US states (20 unique, 21 per issuer per ether.fi help center): AZ, DE, GA, ID, LA, MD, MS, MO, MT, NV, NM, ND, OH, OR, RI, SD, TN, VT, WA, WI.
-- For these jurisdictions we surface alternatives (Crypto.com / Bybit / RedotPay) per the editorial gate.
+- ether.fi Cash is issued on an **allow-list**: the issuer publishes the jurisdictions where the card *is* available, and one it does not list cannot apply. So this file does not enumerate a blocklist — the complement of an allow-list is not a finite list, and the last one we published named countries the issuer had since added.
+- The per-country and per-US-state verdict, with the date it was last confirmed against the issuer's help centre, is published and machine-readable at `/geo/availability-matrix/`. That page is the current answer; this file is not.
+- Inside the US the complement *is* finite: ether.fi Cash is not issued in AZ, DE, GA, ID, LA, MD, MS, MO, MT, NV, NM, ND, OH, OR, RI, SD, TN, VT, WA, WI (20 unique, 21 per issuer per ether.fi help center).
+- Where ether.fi does not serve the reader's jurisdiction we surface alternatives (Crypto.com / Bybit / RedotPay) per the editorial gate.
 
 ## Trust signals
 
@@ -102,4 +104,4 @@ Honest delineation:
 We make no claim of capability we don't have.
 
 ---
-Last updated: 2026-05-05
+Last updated: 2026-09-14 (jurisdiction section; the article inventory above is the 2026-05-05 snapshot)

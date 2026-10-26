@@ -1,6 +1,6 @@
 # DefyCard
 
-> Independent, editorial comparison hub for crypto debit and credit cards. We track 11 cards across the US, UK, EU, LATAM, and APAC, publishing fee changes, cashback rates, country availability, and security/custody analysis.
+> Independent, editorial comparison hub for crypto debit and credit cards. We have published reviews of 14 crypto cards, covering fee changes, cashback rates, country availability, and security/custody analysis.
 
 ## What this site is
 

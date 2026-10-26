@@ -8,6 +8,7 @@ Min 60-min gap between slots.
 from __future__ import annotations
 import json
 import random
+import sys
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any
@@ -44,10 +45,69 @@ _MIN_GAP_MIN = 60
 # is a spam fingerprint per YT classifier. Real new creators publish
 # 1-3/week; we were hitting 42/week. Ramp back up to 4-6 after subs >= 100
 # and view counts confirm algorithm trust. Override via TARGET_SLOTS_PER_DAY
-# env var if testing.
+# env var if testing. This is the HEALTHY-channel target only — see
+# _target_slots() below for why a suppressed channel gets fewer.
 import os as _os
 _TARGET_SLOTS = int(_os.environ.get("TARGET_SLOTS_PER_DAY", "2"))
 _WINDOW_OPEN = time(9, 0)
+
+# E-20 (VG_MODE=h1): 3 slots/week, Mon/Wed/Fri 10:00 ET, YouTube only — a
+# different cadence law than the daily rotation above, not a variant of it.
+_H1_WEEKDAYS = {0, 2, 4}  # Mon, Wed, Fri
+_H1_TIME = time(10, 0)
+
+
+def _h1_slots(platform: str, target_date: date) -> list[dict[str, Any]]:
+    if platform != "youtube":
+        return []  # H1 is a YouTube strategy (D7) — IG/TikTok get no slots in this mode
+    if _os.environ.get("VIDEO_GENERATOR_ENABLED", "false") != "true":
+        return []  # master switch, checked here too so a schedule-only run stays inert
+    if target_date.weekday() not in _H1_WEEKDAYS:
+        return []
+    dt = datetime.combine(target_date, _H1_TIME, tzinfo=ET)
+    return [{
+        "slot_id": f"{platform}-h1-{target_date.isoformat()}",
+        "platform": platform,
+        "due_at_iso": dt.isoformat(),
+        "due_at_utc": dt.astimezone(ZoneInfo("UTC")).isoformat(),
+        "fired": False,
+    }]
+
+
+def _target_slots(platform: str) -> int:
+    """How many slots to SCHEDULE today for `platform`.
+
+    Found 2026-08-31: the cadence gate (pipeline.analytics.cadence_allowed,
+    cap=1/day while suppressed) was capping FIRES correctly, but this
+    generator kept writing _TARGET_SLOTS=2 every day regardless. An unfired
+    slot is not discarded here (write() overwrites, but only once a day, at
+    00:05 ET) — so the day's second slot sat unfired until midnight ET, when
+    the gate's own fired_today counter reset to 0 for the new day and fired
+    the leftover within the hour, BEFORE that day's own regeneration had even
+    run. Net effect measured in state/published.db: ~2/day, every day, for
+    the whole 13-day suppressed window — the cap was never actually wrong,
+    the SCHEDULE just kept manufacturing a second slot for it to eventually
+    leak through. Scheduling only as many slots as the gate will ever let
+    fire removes the leftover, not just the symptom: with target==cap there
+    is nothing left over to roll into the next day.
+
+    Reads the SAME cap the gate reads (pipeline.analytics._SUPPRESSED_SLOTS_PER_DAY)
+    rather than a second copy of the number, and fails closed (schedules the
+    smaller, suppressed count) if channel health cannot be measured at all —
+    matching channel_health()'s own fail-closed default.
+    """
+    try:
+        from . import analytics as _analytics
+        health = _analytics.channel_health(platform=platform)
+    except Exception as e:  # noqa: BLE001
+        print(f"[schedule] channel_health unavailable for {platform} "
+              f"({type(e).__name__}: {e}) — scheduling the suppressed count",
+              file=sys.stderr)
+        return 1
+    if not health.get("suppressed"):
+        return _TARGET_SLOTS
+    from . import analytics as _analytics  # noqa: F811 (already imported above on the happy path)
+    return min(_TARGET_SLOTS, _analytics._SUPPRESSED_SLOTS_PER_DAY)  # noqa: SLF001
 _WINDOW_CLOSE = time(21, 0)
 
 
@@ -76,7 +136,10 @@ def generate(platform: str, target_date: date | None = None,
     Returns: [{slot_id, due_at_iso, fired: false}, ...]
     """
     target_date = target_date or datetime.now(ET).date()
+    if _config.vg_mode() == "h1":
+        return _h1_slots(platform, target_date)
     rng = random.Random(seed if seed is not None else int(target_date.toordinal()))
+    target_slots = _target_slots(platform)
 
     weekday = target_date.weekday()
     chosen_times: list[time] = []
@@ -98,13 +161,13 @@ def generate(platform: str, target_date: date | None = None,
                     continue
                 chosen_times.append(t)
                 break
-            if len(chosen_times) >= _TARGET_SLOTS:
+            if len(chosen_times) >= target_slots:
                 break
-        if len(chosen_times) >= _TARGET_SLOTS:
+        if len(chosen_times) >= target_slots:
             break
 
     # Then fill remaining slots uniformly across the open window
-    while len(chosen_times) < _TARGET_SLOTS:
+    while len(chosen_times) < target_slots:
         for _attempt in range(80):
             hour = rng.randint(9, 20)
             minute = rng.randint(0, 59)
@@ -179,3 +242,24 @@ def mark_fired(slot_id: str) -> None:
     tmp = p.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, indent=2), encoding="utf-8")
     tmp.replace(p)
+
+
+def mark_failed(slot_id: str, reason: str) -> bool:
+    """Record the failure reason on the slot. True — the reason is NEW for
+    this slot (first tick with it), False — this exact text already went to
+    Telegram. Slot missing (regenerated between ticks) -> True: an extra
+    alert is cheaper than a swallowed one."""
+    state = load()
+    for slots in state.get("by_platform", {}).values():
+        for s in slots:
+            if s["slot_id"] != slot_id:
+                continue
+            if s.get("last_failure") == reason:
+                return False
+            s["last_failure"] = reason
+            p = _state_path()
+            tmp = p.with_suffix(".tmp")
+            tmp.write_text(json.dumps(state, indent=2), encoding="utf-8")
+            tmp.replace(p)
+            return True
+    return True

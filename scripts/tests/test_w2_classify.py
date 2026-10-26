@@ -53,11 +53,12 @@ def test_every_cold_page_lands_in_exactly_one_list():
 
 # --- unmeasured must not read as measured ----------------------------------
 
-def test_unreachable_ga4_returns_none_not_an_empty_mapping(monkeypatch):
+def test_unreachable_ga4_returns_none_not_an_empty_mapping(monkeypatch, tg_alerts):
     """{} would make every page a double zero — the whole site a redirect
     candidate — off a network error."""
     monkeypatch.setattr(w2, "_load", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
     assert w2.ga4_sessions("2026-07-16", "2026-08-13") is None
+    assert tg_alerts == ["instrument_dead: w2-classify GA4 unreachable (RuntimeError: boom) — classification refused"]
 
 
 # --- duplicate detection ---------------------------------------------------

@@ -1,0 +1,52 @@
+---
+/**
+ * VerifiedBadge — "checked against the issuer" line for a money figure
+ * sourced from config/facts/<partner>.yaml.
+ *
+ * T-0142-06: nothing on the page told a reader whether a number was
+ * hand-typed or actually checked against ether.fi (Y63: a dead promo rate
+ * survived four months past its own end date with no signal distinguishing
+ * it from a live one). This prints the fact record's own `verified_at` +
+ * `source_url` — never a value the template invents — next to the figure
+ * it backs. Only ever passed a `status: current` fact; the caller decides
+ * eligibility, this just renders what it's given.
+ *
+ * T-0142-06 REVIEW-FIX (ruling-2): a bare date/source claimed nothing about
+ * WHICH number was checked, so it read as a blanket "everything in this
+ * section is verified" stamp — on 31 pages it sat right under stale hand-
+ * written copy the cited fact's own `history` marks wrong ("$40 refundable"
+ * vs the fact's `value: 50`). `claim` makes the badge state the one figure
+ * it actually backs, so it can never be read as endorsing a number it never
+ * checked.
+ */
+export interface Props {
+  claim: string;
+  verifiedAt: string;
+  sourceUrl: string;
+}
+const { claim, verifiedAt, sourceUrl } = Astro.props;
+---
+<p class="verified-badge">
+  <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+  {claim} · Verified against the issuer {verifiedAt} ·{' '}
+  <a href={sourceUrl} rel="nofollow noopener" target="_blank">source</a>
+</p>
+
+<style>
+  .verified-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0 0;
+    font-size: 0.85rem;
+    color: var(--outline);
+  }
+  .verified-badge .material-symbols-outlined {
+    font-size: 1rem;
+    color: var(--status-success);
+  }
+  .verified-badge a {
+    color: inherit;
+    text-decoration: underline;
+  }
+</style>

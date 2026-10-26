@@ -1,0 +1,9 @@
+# T-0142-08 ruling-2 REJECT — 6 geo pages (india, turkey, arizona, nevada,
+# georgia, washington) still linked their Plasma One row to the reconstructed,
+# NXDOMAIN host `help.plasma.org`. Real host, verified 2026-09-25 (curl -L,
+# 200, 86983 bytes, matches the captured fixture byte-for-byte):
+# https://intercom.help/plasma-6c43763cd799/en/articles/14703938
+# 2 literals; the first covers arizona/nevada/georgia/washington (identical
+# trailing clause in all four), the second covers india/turkey (table row).
+([help article 14703938](https://help.plasma.org/en/articles/14703938), checked 2026-09-24)	([help article 14703938](https://intercom.help/plasma-6c43763cd799/en/articles/14703938), checked 2026-09-25)
+([issuer help center](https://help.plasma.org/en/articles/14703938))	([issuer help center](https://intercom.help/plasma-6c43763cd799/en/articles/14703938))

@@ -61,6 +61,8 @@ from pathlib import Path
 from pathlib import Path as pathlib_Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from slug_lib import slugify  # noqa: E402 -- LAW #ONE-PLACE canonical slugify, must match the writer
 API = "https://ssl.bing.com/webmaster/api.svc/json"
 BANK = ROOT / ".claude" / "skills" / "keywords" / "SKILL.md"
 CANDIDATES = ROOT / ".claude" / "skills" / "keywords" / "CANDIDATES-BING.md"
@@ -253,11 +255,6 @@ def normalise(q: str) -> str:
     words = [re.sub(r"(?<=[a-z]{3})s$", "", w) for w in q.split()]
     drop = {"the", "a", "an", "for", "in", "of", "to", "best", "top", "2025", "2026"}
     return " ".join(sorted(w for w in words if w and w not in drop))
-
-
-def slugify(text: str) -> str:
-    s = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-    return s[:60]
 
 
 def bank_keywords() -> list[str]:

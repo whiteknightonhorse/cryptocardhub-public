@@ -82,6 +82,24 @@ def _platform_eligible(pattern: dict[str, Any], platform: str) -> bool:
     return tier != "low"
 
 
+def _duration_compatible(pattern: dict[str, Any], band: list[float] | None) -> bool:
+    """True if `pattern`'s target_seconds range overlaps the topic's
+    duration_band. T-0142-02: the topic's band (e.g. H1 youtube [30, 45]) is
+    the ONE length law — a duration_band-axis pattern outside it (e.g.
+    duration_long_60_90) must never be selectable, or the writer composes for
+    a length the render (Y49: duration = min(max_seconds, tts+0.5)) will
+    silently cut down to something else. Patterns on other axes carry no
+    `target_seconds` and are always compatible."""
+    if band is None:
+        return True
+    target = pattern.get("target_seconds")
+    if not target:
+        return True
+    t_lo, t_hi = float(target[0]), float(target[1])
+    b_lo, b_hi = float(band[0]), float(band[-1])
+    return t_lo <= b_hi and b_lo <= t_hi
+
+
 def _check_mutual_exclusions(
     selected: dict[str, str], pattern_id: str, banned_with: list[str]
 ) -> bool:
@@ -90,7 +108,8 @@ def _check_mutual_exclusions(
 
 
 def select(platform: str, topic_class: str | None = None,
-           seed: int | None = None) -> dict[str, Any]:
+           seed: int | None = None,
+           duration_band: list[float] | None = None) -> dict[str, Any]:
     """Pick one pattern per creative axis. Returns a dict mapping axis -> pattern_id
     plus a summary of why each was picked.
 
@@ -98,6 +117,10 @@ def select(platform: str, topic_class: str | None = None,
         platform: "youtube" | "instagram" | "tiktok"
         topic_class: optional topic class hint ("TOFU" | "MOFU" | "BOFU" | "VIRAL")
         seed: optional rng seed for reproducible selection
+        duration_band: topic's [lo, hi] seconds (fetch_topic's duration_band).
+                        Drops duration_band-axis patterns outside this range
+                        (T-0142-02) — the writer must never be handed a length
+                        the topic didn't ask for.
 
     Returns:
         {
@@ -117,16 +140,19 @@ def select(platform: str, topic_class: str | None = None,
 
     for axis in cat["axes"]:
         patterns = cat["categories"].get(axis, [])
-        # Filter by platform eligibility + mutual exclusion + not disabled
+        # Filter by platform eligibility + duration compatibility + mutual
+        # exclusion + not disabled
         eligible = [
             p for p in patterns
             if _platform_eligible(p, platform)
+            and _duration_compatible(p, duration_band)
             and not p.get("disabled", False)
             and _check_mutual_exclusions(selected, p["id"], p.get("banned_with", []))
         ]
         if not eligible:
             # Defensive: ALL patterns banned — relax mutual exclusion this round
             eligible = [p for p in patterns if _platform_eligible(p, platform)
+                        and _duration_compatible(p, duration_band)
                         and not p.get("disabled", False)]
         if not eligible:
             # Worst case: take any pattern

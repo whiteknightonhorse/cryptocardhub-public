@@ -119,6 +119,67 @@ echo "=== 8. CSS tokens loaded ==="
 echo "$home_html" | grep -qE "tokens\.[a-f0-9]+\.css|src/styles/tokens" && ok "tokens.css linked" || wrn "could not detect tokens.css"
 
 echo ""
+echo "=== 9. www -> apex 301 ==="
+www_hdr=$(curl -sI "https://www.defycard.com/reviews/binance-card-review/" 2>&1)
+www_status=$(echo "$www_hdr" | head -1 | grep -oE '\b[0-9]{3}\b' | head -1)
+www_loc=$(echo "$www_hdr" | tr -d '\r' | awk 'tolower($1)=="location:"{print $2; exit}')
+if [ "$www_status" = "301" ] && [ "$www_loc" = "https://defycard.com/reviews/binance-card-review/" ]; then
+  ok "www -> 301 $www_loc"
+else
+  err "www redirect wrong: status=$www_status location=$www_loc"
+fi
+
+echo ""
+echo "=== 10. Retirement sample (redirects.map) ==="
+MAP="$ROOT/seo-site/redirects.map"
+row301=$(awk -F'\t' '/^\//{ if ($2 != "410") { print $1 "\t" $2; exit } }' "$MAP")
+row410=$(awk -F'\t' '/^\//{ if ($2 == "410") { print $1; exit } }' "$MAP")
+if [ -n "$row301" ]; then
+  from301=${row301%%$'\t'*}; to301=${row301#*$'\t'}
+  r_hdr=$(curl -sI "$ORIGIN$from301" 2>&1)
+  r_status=$(echo "$r_hdr" | head -1 | grep -oE '\b[0-9]{3}\b' | head -1)
+  r_loc=$(echo "$r_hdr" | tr -d '\r' | awk 'tolower($1)=="location:"{print $2; exit}')
+  if [ "$r_status" = "301" ] && { [ "$r_loc" = "$ORIGIN$to301" ] || [ "$r_loc" = "$to301" ]; }; then
+    ok "$from301 -> 301 $r_loc"
+  else
+    err "$from301 expected 301 -> $to301, got $r_status $r_loc"
+  fi
+else
+  err "redirects.map has no 301 row"
+fi
+if [ -n "$row410" ]; then
+  g_status=$(curl -s -o /dev/null -w "%{http_code}" "$ORIGIN$row410")
+  [ "$g_status" = "410" ] && ok "$row410 -> 410" || err "$row410 expected 410, got $g_status"
+else
+  err "redirects.map has no 410 row"
+fi
+
+echo ""
+echo "=== 11. One sitemap (sitemap.xml == sitemap-index.xml) ==="
+curl -s "$ORIGIN/sitemap.xml" -o /tmp/sm-a-$$.xml
+curl -s "$ORIGIN/sitemap-index.xml" -o /tmp/sm-b-$$.xml
+if [ -s /tmp/sm-a-$$.xml ] && cmp -s /tmp/sm-a-$$.xml /tmp/sm-b-$$.xml; then
+  ok "sitemap.xml and sitemap-index.xml are byte-identical"
+else
+  err "sitemap.xml and sitemap-index.xml differ (or empty)"
+fi
+rm -f /tmp/sm-a-$$.xml /tmp/sm-b-$$.xml
+
+echo ""
+echo "=== 12. Visible breadcrumb on a sampled article ==="
+# Step 4 deletes each downloaded page inside its loop (1-8 stay untouched), so
+# re-fetch the first sampled article here.
+bc_md="${MD_FILES[0]:-}"
+if [ -n "$bc_md" ]; then
+  bc_bucket=$(awk '/^bucket:/{gsub(/[",]/,""); print $2; exit}' "$bc_md")
+  bc_url="$ORIGIN/$bc_bucket/$(basename "$bc_md" .md)/"
+  bc_n=$(curl -s "$bc_url" | grep -c 'aria-label="Breadcrumb"' || true)
+  [ "$bc_n" -ge 1 ] && ok "$bc_url has visible breadcrumb" || err "$bc_url has no aria-label=\"Breadcrumb\""
+else
+  err "no sampled article for breadcrumb check"
+fi
+
+echo ""
 echo "=========================================================="
 echo "  Verification: $PASS pass / $WARN warn / $FAIL fail"
 echo "=========================================================="

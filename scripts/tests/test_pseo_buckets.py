@@ -76,7 +76,7 @@ def test_the_generator_is_not_simply_round_robin(clusters):
 
 # --- geo: blocked jurisdictions first ---------------------------------------
 
-BLOCKED_FIRST = "best-crypto-card-india"      # in etherfi.unavailable_countries
+BLOCKED_FIRST = "best-crypto-card-india"      # not on the issuer's allow-list
 NOT_BLOCKED = "best-crypto-card-uk"           # ether.fi works there
 
 

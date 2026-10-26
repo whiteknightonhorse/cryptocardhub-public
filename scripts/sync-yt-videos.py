@@ -94,11 +94,18 @@ def _yt_availability(video_ids: list[str]) -> dict[str, dict]:
     return out
 
 
+# A video minutes-old still reads uploadStatus=uploaded (processing hasn't
+# finished) — treating that as ineligible drops every fresh publish from the
+# sync until the NEXT deploy happens to run after processing completes, which
+# for a low-cadence schedule can be days (T-0142 ruling T-0142-01).
+_LIVE_UPLOAD_STATUSES = {"uploaded", "processed"}
+
+
 def _is_publishable(meta: dict | None) -> tuple[bool, str]:
     """Return (eligible, reason). A video is eligible iff:
       - present in YT response (not deleted)
       - privacyStatus == public
-      - uploadStatus == processed (not failed/rejected)
+      - uploadStatus in {uploaded, processed} (not failed/rejected)
       - madeForKids == False (kids content excluded from card affiliate site)
     """
     if meta is None:
@@ -106,7 +113,7 @@ def _is_publishable(meta: dict | None) -> tuple[bool, str]:
     st = meta.get("status") or {}
     if st.get("privacyStatus") != "public":
         return False, f"privacy={st.get('privacyStatus')}"
-    if st.get("uploadStatus") != "processed":
+    if st.get("uploadStatus") not in _LIVE_UPLOAD_STATUSES:
         return False, f"uploadStatus={st.get('uploadStatus')}"
     if st.get("madeForKids") is True:
         return False, "made_for_kids"
@@ -180,9 +187,23 @@ def _match_pseo_slug(topic: dict, script: dict) -> str | None:
     when confidence is high; otherwise returns None and the video appears
     only on /videos/ pages.
     """
-    # 1. Explicit hint wins
-    if topic.get("target_pseo_slug"):
-        return str(topic["target_pseo_slug"]).strip("/") or None
+    # 1. Explicit hint wins. The renderer ([bucket]/[slug].astro) and the
+    # video sitemap both key on the FULL "bucket/slug" path — H1 targets
+    # (targets-<week>.json, via summary.json) store bucket and slug as two
+    # separate fields, so a bare hint needs the bucket prefixed back on
+    # before it means anything to either reader.
+    hint = topic.get("target_pseo_slug")
+    if hint:
+        hint = str(hint).strip("/")
+        if hint and "/" not in hint and topic.get("bucket"):
+            hint = f"{topic['bucket']}/{hint}"
+        # Sanity: only return a hint when the article actually exists, so we
+        # never embed a video on a 404 (mirrors rule 2's check below).
+        if hint and "/" in hint:
+            bucket, slug_part = hint.split("/", 1)
+            if list(PSEO_DIR.glob(f"{slug_part}.md")):
+                return hint
+        return None
     # 2. VIRAL: fall back on category map. We still link the page but only
     #    to a hand-curated parent article — never to a narrow long-tail.
     if topic.get("class") == "VIRAL" or topic.get("pool") == "viral":
@@ -336,6 +357,8 @@ def main() -> int:
     written = 0
     skipped_missing_topic = 0
     skipped_missing_script = 0
+    h1_total = 0
+    h1_attached = 0
     for r in rows:
         if api_check_active:
             eligible, reason = _is_publishable(yt_meta.get(r["external_id"]))
@@ -351,7 +374,40 @@ def main() -> int:
         # was published successfully and treat as eligible.
         eligible_ids.add(r["external_id"])
         row = dict(r)
+
+        # Render dir (and its summary.json) is looked up BEFORE deciding
+        # off-pool: H1 topics come from targets-<week>.json, never from
+        # topic_pool.json/topic_pool_viral.json, so `topics.get(topic_id)`
+        # always misses for them. summary.json is the runtime-enriched
+        # topic written at render time and is the only place an H1 topic's
+        # metadata (incl. target_pseo_slug) survives (T-0142 ruling Q2).
+        render_dir = _find_render_dir(row["channel"], row["ts"], int(row["topic_id"]))
+        script: dict = {}
+        summary: dict = {}
+        if render_dir is None:
+            skipped_missing_script += 1
+        else:
+            for name, target in (("script.json", "script"), ("summary.json", "summary")):
+                p = render_dir / name
+                if not p.exists():
+                    continue
+                try:
+                    val = json.loads(p.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError) as e:
+                    print(f"[sync-yt-videos] warn {row['external_id']}: bad {name} ({e})")
+                    continue
+                if target == "script":
+                    script = val
+                else:
+                    summary = val
+
         topic = topics.get(int(row["topic_id"]))
+        summary_topic = summary.get("topic") if isinstance(summary.get("topic"), dict) else None
+        if not topic and summary_topic and summary_topic.get("id") == int(row["topic_id"]):
+            topic = summary_topic
+        if summary_topic and summary_topic.get("pool") == "h1":
+            h1_total += 1
+
         if not topic:
             # Topic was removed from the pool (e.g. operator narrowed the
             # viral pool for niche cohesion per Y44). Video stays alive on
@@ -399,35 +455,18 @@ def main() -> int:
                 print(f"[sync-yt-videos] off-pool {row['external_id']}: bootstrapped minimal JSON (topic_id={row['topic_id']} not in pool, target_pseo_slug=null per Y44)")
             skipped_missing_topic += 1
             continue
-        render_dir = _find_render_dir(row["channel"], row["ts"], int(row["topic_id"]))
-        script: dict = {}
-        summary: dict = {}
-        if render_dir is None:
-            skipped_missing_script += 1
-        else:
-            for name, target in (("script.json", "script"), ("summary.json", "summary")):
-                p = render_dir / name
-                if not p.exists():
-                    continue
-                try:
-                    val = json.loads(p.read_text(encoding="utf-8"))
-                except (OSError, json.JSONDecodeError) as e:
-                    print(f"[sync-yt-videos] warn {row['external_id']}: bad {name} ({e})")
-                    continue
-                if target == "script":
-                    script = val
-                else:
-                    summary = val
 
         # Pass the runtime-enriched topic (from summary) to the matcher so
         # VIRAL/pool flags actually take effect.
-        if summary and isinstance(summary.get("topic"), dict):
-            topic = {**topic, **summary["topic"]}
+        if summary_topic:
+            topic = {**topic, **summary_topic}
         entry = _build_entry(row, topic, script, summary, yt_meta.get(row["external_id"]))
         out_path = VIDEOS_DIR / f"{entry['id']}.json"
         out_path.write_text(json.dumps(entry, indent=2, ensure_ascii=False), encoding="utf-8")
         written += 1
         link_target = entry.get("target_pseo_slug") or "(none)"
+        if topic.get("pool") == "h1" and entry.get("target_pseo_slug"):
+            h1_attached += 1
         print(f"[sync-yt-videos] wrote {entry['id']}: '{entry['title'][:50]}' → pseo:{link_target}")
 
     # Final orphan sweep — any JSON whose video_id is NOT in our publish_log
@@ -448,6 +487,7 @@ def main() -> int:
         f"{skipped_missing_script} fell back to topic-only metadata "
         f"({datetime.now(timezone.utc).isoformat()})"
     )
+    print(f"[sync-yt-videos] h1: attached {h1_attached}/{h1_total}")
     return 0
 
 

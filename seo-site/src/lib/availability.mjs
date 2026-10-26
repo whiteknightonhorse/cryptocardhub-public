@@ -73,17 +73,38 @@ export function availabilityNote(card, today = new Date()) {
   return `Last verified: ${card.verified} (${age} days ago)`;
 }
 
+/** slug -> {name, kind}: the join table between our URLs and the issuer's
+ *  jurisdiction names. Not derivable — `best-crypto-card-georgia` is the US
+ *  state, `best-crypto-card-uk` is "United Kingdom". */
+export const SLUG_JURISDICTIONS = AVAILABILITY.slug_jurisdictions || {};
+
 /**
  * The union of every jurisdiction any published card has an opinion about,
  * sorted. Countries and US states are kept in separate tables — "Georgia" is
  * both a country and a US state and merging them is how a page starts lying.
+ *
+ * Three YAML-sourced sets, and the third is load-bearing. Under an allow-list
+ * the rows are the countries the issuer NAMES, so India — absent from the
+ * issuer's page, and the single highest-converting object on this site — would
+ * silently drop out of the matrix along with its link to the page that names
+ * what an Indian reader CAN get. That is the Y50 money bug re-opening through
+ * a shape change. So every jurisdiction we publish an honest "not available
+ * here" page about stays a row, and it stays a row because the YAML says so,
+ * not because the template does.
  */
 export function jurisdictions(cards) {
   const countries = new Set();
   const states = new Set();
   for (const c of cards) {
     for (const x of c.countries || []) countries.add(x);
-    for (const x of c.us_states_blocked || []) states.add(x);
+    for (const x of c.countries_explicit_no || []) countries.add(x);
+    for (const x of c.countries_document_blocked || []) countries.add(x);
+    for (const x of c.us_states || []) states.add(x);
+    for (const x of c.us_states_explicit_no || []) states.add(x);
+    for (const x of c.us_states_blocked || []) states.add(x);   // blocklist cards
+  }
+  for (const { name, kind } of Object.values(SLUG_JURISDICTIONS)) {
+    (kind === 'us_state' ? states : countries).add(name);
   }
   return {
     countries: [...countries].sort(),
@@ -93,24 +114,62 @@ export function jurisdictions(cards) {
 
 /**
  * Verdict for one (card, jurisdiction) cell.
- *   blocklist  -> listed means NOT available
- *   allowlist  -> listed means available
+ *   blocklist  -> listed means NOT available, absent means available
+ *   allowlist  -> listed means available, ABSENT MEANS NOT (default-deny)
  * A card whose mode we do not understand returns null and the cell renders as
  * "not stated" rather than guessing in the issuer's favour.
+ *
+ * `kind` picks the list, never the rule. The state branch used to hard-code
+ * "states are always a blocklist"; the issuer publishes an allow-list of 31 US
+ * jurisdictions now, and under that hard-coded rule Mississippi read as
+ * "Available".
+ *
+ * COUNTRY BRANCH, T-0142-08: `countries: null` and `countries: []` are two
+ * different facts, not two spellings of the same one. `null` means the issuer
+ * publishes no global allow-list at all (Plasma One: "a growing number of
+ * countries ... determined by our card issuing partner") — a country we have
+ * no opinion on reads "Not stated", never "Not available". `[]` (or a real
+ * list) is default-deny as usual: a name absent from a STATED list is refused.
+ * `countries_explicit_no` / `countries_document_blocked` are the issuer's own
+ * named refusals and win over both — a country the issuer explicitly blocks
+ * is "Not available" even while the general allow-list stays unpublished.
  */
 export function cellFor(card, name, kind = 'country') {
-  const list = kind === 'state' ? (card.us_states_blocked || []) : (card.countries || []);
-  const listed = list.includes(name);
-  if (kind === 'state') return listed ? false : true;   // states are always a blocklist
-  if (card.mode === 'blocklist') return !listed;
-  if (card.mode === 'allowlist') return listed;
+  const allow = card.mode === 'allowlist';
+  if (kind === 'state') {
+    const list = (allow ? card.us_states : card.us_states_blocked) || [];
+    const listed = list.includes(name);
+    if (card.mode === 'blocklist') return !listed;
+    if (allow) return listed;
+    return null;
+  }
+  const blocked = [card.countries_explicit_no, card.countries_document_blocked]
+    .some((l) => Array.isArray(l) && l.includes(name));
+  if (blocked) return false;
+  if (card.mode === 'blocklist') return !(card.countries || []).includes(name);
+  if (allow) {
+    if (card.countries === null || card.countries === undefined) return null;
+    return card.countries.includes(name);
+  }
   return null;
 }
 
-/** slug of the honest "not available here" page for a country, when we have one.
- *  Read from unavailable_slugs so the matrix links to the real alternative
- *  instead of dead-ending the reader on a red cell. */
+/** slug of the honest "not available here" page for a jurisdiction, when we
+ *  have one, so the matrix links the real alternative instead of dead-ending
+ *  the reader on a red cell. Read from the explicit map, not re-slugified:
+ *  a second name->slug implementation is the defect this project has already
+ *  paid for four times. */
 export function geoSlugFor(name) {
-  const want = `best-crypto-card-${name.toLowerCase().replace(/\s+/g, '-')}`;
-  return (AVAILABILITY.unavailable_slugs || []).includes(want) ? want : null;
+  const published = new Set(AVAILABILITY.unavailable_slugs || []);
+  for (const [slug, j] of Object.entries(SLUG_JURISDICTIONS)) {
+    if (j.name === name && published.has(slug)) return slug;
+  }
+  return null;
+}
+
+/** True when any published card states availability as an allow-list. Drives
+ *  the one sentence the page says about absent jurisdictions — that sentence
+ *  is a fact about the issuer's format and must not live in the template. */
+export function defaultDeny(cards) {
+  return cards.some((c) => c.mode === 'allowlist');
 }

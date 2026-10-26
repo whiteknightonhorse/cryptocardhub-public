@@ -316,123 +316,15 @@ def fix_scalar_line(line: str, stats: dict) -> str:
     return fix_text(line, stats)
 
 
-def add_verified(text: str) -> tuple[str, bool]:
-    """Give a corrected page the date field it never had.
-
-    Only pages this run actually corrected get one: a check really did happen
-    on them. Back-filling dates onto pages nobody verified would manufacture
-    freshness, which is the very thing the visible date exists to prevent — so
-    the other 112 dateless pages are left alone and reported to the operator.
-    """
-    m = re.search(r'^(snapshot_bullets:\s*)(\[.*\])\s*$', text, re.M)
-    if not m:
-        return text, False
-    try:
-        bullets = json.loads(m.group(2))
-    except json.JSONDecodeError:
-        return text, False
-    if not isinstance(bullets, list):
-        return text, False
-    bullets.append(f"**Last verified:** {TODAY}")
-    return text[:m.start()] + m.group(1) + json.dumps(bullets) + text[m.end():], True
-
-
-def bump_verified(text: str) -> tuple[str, bool]:
-    """The visible check date, only on pages this run actually corrected."""
-    new, n = re.subn(r"(\*\*Last verified:\*\*\s*)\d{4}-\d{2}-\d{2}",
-                     r"\g<1>" + TODAY, text)
-    if n == 0:
-        new, n = re.subn(r"(Last verified:\s*)\d{4}-\d{2}-\d{2}", r"\g<1>" + TODAY, new)
-    return new, n > 0
-
-
-def process(path: Path, stats: dict) -> tuple[str, str]:
-    before = path.read_text(encoding="utf-8")
-    found = len(OCCURRENCE.findall(before))
-    stats["found"] += found
-
-    lines = before.split("\n")
-    out = []
-    for line in lines:
-        if not OCCURRENCE.search(line):
-            out.append(line)
-            continue
-        nl = fix_frontmatter_line(line, stats)
-        if nl == line:
-            nl = fix_scalar_line(line, stats)
-        out.append(nl)
-    after = "\n".join(out)
-
-    if after != before:
-        after, bumped = bump_verified(after)
-        if not bumped:
-            after, added = add_verified(after)
-            stats["date_added"] = stats.get("date_added", 0) + int(added)
-            if not added:
-                stats["no_date_field"].append(path.stem)
-        stats["date_bumped"] += int(bumped)
-    return before, after
-
+# add_verified / bump_verified / load_table / apply_table used to live here in
+# full. They now live in scripts/corpus_edit.py, with the `--expect` ceiling
+# attached to them, and this script imports them — one implementation, per the
+# rule the 2026-08-13 accident bought (.claude/CLAUDE.md, THE ACCIDENT).
+sys.path.insert(0, str(ROOT / "scripts"))
+from corpus_edit import (  # noqa: E402 -- LAW #ONE-PLACE canonical table editor
+    add_verified, apply_table, bump_verified, load_table)
 
 TABLE = ROOT / "scripts" / "promo-replacements.tsv"
-
-
-def load_table() -> list[tuple[str, str]]:
-    """Hand-written exact replacements. Order is preserved: longer, more
-    specific entries should come first in the file so a shorter one cannot
-    consume part of a sentence a longer one was written for."""
-    if not TABLE.exists():
-        return []
-    out = []
-    for i, line in enumerate(TABLE.read_text(encoding="utf-8").split("\n"), 1):
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        parts = line.split("\t")
-        if len(parts) < 2:
-            print(f"[table] line {i}: no tab, skipped", file=sys.stderr)
-            continue
-        out.append((parts[0], parts[1]))
-    return out
-
-
-def apply_table(files: list[Path], table: list[tuple[str, str]],
-                write: bool) -> dict:
-    """Apply exact replacements. Refuse anything ambiguous."""
-    stat = {"applied": 0, "files": 0, "unused": [], "ambiguous": [], "dated": 0}
-    used = set()
-    for f in files:
-        before = f.read_text(encoding="utf-8")
-        after = before
-        for old_raw, new_raw in table:
-            for old, new in ((old_raw, new_raw),
-                             (json.dumps(old_raw)[1:-1], json.dumps(new_raw)[1:-1])):
-                if after.count(old):
-                    break
-            n = after.count(old)
-            if n == 0:
-                continue
-            if n > 1:
-                # Two identical sentences in one file are usually the page body
-                # and its JSON-LD twin, and both should change — but "usually"
-                # is not a licence, so it is reported and replaced everywhere
-                # only when the replacement is unambiguous (no partial match).
-                stat["ambiguous"].append((f.stem, old[:60], n))
-            after = after.replace(old, new)
-            stat["applied"] += n
-            used.add(old_raw)
-        if after == before:
-            continue
-        after, bumped = bump_verified(after)
-        if not bumped:
-            after, added = add_verified(after)
-            stat["dated"] += int(added)
-        else:
-            stat["dated"] += 1
-        stat["files"] += 1
-        if write:
-            f.write_text(after, encoding="utf-8")
-    stat["unused"] = [o[:70] for o, _ in table if o not in used]
-    return stat
 
 
 def page_list(which: str) -> list[Path]:
@@ -471,7 +363,7 @@ def main() -> int:
         # applied" as though the strings were wrong.
         files = sorted(CONTENT.glob("*.md"))
         print(f"table mode: scanning all {len(files)} pages, not only promo pages")
-        table = load_table()
+        table = load_table(TABLE) if TABLE.exists() else []
         print(f"literal replacements loaded: {len(table)}")
         st = apply_table(files, table, a.write)
         print(f"  replacements applied : {st['applied']}")

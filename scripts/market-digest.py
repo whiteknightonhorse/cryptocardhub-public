@@ -39,6 +39,9 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
+
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "seo-site" / "src" / "content" / "pseo"
 LOG_DIR = ROOT / "logs" / "pseo"
@@ -56,6 +59,20 @@ def _checker():
     sys.modules["availability_check"] = mod
     spec.loader.exec_module(mod)
     return mod
+
+
+def _changelog_link() -> str | None:
+    """Link to E-16's changelog page, but only if it actually exists — an
+    empty event ledger means no changelog page is published, and a link to a
+    URL that doesn't exist is a dead internal link (G20)."""
+    spec = importlib.util.spec_from_file_location(
+        "build_changelog", ROOT / "scripts" / "build-changelog.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["build_changelog"] = mod
+    spec.loader.exec_module(mod)
+    if not (CONTENT / f"{mod.SLUG}.md").is_file():
+        return None
+    return f"/{mod.BUCKET}/{mod.SLUG}/"
 
 
 def slug_for(month: str) -> str:
@@ -120,6 +137,11 @@ def build(month: str, rows: list[dict]) -> dict:
                            f"{r['summary']}")
 
     body = [f"## What changed in {pretty}", ""]
+    link = _changelog_link()
+    if link:
+        body.append("For every verified change to ether.fi Cash's own rates "
+                    f"and terms, see the full [ether.fi Cash changelog]({link}).")
+        body.append("")
     for kind, items in by_kind.items():
         body.append(f"### {HUMAN.get(kind, kind)}")
         body.append("")
@@ -188,6 +210,13 @@ def main() -> int:
                     help="YYYY-MM (default: the month that just ended)")
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args()
+
+    # E-02: checked before EVERYTHING else, including the no-write preview
+    # mode -- see the same check in pseo-generate.py's _main() for why.
+    if not pseo_enabled():
+        print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
+        print("[digest] skip: pseo_disabled (PSEO_ENABLED=false)")
+        return 0
 
     if a.month:
         month = a.month

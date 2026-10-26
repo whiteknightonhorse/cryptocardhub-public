@@ -11,6 +11,7 @@ Everything here is written from the side of REFUSING to publish.
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -140,3 +141,117 @@ def test_slugs_are_cut_at_a_word_boundary():
     assert len(slug) <= 60
     assert not slug.endswith("-")
     assert slug.split("-")[-1] in q.lower().replace("?", "").replace(",", "").split()
+
+
+# --- --only-if-consumed (Fable 2026-09-14, A4 step 5) -----------------------
+#
+# The stall's immediate cause: cohort 1 finished printing (20/20 items either
+# published or refused) on 2026-09-05 and nothing ever opened cohort 2 — the
+# tap (tap_is_open, faq-verdict.py) answers a DIFFERENT question ("has this
+# cohort been judged at +14") and had been open since 09-07. Two separate
+# gates, only one of them wired to a cron.
+
+def test_cohort_is_consumed_true_with_no_cohorts_yet():
+    assert fc.cohort_is_consumed({"cohorts": []}) is True
+    assert fc.cohort_is_consumed({}) is True
+
+
+def test_cohort_is_consumed_false_while_items_remain_open():
+    led = {"cohorts": [{"items": [{"published": {"path": "a"}}, {}]}]}
+    assert fc.cohort_is_consumed(led) is False
+
+
+def test_cohort_is_consumed_true_when_every_item_is_published_or_refused():
+    """The exact live shape of cohort 1 on 2026-09-14: 20/20 done, tap open
+    since 09-07 — this is the case that must open cohort 2."""
+    led = {"cohorts": [{"items": [{"published": {"path": "a"}}] * 19 +
+                       [{"refused": {"reasons": ["x"]}}]}]}
+    assert fc.cohort_is_consumed(led) is True
+
+
+def test_only_if_consumed_refuses_to_open_a_second_cohort_while_the_first_has_open_items(
+    tmp_path, monkeypatch
+):
+    ledger = tmp_path / "faq-cohorts.json"
+    ledger.write_text(json.dumps({"cohorts": [{
+        "opened": "2026-09-01", "verdict_due_14": "2026-09-15", "verdict_due_28": "2026-09-29",
+        "verdict_14": {"status": "unmeasurable"},
+        "items": [{"question": "Q1?", "slug": "q1", "parent": "/help/x/"},   # still open
+                  {"question": "Q2?", "slug": "q2", "parent": "/help/x/",
+                   "published": {"on": "2026-09-01", "path": "seo-site/src/content/pseo/q2.md"}}],
+    }]}), encoding="utf-8")
+    monkeypatch.setattr(fc, "LEDGER", ledger)
+    monkeypatch.setattr(fc, "select", lambda size, writer_sha=None: [])
+    import sys as _sys
+    monkeypatch.setattr(_sys, "argv",
+                        ["faq-children.py", "--cohort", "20", "--write", "--only-if-consumed"])
+    rc = fc.main()
+    assert rc == 1
+    led = json.loads(ledger.read_text(encoding="utf-8"))
+    assert len(led["cohorts"]) == 1     # no second cohort was appended
+
+
+def test_only_if_consumed_opens_a_second_cohort_once_the_first_is_fully_consumed(
+    tmp_path, monkeypatch
+):
+    ledger = tmp_path / "faq-cohorts.json"
+    ledger.write_text(json.dumps({"cohorts": [{
+        "opened": "2026-08-13", "verdict_due_14": "2026-08-27", "verdict_due_28": "2026-09-10",
+        "verdict_14": {"status": "unmeasurable"},
+        "items": [{"question": "Q1?", "slug": "q1", "parent": "/help/x/",
+                   "published": {"on": "2026-09-01", "path": "a.md"}}],
+    }]}), encoding="utf-8")
+    monkeypatch.setattr(fc, "LEDGER", ledger)
+    monkeypatch.setattr(fc, "select", lambda size, writer_sha=None: [{"question": "Q2?", "parent": "/help/y/",
+                                                     "parent_fetches": 5, "slug": "q2"}])
+    import sys as _sys
+    monkeypatch.setattr(_sys, "argv",
+                        ["faq-children.py", "--cohort", "20", "--write", "--only-if-consumed"])
+    rc = fc.main()
+    assert rc == 0
+    led = json.loads(ledger.read_text(encoding="utf-8"))
+    assert len(led["cohorts"]) == 2
+    assert led["cohorts"][1]["items"][0]["slug"] == "q2"
+
+
+# --- void (ruling-2 Task B) -------------------------------------------------
+
+def _led(tmp_path, monkeypatch, cohort):
+    p = tmp_path / "faq-cohorts.json"
+    p.write_text(json.dumps({"cohorts": [cohort]}), encoding="utf-8")
+    monkeypatch.setattr(fc, "LEDGER", p)
+    return p
+
+
+def test_void_refuses_a_judged_cohort(tmp_path, monkeypatch):
+    import pytest
+    p = _led(tmp_path, monkeypatch, {"items": [], "verdict_14": {"status": "fail"}})
+    with pytest.raises(ValueError):
+        fc.void_cohort(1, "r")
+    assert "voided" not in json.loads(p.read_text(encoding="utf-8"))["cohorts"][0]
+
+
+def test_void_refuses_twice(tmp_path, monkeypatch):
+    import pytest
+    _led(tmp_path, monkeypatch, {"items": []})
+    fc.void_cohort(1, "r")
+    with pytest.raises(ValueError):
+        fc.void_cohort(1, "r")
+
+
+def test_a_voided_cohort_reads_as_consumed_and_keeps_its_rows(tmp_path, monkeypatch):
+    p = _led(tmp_path, monkeypatch, {"items": [{"slug": "a"}, {"slug": "b"}]})
+    led = json.loads(p.read_text(encoding="utf-8"))
+    assert fc.cohort_is_consumed(led) is False
+    rec = fc.void_cohort(1, "manufactured fail")
+    led = json.loads(p.read_text(encoding="utf-8"))
+    assert rec["reason"] == "manufactured fail"
+    assert rec["ruling"] == "CCH-FAQ-G36-0929.ruling-2"
+    assert len(led["cohorts"][0]["items"]) == 2          # void is not deletion
+    assert fc.cohort_is_consumed(led) is True
+
+
+def test_retryable_g36_refusal_without_writer_sha():
+    old = {"reasons": ["unbacked_number: $40"]}           # cohort-3 shape, no gate/writer_sha
+    assert fc._retryable(old, "abc123") is True
+    assert fc._retryable(old, None) is False

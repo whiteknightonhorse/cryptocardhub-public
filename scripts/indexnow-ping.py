@@ -17,6 +17,8 @@ So:
   * the first run submits NOTHING. With no prior state, "changed" is not
     knowable, and guessing means guessing "everything".
   * later runs submit exactly the URLs whose content file's hash moved.
+  * redirects.map sources new relative to the state ("__redirects__") are
+    submitted too, so a retired URL is announced once.
   * a run that would submit more than MAX_URLS refuses and says why.
 
 State lives in logs/aeo/indexnow-state.json (content hashes, not mtimes —
@@ -42,6 +44,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "seo-site" / "src" / "content" / "pseo"
 PUBLIC = ROOT / "seo-site" / "public"
 STATE = ROOT / "logs" / "aeo" / "indexnow-state.json"
+REDIRECTS = ROOT / "seo-site" / "redirects.map"
 SITE = "https://defycard.com"
 ENDPOINT = "https://api.indexnow.org/indexnow"
 
@@ -99,6 +102,25 @@ def changed_urls(current: dict[str, str], previous: dict[str, str] | None) -> li
     return sorted(u for u, h in current.items() if previous.get(u) != h)
 
 
+def redirect_map() -> dict[str, str]:
+    """source -> target (410 rows keep "410") from redirects.map."""
+    out: dict[str, str] = {}
+    if REDIRECTS.exists():
+        for line in REDIRECTS.read_text(encoding="utf-8").splitlines():
+            parts = line.split()
+            if len(parts) == 2 and not line.lstrip().startswith("#"):
+                out[parts[0]] = parts[1]
+    return out
+
+
+def new_redirect_urls(current: dict[str, str], previous: dict | None) -> list[str]:
+    """Retired URLs not yet announced. A state without "__redirects__" (first
+    run after this law) records and submits nothing, same rule as content."""
+    if previous is None or "__redirects__" not in previous:
+        return []
+    return sorted(SITE + s for s in current if s not in previous["__redirects__"])
+
+
 def load_state() -> dict[str, str] | None:
     if not STATE.exists():
         return None
@@ -139,6 +161,11 @@ def main() -> int:
     previous = load_state()
     current = current_hashes()
     urls = changed_urls(current, previous)
+    rmap = redirect_map()
+    # Retired URLs: IndexNow also covers deleted/redirected URLs; the engine
+    # re-fetches and sees the 301/410.
+    urls = sorted(set(urls) | set(new_redirect_urls(rmap, previous)))
+    current = {**current, "__redirects__": rmap}  # type: ignore[dict-item]
 
     if previous is None:
         print(f"[indexnow] first run — recording {len(current)} hashes, submitting nothing")
@@ -152,6 +179,8 @@ def main() -> int:
     if len(urls) > 20:
         print(f"    ... and {len(urls) - 20} more")
     if not urls:
+        if current != previous and not a.dry_run:
+            save_state(current)   # record the redirect map even when nothing is sent
         return 0
     if len(urls) > MAX_URLS:
         print(f"[indexnow] REFUSING: {len(urls)} > MAX_URLS={MAX_URLS}. That is a "

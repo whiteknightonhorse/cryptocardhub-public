@@ -18,7 +18,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  publishedCards, jurisdictions, cellFor, availabilityNote,
+  publishedCards, jurisdictions, cellFor, availabilityNote, defaultDeny,
 } from '../src/lib/availability.mjs';
 import { resolveAffiliate, primaryPartnerFor } from '../src/lib/affiliates.mjs';
 
@@ -271,11 +271,16 @@ async function buildMatrixMarkdown() {
     }
     if (usStates.length) {
       L.push('', '## By US state', '');
-      L.push('States not listed are supported by every card in this table.', '');
+      L.push(defaultDeny(cards)
+        ? 'Issuers on this page publish allow-lists: a jurisdiction that is not listed cannot apply.'
+        : 'Issuers on this page publish blocked-jurisdiction lists, so an absent entry means "not blocked".', '');
       L.push(`| US state | ${cards.map((c) => c.name).join(' | ')} |`);
       L.push(`|---|${cards.map(() => '---').join('|')}|`);
       for (const name of usStates) {
-        const cells = cards.map((c) => (cellFor(c, name, 'state') ? 'Available' : 'Not available'));
+        const cells = cards.map((c) => {
+          const v = cellFor(c, name, 'state');
+          return v === null ? 'Not stated' : (v ? 'Available' : 'Not available');
+        });
         L.push(`| ${name} | ${cells.join(' | ')} |`);
       }
     }

@@ -138,6 +138,28 @@ def test_a_thin_page_is_excluded_not_padded():
         longform.build_script({"slug": "thin", "intro_paragraph": "Two words."})
 
 
+def test_render_one_always_uses_edge_never_elevenlabs(tmp_path, monkeypatch):
+    """T-0139 ruling-1 Q4: NARRATION_WORDS_PER_SECOND and the [185, 260]s gate
+    are measured on the pinned Edge voice — TTS_PROVIDER=elevenlabs (E-19,
+    live for Shorts) must not steer long-form onto an unmeasured voice, and
+    must not touch the shared ElevenLabs quota at all."""
+    monkeypatch.setenv("TTS_PROVIDER", "elevenlabs")
+    monkeypatch.setattr(longform, "out_dir", lambda slug, day=None: tmp_path / slug)
+    assert not hasattr(longform, "tts_eleven"), (
+        "longform must not import tts_eleven at all"
+    )
+    seen = {}
+    orig = longform.tts_edge.synthesize
+
+    def _spy(*a, **k):
+        seen["voice"] = k.get("voice")
+        return orig(*a, **k)
+
+    monkeypatch.setattr(longform.tts_edge, "synthesize", _spy)
+    longform.render_one(SLUG, dry_run=True, day="2026-08-11")
+    assert seen["voice"] == longform.PILOT_VOICE
+
+
 def test_short_narration_is_a_hard_failure(tmp_path, monkeypatch):
     """No 'accept short' branch: that is exactly how a long-form silently
     becomes a Short."""

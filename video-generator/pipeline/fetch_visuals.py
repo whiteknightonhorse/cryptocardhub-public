@@ -50,6 +50,24 @@ MIN_REAL = 2
 _MAX_PAGES = 5
 
 
+class NoVisualsError(RuntimeError):
+    """Fewer than MIN_REAL real assets were found, and the cause (`_zero_cause`)
+    says it will happen again on retry — `.cause` lets a caller (T-0140) tell a
+    page property (query structurally unfindable) apart from a machine failure
+    (`all visual providers failed`, still a bare RuntimeError, never this class)."""
+
+    def __init__(self, message: str, cause: str | None) -> None:
+        super().__init__(message)
+        self.cause = cause
+
+
+# T-0140: only `empty_results` is a page property — every provider answered,
+# and the query is fixed by the page's own frontmatter, so retrying it changes
+# nothing. `all_deduped` (supply, cures itself in <=7d) and the machine causes
+# (`provider_error`, `non_200`, `downloads_failed`, `unknown`) are transient.
+PAGE_PROPERTY_CAUSES = frozenset({"empty_results"})
+
+
 def _pexels_key() -> str | None:
     return os.environ.get("PEXELS_API_KEY")
 
@@ -324,9 +342,10 @@ def fetch(query: str, want: int, out_dir: Path,
             "and ship a video of solid-colour slides"
         )
     if len(out) < need:
-        raise RuntimeError(
+        raise NoVisualsError(
             f"only {len(out)} real asset(s) for {query!r} (need {need}); "
             f"cause={cause}. Refusing the slot — a padded render publishes "
-            f"solid-colour slides, which is what Y58 was written to stop."
+            f"solid-colour slides, which is what Y58 was written to stop.",
+            cause,
         )
     return out

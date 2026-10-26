@@ -15,8 +15,9 @@
 import '../styles/tokens.css';
 import '../styles/fonts.css';
 import '../styles/global.css';
+import entity from '../data/entity.json';
 import WebMCP from '../components/WebMCP.astro';
-import { partnerUrl, DEFAULT_PARTNER, PARTNER_HOST_MAP } from '../lib/affiliates.mjs';
+import { partnerUrl, DEFAULT_PARTNER, PARTNER_HOST_MAP, NO_CARD_CTA } from '../lib/affiliates.mjs';
 
 export interface Props {
   title: string;
@@ -65,8 +66,12 @@ const {
 } = Astro.props;
 
 const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const ogImageAbs = ogImage ? new URL(ogImage, siteOrigin).toString() : undefined;
 const canonicalUrl = canonical || new URL(Astro.url.pathname, siteOrigin).toString();
-const affiliateUrl = partnerUrl(affiliatePartner);
+// T-0142-15: `affiliatePartner === 'none'` — no card this site tracks can
+// currently be issued to this page's readers. Route the sticky CTA to the
+// availability matrix instead of throwing on `partnerUrl('none')`.
+const affiliateUrl = affiliatePartner === 'none' ? NO_CARD_CTA : partnerUrl(affiliatePartner);
 const twitterHandle = import.meta.env.PUBLIC_TWITTER_HANDLE || '';
 const year = new Date().getFullYear();
 
@@ -89,7 +94,7 @@ const globalGraph = {
       name: 'DefyCard',
       url: siteOrigin,
       logo: `${siteOrigin}/favicon.svg`,
-      sameAs: [],
+      sameAs: entity.sameAs,
     },
     {
       '@type': 'WebSite',
@@ -110,6 +115,13 @@ const globalGraph = {
     },
   ],
 };
+
+const sectionLinks = [
+  ['/hub/', 'Crypto card hubs'], ['/compare/', 'Card-vs-card comparisons'], ['/reviews/', 'Card reviews'],
+  ['/how-to/', 'How-to guides'], ['/for/', 'Cards by use case'], ['/geo/', 'Cards by country'],
+  ['/tools/', 'Calculators'], ['/learn/', 'Learn'], ['/help/', 'Troubleshooting'], ['/news/', 'News'],
+  ['/faq/', 'FAQ'], ['/videos/', 'Videos'], ['/geo/availability-matrix/', 'Availability matrix'],
+];
 
 const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
   '@context': 'https://schema.org',
@@ -134,6 +146,7 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
         <script is:inline set:html={`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
+          if (navigator.webdriver) { window['ga-disable-${gaId}'] = true; }
           gtag('js', new Date());
           gtag('config', '${gaId}');
         `}></script>
@@ -143,6 +156,7 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" type="application/rss+xml" title="DefyCard" href="/rss.xml" />
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     <meta name="author" content="DefyCard Editorial" />
@@ -153,7 +167,7 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="DefyCard" />
     <meta property="og:type" content={ogType} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImageAbs && <meta property="og:image" content={ogImageAbs} />}
     <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
     {twitterHandle && <meta name="twitter:site" content={twitterHandle} />}
     {twitterHandle && <meta name="twitter:creator" content={twitterHandle} />}
@@ -230,6 +244,20 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
       </div>
     )}
 
+    {breadcrumbs && breadcrumbs.length > 0 && (
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol>
+          {breadcrumbs.map((b, i) => (
+            <li>
+              {i < breadcrumbs.length - 1
+                ? <a href={new URL(b.url, 'https://defycard.com').pathname}>{b.name}</a>
+                : <span aria-current="page">{b.name}</span>}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+
     <!-- 3. MAIN CONTENT -->
     <main>
       <slot />
@@ -251,7 +279,10 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
           <a href="/privacy/">Privacy</a>
           <a href="/terms/">Terms</a>
           <a href="/contact/">Contact</a>
-          <a href="/sitemap-index.xml">Sitemap</a>
+          <a href="/sitemap.xml">Sitemap</a>
+        </nav>
+        <nav aria-label="Sections">
+          {sectionLinks.map(([href, label]) => <a href={href}>{label}</a>)}
         </nav>
         <div class="copyright">
           &copy; {year} DefyCard. Editorial crypto debit card comparisons. Content is for informational purposes only.
@@ -260,12 +291,21 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
     </footer>
 
     <!-- 5. STICKY MOBILE CTA (≤768px only) -->
-    <aside class="affiliate-sticky-bar" aria-label="Get your DefyCard">
-      <a href={affiliateUrl} rel="sponsored noopener" target="_blank">
-        Get your DefyCard
-        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-      </a>
-    </aside>
+    {affiliatePartner === 'none' ? (
+      <aside class="affiliate-sticky-bar" aria-label="See where each card is available">
+        <a href={affiliateUrl}>
+          See where each card is available
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </aside>
+    ) : (
+      <aside class="affiliate-sticky-bar" aria-label="Get your DefyCard">
+        <a href={affiliateUrl} rel="sponsored noopener" target="_blank">
+          Get your DefyCard
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </aside>
+    )}
 
     <!-- 6. WebMCP — exposes site tools to AI agents (no-op in unsupported browsers) -->
     <WebMCP />
@@ -306,6 +346,7 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
     -->
     <script is:inline define:vars={{ partnerHostMap: PARTNER_HOST_MAP }}>
       document.addEventListener('click', function (e) {
+        if (!e.isTrusted) return;
         var link = e.target && e.target.closest ? e.target.closest('a') : null;
         if (!link) return;
         var href = link.getAttribute('href') || '';

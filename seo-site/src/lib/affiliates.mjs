@@ -110,6 +110,14 @@ export const PARTNER_HOST_MAP = Object.fromEntries(
 /** pSEO slugs whose jurisdiction cannot get ether.fi (config/availability.yaml). */
 export const UNAVAILABLE_SLUGS = new Set(avail?.unavailable_slugs || []);
 
+/**
+ * T-0142-15: where `primary_partner === 'none'` — no card this site tracks
+ * can currently be issued to the page's readers (e.g. india, turkey). The
+ * generic CTAs route here instead of to any partner, so the page never sends
+ * a reader to a card they cannot get.
+ */
+export const NO_CARD_CTA = '/geo/availability-matrix/';
+
 export function partnerUrl(slug) {
   const p = PARTNERS[slug];
   if (!p) throw new Error(`[affiliates] unknown partner "${slug}" — not in config/affiliates.yaml`);
@@ -140,10 +148,14 @@ const TAGGED = /<<AFFILIATE_URL:([a-z0-9_-]+)>>/gi;
  */
 export function resolveAffiliate(text, primary = DEFAULT_PARTNER) {
   if (typeof text !== 'string' || !text) return text;
-  return text
-    .replace(TAGGED, (_, slug) => partnerUrl(slug.toLowerCase()))
-    .split(BARE)
-    .join(partnerUrl(primary));
+  const tagged = text.replace(TAGGED, (_, slug) => partnerUrl(slug.toLowerCase()));
+  // Lazy: only resolve the bare placeholder's URL if it is actually present.
+  // `.join(partnerUrl(primary))` used to run unconditionally as a `.join()`
+  // argument, so ANY call with primary === 'none' (a page with no obtainable
+  // card, T-0142-15) threw even when the text carried no placeholder at all.
+  if (!tagged.includes(BARE)) return tagged;
+  const url = primary === 'none' ? NO_CARD_CTA : partnerUrl(primary);
+  return tagged.split(BARE).join(url);
 }
 
 /**

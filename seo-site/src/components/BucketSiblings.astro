@@ -7,10 +7,11 @@
  *   On tablet:   2-col grid, all equal
  *   On mobile:   1-col stack
  *
- * Picks N random siblings from same bucket via deterministic shuffle seeded
- * by the current entry's slug — link graph stable across builds.
+ * Picks the N topically closest pages (Jaccard over keyword tokens, all buckets)
+ * via lib/related.mjs; same-bucket seeded shuffle fills any shortfall.
  */
 import { getCollection } from 'astro:content';
+import { pickRelated } from '../lib/related.mjs';
 
 export interface Props {
   bucket: string;
@@ -26,20 +27,6 @@ const {
   heading,
 } = Astro.props;
 
-const bucketDisplayName: Record<string, string> = {
-  hub: 'Guides',
-  compare: 'Comparisons',
-  reviews: 'Card Reviews',
-  geo: 'Country Guides',
-  tools: 'Tools',
-  'how-to': 'How-To',
-  for: 'Use Cases',
-  learn: 'Education',
-  help: 'Troubleshooting',
-  news: 'News',
-  faq: 'FAQ',
-};
-
 const bucketChip: Record<string, string> = {
   hub: 'GUIDE',
   compare: 'COMPARE',
@@ -54,23 +41,10 @@ const bucketChip: Record<string, string> = {
   faq: 'FAQ',
 };
 
-function seededShuffle<T>(arr: T[], seed: string): T[] {
-  let s = 0;
-  for (const c of seed) s = (s * 31 + c.charCodeAt(0)) >>> 0;
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    s = (s * 1103515245 + 12345) >>> 0;
-    const j = s % (i + 1);
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-const siblings = (await getCollection('pseo'))
-  .filter((e) => e.data.bucket === bucket && e.data.slug !== excludeSlug);
-
-const picked = seededShuffle(siblings, excludeSlug).slice(0, count);
-const headingText = heading || `More from ${bucketDisplayName[bucket] || bucket}`;
+const all = await getCollection('pseo');
+const current = all.find((e) => e.data.bucket === bucket && e.data.slug === excludeSlug);
+const picked = current ? pickRelated(current, all, count) : [];
+const headingText = heading || 'Related reading';
 ---
 {picked.length > 0 && (
   <section class="bucket-siblings" aria-labelledby="siblings-heading">

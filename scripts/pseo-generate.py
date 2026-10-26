@@ -25,7 +25,7 @@ import re
 import sys
 import time
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -36,6 +36,15 @@ except ImportError:  # pragma: no cover
     urllib = None  # type: ignore
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from slug_lib import slugify, retired_slugs  # noqa: E402 -- LAW #ONE-PLACE canonical slugify
+import availability_lib  # noqa: E402 -- LAW #ONE-PLACE canonical unavailable_for
+from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
+import telegram_lib  # noqa: E402
+import no_progress_guard  # noqa: E402
+import money_gate  # noqa: E402 -- G36: a number in money copy must come from a fact
+import facts_lib  # noqa: E402 -- competitor facts block in the writer prompt
+import humanize_gate  # noqa: E402 -- G37: copy-edit AI tells before G36 sees the text
 SKILL_KEYWORDS = ROOT / ".claude" / "skills" / "keywords" / "SKILL.md"
 SKILL_ETHERFI = ROOT / ".claude" / "skills" / "etherfi" / "SKILL.md"
 SKILL_DESIGN = ROOT / ".claude" / "skills" / "design-system" / "SKILL.md"
@@ -46,7 +55,50 @@ LOG_DIR = ROOT / "logs" / "pseo"
 STATE_DIR = ROOT / "video-generator" / "state"
 RATE_FILE_DEFAULT = ROOT / "config" / "pseo-rate.txt"
 
-DEFAULT_MODEL = os.environ.get("WRITER_MODEL", "claude-haiku-4-5-20251001")
+FLEET_PAUSED_UNTIL_PATH = Path.home() / ".fleet-paused-until"
+
+
+def fleet_paused_until_epoch() -> Optional[int]:
+    """T-0125: this script's call_claude_cli() hits /usr/bin/claude by an
+    ABSOLUTE path, from a cron line that also invokes /usr/bin/python3 by
+    absolute path -- neither ever goes through PATH, so the ~/bin/claude
+    PATH-guard (T-0121) cannot see this call at all. Ported verbatim from
+    apibase's own content-machine/scripts/pseo-generate.py (T-15):
+    mirrors ~/bin/claude's own pause-wrapper parsing exactly (first line,
+    strip everything but digits) so this reads the same file the same way --
+    a missing/empty/malformed file means "not paused", never a crash."""
+    if not FLEET_PAUSED_UNTIL_PATH.exists():
+        return None
+    try:
+        first_line = FLEET_PAUSED_UNTIL_PATH.read_text(encoding="utf-8").splitlines()[0]
+    except (OSError, IndexError):
+        return None
+    digits = re.sub(r"[^0-9]", "", first_line)
+    return int(digits) if digits else None
+
+
+def fleet_pause_reason_by() -> tuple[str, str]:
+    """Lines 2/3 of ~/.fleet-paused-until ('reason: ...' / 'by: ...'), or
+    'absent' for either that the setter didn't write (T-0142-03).
+
+    Before this, `skip: fleet_paused` named only the deadline -- a human
+    reading the log for eight days (Y53's family: a value existed, nothing
+    read it at the boundary) never learned who paused the fleet or why.
+    """
+    try:
+        lines = FLEET_PAUSED_UNTIL_PATH.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return "absent", "absent"
+    reason = by = "absent"
+    for line in lines[1:]:
+        if line.startswith("reason:"):
+            reason = line.split(":", 1)[1].strip() or "absent"
+        elif line.startswith("by:"):
+            by = line.split(":", 1)[1].strip() or "absent"
+    return reason, by
+
+
+DEFAULT_MODEL = os.environ.get("WRITER_MODEL", "claude-haiku-5-5")
 UNSPLASH_KEY = os.environ.get("UNSPLASH_ACCESS_KEY", "").strip()
 
 # Probabilistic-gate parameters (per write-article skill §4.3)
@@ -97,6 +149,7 @@ class KeywordRow:
     bucket: str        # "B"
     bucket_name: str   # "Comparison"
     keyword: str       # "redotpay vs nexo card"
+    supporting_only: bool = False   # Notes cell says `supporting-only`: never a page of its own
 
 
 @dataclass
@@ -131,20 +184,16 @@ def parse_keyword_bank(path: Path) -> list[KeywordRow]:
             # Skip header letter (e.g. literal "A" or "B" in the # column)
             if not re.match(rf"^{bucket_letter}\d+$", code):
                 continue
+            eol = section.find("\n", row_match.end())
+            line = section[row_match.start():eol if eol != -1 else len(section)]
             rows.append(KeywordRow(
                 code=code,
                 bucket=bucket_letter,
                 bucket_name=bucket_name,
                 keyword=keyword,
+                supporting_only="supporting-only" in line,
             ))
     return rows
-
-
-def slugify(text: str) -> str:
-    s = text.lower()
-    s = re.sub(r"[^a-z0-9]+", "-", s)
-    s = s.strip("-")
-    return s[:60]
 
 
 # =============================================================================
@@ -638,23 +687,68 @@ BUCKET_WEIGHTS = {
 # The geo bucket's own priority. An honest "this card is not available where
 # you live, here is what you can get instead" page is the most-cited and
 # highest-converting object this site has produced (6 of 10 assistant-driven
-# clicks landed on the India and Turkey pages). Countries the issuer names as
-# unavailable therefore jump the queue ahead of countries where everything
-# already works.
-def _unavailable_countries() -> list[str]:
-    import yaml
-    avail = yaml.safe_load(AVAILABILITY_PATH.read_text(encoding="utf-8")) or {}
-    return list((avail.get("etherfi") or {}).get("unavailable_countries") or [])
+# clicks landed on the India and Turkey pages). Jurisdictions the issuer does
+# not list therefore jump the queue ahead of the ones where everything already
+# works.
+def _blocked_slugs() -> set[str]:
+    """Slugs whose jurisdiction cannot get the card.
+
+    The issuer moved to an allow-list, so there is no finite list of blocked
+    countries to enumerate any more — the question is answered per slug,
+    through the YAML's own slug->jurisdiction map. A slug with no mapping is
+    NOT promoted: unknown is not the same as blocked, and guessing here would
+    reorder the whole print queue on a slugify near-miss.
+    """
+    cfg = availability_lib.load(AVAILABILITY_PATH)
+    return {slug for slug, j in availability_lib.slug_jurisdictions(cfg).items()
+            if availability_lib.unavailable_for(j["name"], cfg)}
 
 
-def geo_priority(slug: str, countries: Optional[list[str]] = None) -> int:
+def geo_priority(slug: str, blocked: Optional[set[str]] = None) -> int:
     """0 = write this geo page first (jurisdiction where the card is blocked)."""
-    if countries is None:
-        countries = _unavailable_countries()
-    for c in countries:
-        if slug == f"best-crypto-card-{slugify(c)}":
-            return 0
-    return 1
+    if blocked is None:
+        blocked = _blocked_slugs()
+    return 0 if slug in blocked else 1
+
+
+# The 14 brand tokens of keywords/SKILL.md section 3.1. "etherfi" is an alias of "ether.fi".
+BRANDS = frozenset({"ether.fi", "crypto.com", "coinbase", "binance", "bybit", "gnosis",
+                    "redotpay", "bleap", "nexo", "wirex", "metamask", "kast", "uphold", "gemini"})
+_BRAND_RE = re.compile(
+    r"(?<![a-z0-9])(" + "|".join(re.escape(b) for b in sorted(BRANDS) + ["etherfi"]) + r")(?![a-z0-9])")
+
+
+def brand_of(keyword: str) -> Optional[str]:
+    """First brand token in the keyword (leftmost), else None."""
+    m = _BRAND_RE.search(keyword.lower())
+    if not m:
+        return None
+    return "ether.fi" if m.group(1) == "etherfi" else m.group(1)
+
+
+def _siblings(items: list[KeywordRow], i: int) -> list[KeywordRow]:
+    """Two supporting rows for items[i]. A branded primary only takes rows of
+    its own brand or brand-less rows: a Gemini page must never be briefed with
+    "is crypto.com card worth it" (gemini-card-review wrote a Crypto.com review)."""
+    primary = items[i]
+    b = brand_of(primary.keyword)
+    if b is None:
+        sib = [items[j] for j in (i + 1, i + 2) if j < len(items)]
+        if len(sib) < 2 and i >= 2:
+            sib = (sib + items[:2])[:2]
+        return sib
+
+    def ok(r: KeywordRow) -> bool:
+        return r is not primary and brand_of(r.keyword) in (None, b)
+
+    sib = [r for r in items[i + 1:] if ok(r)][:2]
+    if len(sib) < 2 and i >= 2:
+        sib += [r for r in items[:2] if ok(r) and r not in sib]
+        sib = sib[:2]
+    if len(sib) < 2:   # pad with brand-less rows of the same segment
+        sib += [r for r in items if ok(r) and brand_of(r.keyword) is None and r not in sib]
+        sib = sib[:2]
+    return sib
 
 
 def build_clusters(rows: list[KeywordRow]) -> list[Cluster]:
@@ -685,10 +779,12 @@ def build_clusters(rows: list[KeywordRow]) -> list[Cluster]:
     for segment, items in by_segment.items():
         chain: list[Cluster] = []
         for i, primary in enumerate(items):
-            siblings = [items[j] for j in (i + 1, i + 2) if j < len(items)]
-            if len(siblings) < 2 and i >= 2:
-                siblings = (siblings + items[:2])[:2]
-            if len(siblings) < 2:
+            if primary.supporting_only:
+                continue
+            siblings = _siblings(items, i)
+            # The brand filter may leave fewer than 2 rows; it must never remove
+            # a page from the queue, so the pre-filter emit condition decides.
+            if len(siblings) < 2 and not (i >= 2 or i + 2 < len(items)):
                 continue
             chain.append(Cluster(
                 primary=primary,
@@ -697,8 +793,8 @@ def build_clusters(rows: list[KeywordRow]) -> list[Cluster]:
                 url_segment=segment,
             ))
         if segment == "geo":
-            countries = _unavailable_countries()
-            chain.sort(key=lambda c: geo_priority(slugify(c.primary.keyword), countries))
+            blocked = _blocked_slugs()
+            chain.sort(key=lambda c: geo_priority(slugify(c.primary.keyword), blocked))
         if chain and BUCKET_WEIGHTS.get(segment, 1) > 0:
             per_segment[segment] = chain
 
@@ -730,6 +826,56 @@ def build_clusters(rows: list[KeywordRow]) -> list[Cluster]:
 # Prompt construction (cached system block + per-page user message)
 # =============================================================================
 
+# The affiliate rows inside `.claude/skills/etherfi/SKILL.md` §1 are dated
+# 2026-04-01 and four of them are wrong: payout currency "SCR", payout cadence
+# "rolling, not batched", physical-card commission "10 %–25 %", and the
+# nowhere-sourced "within 1–2 business days". ether.fi/affiliates (read
+# 2026-09-14) says USDC on the 15th of the month and 20/20/20/25 %; the gitbook
+# T&C still says SCR. Two issuer surfaces disagree on the payout, so it is
+# DISPUTED and the writer must assert neither — while the physical-card
+# commission, which both agree on, is simply corrected.
+#
+# This block is appended to the cached system prompt AFTER the skill excerpt so
+# it is the last word on the same subject. It lives here as a literal and not in
+# the skill file because the harness refuses every write under `.claude/`
+# (PROGRESS.md#T-w0-05). When E-07a lands `config/facts/etherfi.yaml` +
+# `facts_lib.render()`, this constant is replaced by that render call — one
+# place, and this is it until then.
+AFFILIATE_FACTS_BLOCK = """
+## Affiliate-program facts — THESE OVERRIDE THE SKILL SECTION ABOVE (verified 2026-09-29)
+
+The skill excerpt above was re-read 2026-09-29. Where it disagrees with this block,
+this block wins. Breaking any rule here is a P0 failure.
+
+- **Payout is settled** — paid in USDC to the affiliate's ether.fi Cash vault,
+  monthly, on the 15th of the following month. These strings are BANNED from
+  every field you produce:
+  `SCR` · `paid in SCR` · `rolling payout` · `not batched`
+  · `within 1-2 business days` · `24-48 hours` · `5th-10th of the month`
+  Write, verbatim: `paid in USDC to your ether.fi Cash vault on the 15th of the
+  following month (ether.fi affiliates page, verified 2026-09-29)`.
+  The ONE legitimate use of the word "rolling" here is tier maintenance (a
+  rolling referral count to hold a tier) — never a payout.
+- Referral cashback: Tier 1 earns 0.1 % and Tier 4 earns 0.3 % of your referrals'
+  spending, lifetime, no cap; see the allow-list for Tiers 2-3. An older Referral
+  Program T&C states different terms; never print `1%`, `12 months` or `$1,000`
+  as referral terms.
+- **Physical-card commission is `20-25 % (tiered)`.** The skill's `10 %-25 %`
+  is stale. `10-25 %` is BANNED.
+- A cashback or commission claim with no number you can point at in this block
+  is not a claim you may print. Say where the reader looks it up instead.
+"""
+
+
+def _redact_unbacked(text: str) -> str:
+    """Replace every money token G36 would refuse with `[see allow-list]`, so a
+    skill excerpt cannot teach the writer a number the gate then rejects."""
+    bad = set(money_gate.unbacked(text))
+    for v, u, a, b in reversed(money_gate.tokens(text)):
+        if money_gate._fmt(v, u) in bad:
+            text = text[:a] + "[see allow-list]" + text[b:]
+    return text
+
 
 def build_cached_system_prompt() -> str:
     """Concatenate skill content for prompt caching. Re-read each run so updates propagate."""
@@ -745,14 +891,38 @@ def build_cached_system_prompt() -> str:
     parts.append("- Positioning: 'yield while spending', anti-bank, self-custody\n")
     parts.append("- Audience: global English crypto-card seekers (US/UK/EU/LATAM/APAC)\n")
 
+    # Before the skill excerpt, inside the byte window (Y63): same lists the G37 linter reads.
+    parts.append(humanize_gate.voice_block())
+
     parts.append("\n## Article-writing contract (P0 + P1 rules)\n")
-    parts.append(SKILL_WRITE_ARTICLE.read_text(encoding="utf-8")[:14000])
+    parts.append(_redact_unbacked(SKILL_WRITE_ARTICLE.read_text(encoding="utf-8")[:14000]))
 
     parts.append("\n## EtherFI facts (verbatim from issuer; cite where relevant)\n")
-    parts.append(SKILL_ETHERFI.read_text(encoding="utf-8")[:7000])
+    parts.append(_redact_unbacked(SKILL_ETHERFI.read_text(encoding="utf-8")[:7000]))
+    # MUST come after the skill excerpt: it contradicts four rows inside it.
+    parts.append(AFFILIATE_FACTS_BLOCK)
+    # Competitor facts the G36 allow-list already permits: without them the writer
+    # cannot see them and invents the product (gemini page called a WebBank credit card custodial).
+    _cf = [f for f in facts_lib.load_all()
+           if f["status"] == "current" and (f.get("applies_to") or {}).get("brand") in ("gemini", "coinbase")]
+    if _cf:
+        parts.append("\n## Competitor facts (issuer quotes; the ONLY source for Gemini/Coinbase claims)\n")
+        for f in _cf:
+            at = f["applies_to"]
+            parts.append(f"- [{at['brand']} {at.get('product', '')}] {f['id']} = {f['value']} {f.get('unit') or ''}"
+                         f" — \"{f['source_quote']}\"\n")
+        parts.append("Describe a competitor ONLY from these rows; never infer custody, issuer or rates not listed here.\n")
+
+    # ONE allow-list: the same function G36 checks against (money_gate).
+    parts.append("\n## Money numbers you may print (G36 allow-list)\n"
+                 "The ONLY numbers with a money unit you may print; anything else is "
+                 "refused unread, whatever the skill excerpt above says. Where you "
+                 "have no number, say where the reader looks it up. A tier- or "
+                 "currency-specific figure must sit next to its own tier or currency.\n"
+                 + ", ".join(money_gate.allowed_tokens()) + "\n")
 
     parts.append("\n## Competitor & marketing context (excerpts)\n")
-    parts.append(SKILL_COMPETITOR.read_text(encoding="utf-8")[:5000])
+    parts.append(_redact_unbacked(SKILL_COMPETITOR.read_text(encoding="utf-8")[:5000]))
 
     parts.append("\n## Mandatory placeholders in body_markdown\n")
     parts.append("- `<<AFFILIATE_URL>>` — text-link target (Astro substitutes at build time)\n")
@@ -761,6 +931,9 @@ def build_cached_system_prompt() -> str:
                  "URL — never `[text](<<AFFILIATE_BUTTON>>)`. The only placeholder allowed inside "
                  "`](...)` is `<<AFFILIATE_URL>>`.**\n")
     parts.append("- `<<IMAGE_0>>`, `<<IMAGE_1>>`, `<<IMAGE_2>>` — image slots (substituted post-generation)\n")
+    parts.append("- `body_markdown` is pure Markdown: NO HTML tags of any kind (no <aside>, <details>, "
+                 "<p>, <div>, <strong>). The template wraps sections itself; the 'Renders as' column "
+                 "in the contract above describes the template's output, not yours.\n")
     parts.append("- NEVER paste `https://www.ether.fi/@defycard` or any literal affiliate URL.\n")
 
     parts.append("\n## English-only (Phase 1)\n")
@@ -844,8 +1017,7 @@ Primary keyword (in title, H1, first 100 words, body H2):
   "{cluster.primary.keyword}"
 
 Supporting keywords (each appears ≥2× in body):
-  - "{cluster.supporting[0].keyword}"
-  - "{cluster.supporting[1].keyword}"
+{chr(10).join(f'  - "{r.keyword}"' for r in cluster.supporting) or '  (none)'}
 
 Internal link candidates for THIS page's section (these exist; nothing else
 does — a link outside this list is stripped before publication):
@@ -883,6 +1055,32 @@ def _strip_code_fences(text: str) -> str:
     return text.strip()
 
 
+_HTML_TAG_RE = re.compile(r"(?<!<)</?[A-Za-z][^<>]*>")  # lookbehind: never eat one bracket of <<AFFILIATE_URL>>
+_TAG_LINE_RE = re.compile(r"^[ \t]*(?:(?<!<)</?[A-Za-z][^<>]*>[ \t]*)+\n?", re.M)
+_SUMMARY_RE = re.compile(r"<summary>\s*(?:<strong>|<b>)?(.*?)(?:</strong>|</b>)?\s*</summary>[ \t]*\n?", re.S)
+
+
+def strip_html_wrappers(md: str) -> tuple[str, int]:
+    """-> (md, n_tags_removed). <summary>Q</summary> becomes a **Q** paragraph; a line that is
+    only tags is deleted whole so blank-line structure survives; any inline tag is dropped."""
+    n = len(_HTML_TAG_RE.findall(md))
+    if not n:
+        return md, 0
+    md = _SUMMARY_RE.sub(lambda m: f"**{m.group(1).strip()}**\n\n", md)
+    md = _TAG_LINE_RE.sub("", md)
+    md = _HTML_TAG_RE.sub("", md)
+    return md, n
+
+
+CLAUDE_BIN = "/usr/bin/claude"
+# The ONE argv for every `claude --print` JSON caller (intel/news/council import
+# call_claude_cli). `--tools ""`: with --max-turns 1 a tool call ends the process
+# with exit 1 (CCH-WRITER-01); a writer has nothing to do with tools.
+CLI_BASE_ARGS = ["--print", "--tools", "", "--max-turns", "1", "--output-format", "json",
+                 "--disable-slash-commands", "--exclude-dynamic-system-prompt-sections",
+                 "--no-session-persistence"]
+
+
 def call_claude_cli(
     system_prompt: str,
     user_message: str,
@@ -905,17 +1103,8 @@ def call_claude_cli(
         sp_file.write(system_prompt)
         sp_path = sp_file.name
     try:
-        cmd = [
-            "/usr/bin/claude",
-            "--print",
-            "--model", model,
-            "--append-system-prompt-file", sp_path,
-            "--disable-slash-commands",
-            "--max-turns", "1",
-            "--output-format", "json",
-            "--exclude-dynamic-system-prompt-sections",
-            # No prompt argv — read from stdin
-        ]
+        # No prompt argv — read from stdin
+        cmd = [CLAUDE_BIN, *CLI_BASE_ARGS, "--model", model, "--append-system-prompt-file", sp_path]
         proc = subprocess.run(
             cmd,
             input=user_message,
@@ -924,8 +1113,17 @@ def call_claude_cli(
             timeout=timeout_s,
         )
         if proc.returncode != 0:
+            # The reason lives in stdout JSON (--output-format json), not stderr.
+            rc = proc.returncode
+            try:
+                d = json.loads(proc.stdout)
+            except ValueError:
+                raise RuntimeError(
+                    f"claude CLI exit {rc}: stdout={proc.stdout[:300]!r} stderr={proc.stderr[:300]!r}"
+                )
             raise RuntimeError(
-                f"claude CLI exit {proc.returncode}: stderr={proc.stderr[:500]!r}"
+                f"claude CLI exit {rc}: subtype={d.get('subtype')!r} is_error={d.get('is_error')!r} "
+                f"num_turns={d.get('num_turns')!r} result={str(d.get('result'))[:300]!r}"
             )
         cli_data = json.loads(proc.stdout)
         if cli_data.get("is_error"):
@@ -990,6 +1188,95 @@ def generate_page(
 # =============================================================================
 
 
+def would_overwrite(cluster: Cluster, content_dir: Optional[Path] = None) -> Optional[Path]:
+    """The path this cluster would write to, IF that path already exists.
+
+    Called before generation, not just before the write — the answer is
+    known for free, and 28 straight faq-children runs paid Haiku + Unsplash
+    to find it out anyway because the queue thought the page did not exist
+    (LAW #ONE-PLACE: two slugify() implementations disagreed on where the
+    file already was). `content_dir` is injectable for tests only.
+    """
+    cd = content_dir if content_dir is not None else CONTENT_DIR
+    target = cd / f"{slugify(cluster.primary.keyword)}.md"
+    return target if target.exists() else None
+
+
+_TEMPLATE_H2 = {
+    "what to watch": "what_to_watch",
+    "bottom line": "bottom_line",
+    "the bottom line": "bottom_line",
+    "faq": "faq",
+    "frequently asked questions": "faq",
+}
+_H2_RE = re.compile(r"^## .*$", re.M)
+# Page-level compliance copy is not template content. Shape, audited over the whole
+# pre-strip snapshot (19 pages, 2026-10-19): a paragraph that opens with a bold
+# disclosure label or states the affiliate/volatility notice outright.
+_RISK_RE = re.compile(
+    r"^(?:\*\*(?:Risk|Disclosure|Disclaimer|Important|Country eligibility|Last verified|Warning)\b"
+    r"|\**DefyCard (?:publishes|earns)|\**Crypto assets are volatile)", re.M | re.I)
+_FIGURE_RE = re.compile(r"<figure\b.*?</figure>", re.S)
+_IMG_SRC_RE = re.compile(r'<img\b[^>]*\bsrc="([^"]+)"')
+_RULE_TAIL_RE = re.compile(r"(?:\n[ \t]*)*---[ \t]*\n*\Z")
+
+
+def strip_template_sections(body_md: str, payload: dict) -> tuple[str, int]:
+    """Drop body H2 sections the template already renders from frontmatter.
+
+    [slug].astro (and build-markdown.js for the sidecar) render what_to_watch /
+    bottom_line / faq from fields; a body H2 of the same name shows the reader
+    the section twice (428 of 578 pages, 2026-10-19). A section goes only when
+    its payload field is non-empty. Every other H2 and a bold
+    `**Risk & Disclosure` paragraph ending the block are untouched. -> (body, n_removed)."""
+    heads = list(_H2_RE.finditer(body_md))
+    cuts = []
+    for i, m in enumerate(heads):
+        key = m.group(0)[3:].strip().rstrip(" \t:.?!").lower()
+        field = _TEMPLATE_H2.get(key)
+        if field and payload.get(field):
+            end = heads[i + 1].start() if i + 1 < len(heads) else len(body_md)
+            risk = _RISK_RE.search(body_md, m.end(), end)
+            if risk:  # the page's own disclosure paragraph is not template content
+                end = risk.start()
+            cuts.append((m.start(), end))
+    if not cuts:
+        return body_md, 0
+    out, pos = [], 0
+    for start, end in cuts:
+        out.append(body_md[pos:start])
+        pos = end
+        # an inline image that appears nowhere else on the page is not a duplicate
+        rest = body_md[:start] + body_md[end:]
+        for fig in _FIGURE_RE.findall(body_md[start:end]):
+            src = _IMG_SRC_RE.search(fig)
+            if src and src.group(1) not in rest:
+                out.append(fig + "\n\n")
+        # the block's closing rule stays only when it is the sole separator
+        tail = _RULE_TAIL_RE.search(body_md[start:end])
+        if tail and not "".join(out).rstrip().endswith("---") and end < len(body_md):
+            out.append("---\n\n")
+    out.append(body_md[pos:])
+    res = "".join(out)
+    if pos == len(body_md):  # removed block was last: no dangling rule
+        res = re.sub(r"\n*---[ \t]*\n*\Z", "\n", res.rstrip() + "\n")
+        res = res.rstrip() + "\n"
+    return res, len(cuts)
+
+
+def emit_frontmatter(fm: dict) -> str:
+    """The ONE frontmatter serializer (write_page and humanize-backfill).
+
+    One `key: <JSON>` line per key, in dict order, delimiters included, no
+    trailing newline. Law: yaml.safe_load(inner) == fm. YAML timestamps that a
+    reader parsed into datetime/date go back out as bare ISO scalars."""
+    def scalar(v):
+        if isinstance(v, _dt.date):  # datetime is a subclass
+            return v.isoformat()
+        return json.dumps(v)
+    return "\n".join(["---", *(f"{k}: {scalar(v)}" for k, v in fm.items()), "---"])
+
+
 def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
     p = result.payload
     cluster = result.cluster
@@ -1012,8 +1299,15 @@ def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
     # sed pass. Single source of truth for the affiliate URL stays in .env, so
     # changing the URL only requires a re-deploy (no re-generation needed).
     _existing = existing_paths()
-    _body_raw, _btn_fixed = normalize_placeholders(p["body_markdown"])
+    _body_raw, _n_html = strip_html_wrappers(p["body_markdown"])
+    if _n_html:
+        print(json.dumps({"event": "html_wrappers_stripped", "slug": slug, "n": _n_html}))
+    _body_raw, _btn_fixed = normalize_placeholders(_body_raw)
     body_md = substitute_placeholders(_body_raw, images)
+    body_md, _n_stripped = strip_template_sections(body_md, p)
+    if _n_stripped:
+        print(json.dumps({"event": "template_sections_stripped", "slug": slug,
+                          "n": _n_stripped}, ensure_ascii=False))
     body_md, _links_dropped = validate_internal_links(body_md, _existing)
 
     # The five surfaces the template renders besides the body. The schema
@@ -1072,35 +1366,31 @@ def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
     ]
 
     # YAML frontmatter — Astro content collection consumes this
-    fm_lines = [
-        "---",
-        f"title: {json.dumps(p['title'])}",
-        f"description: {json.dumps(p['meta_description'])}",
-        f"h1: {json.dumps(p['h1'])}",
-        f"slug: {json.dumps(slug)}",
-        f"bucket: {json.dumps(BUCKET_META[cluster.primary.bucket][0])}",
-        f"primary_partner: {json.dumps(primary_partner_for(slug))}",
-        f"primary_keyword: {json.dumps(cluster.primary.keyword)}",
-        f"supporting_keywords: {json.dumps([s.keyword for s in cluster.supporting])}",
-        f"intro_paragraph: {json.dumps(intro)}",
-        f"intro_variant: {json.dumps(intro_variant)}",
-        f"snapshot_bullets: {json.dumps(p.get('snapshot_bullets', []))}",
-        f"long_context_paragraph: {json.dumps(p.get('long_context_paragraph', ''))}",
-        f"what_to_watch: {json.dumps(p.get('what_to_watch', p.get('stakes_bullets', [])))}",
-        f"bottom_line: {json.dumps(p.get('bottom_line', []))}",
-        f"faq: {json.dumps(p.get('faq', []))}",
-        f"related_clusters: {json.dumps(p.get('related_clusters', []))}",
-        f"images: {json.dumps(images_fm)}",
-        f"schema_article: {json.dumps(p.get('schema_article', {}))}",
-        f"schema_faq: {json.dumps(p.get('schema_faq', {}))}",
-        f"generated_at: {json.dumps(datetime.now(timezone.utc).isoformat())}",
-        f"model: {json.dumps(DEFAULT_MODEL)}",
-        f"pattern: {json.dumps(cluster.pattern)}",
-        "---",
-        "",
-        body_md,
-        "",
-    ]
+    fm = {
+        "title": p["title"],
+        "description": p["meta_description"],
+        "h1": p["h1"],
+        "slug": slug,
+        "bucket": BUCKET_META[cluster.primary.bucket][0],
+        "primary_partner": primary_partner_for(slug),
+        "primary_keyword": cluster.primary.keyword,
+        "supporting_keywords": [s.keyword for s in cluster.supporting],
+        "intro_paragraph": intro,
+        "intro_variant": intro_variant,
+        "snapshot_bullets": p.get("snapshot_bullets", []),
+        "long_context_paragraph": p.get("long_context_paragraph", ""),
+        "what_to_watch": p.get("what_to_watch", p.get("stakes_bullets", [])),
+        "bottom_line": p.get("bottom_line", []),
+        "faq": p.get("faq", []),
+        "related_clusters": p.get("related_clusters", []),
+        "images": images_fm,
+        "schema_article": p.get("schema_article", {}),
+        "schema_faq": p.get("schema_faq", {}),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "model": DEFAULT_MODEL,
+        "pattern": cluster.pattern,
+    }
+    fm_lines = [emit_frontmatter(fm), "", body_md, ""]
     target.write_text("\n".join(fm_lines), encoding="utf-8")
     return target
 
@@ -1110,7 +1400,64 @@ def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
 # =============================================================================
 
 
-def log_usage(result: GenerationResult, log_dir: Path = LOG_DIR) -> None:
+def _emit(row: dict) -> None:
+    """Print a pipeline event AND append it to logs/pseo/<utc date>.jsonl.
+
+    A refusal printed to stdout alone is lost with the cron run (KW-04b: the
+    gemini G36 refusal of 14:14Z could never be diagnosed). LOG_DIR is read at
+    CALL time, same rule as log_usage."""
+    row.setdefault("ts", datetime.now(timezone.utc).isoformat())
+    line = json.dumps(row, ensure_ascii=False)
+    print(line)
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    today = datetime.now(timezone.utc).date().isoformat()
+    with (LOG_DIR / f"{today}.jsonl").open("a", encoding="utf-8") as f:
+        f.write(line + "\n")
+
+
+def _g36_context(text: str, unbacked: list[str]) -> list[str]:
+    """The +-60-char window around each unbacked token (max 5, 160 chars each)."""
+    text = money_gate._JSON_ESCAPE.sub(lambda m: chr(int(m.group(1), 16)), text)
+    out: list[str] = []
+    for value, unit, start, end in money_gate.tokens(text):
+        if money_gate._fmt(value, unit) in unbacked and len(out) < 5:
+            out.append(text[max(0, start - 60):end + 60][:160])
+    return out
+
+
+_BANK_REFUSAL_COOLDOWN_H = 24     # one Haiku call per refusal: one price for every cause
+
+
+def _bank_refused_path() -> Path:
+    return FAQ_LEDGER.with_name("bank-refused.json")
+
+
+def _mark_bank_refused(slug: str) -> None:
+    path = _bank_refused_path()
+    led = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    led[slug] = datetime.now(timezone.utc).isoformat()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(led, indent=1) + "\n", encoding="utf-8")
+
+
+def _bank_refused_recently() -> set[str]:
+    path = _bank_refused_path()
+    if not path.exists():
+        return set()
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=_BANK_REFUSAL_COOLDOWN_H)
+    return {slug for slug, ts in json.loads(path.read_text(encoding="utf-8")).items()
+            if datetime.fromisoformat(ts) > cutoff}
+
+
+def log_usage(result: GenerationResult, log_dir: Path | None = None) -> None:
+    # `log_dir` resolves against the module global at CALL time, not def
+    # time: a `Path = LOG_DIR` default binds the value once at import and a
+    # test's `monkeypatch.setattr(pg, "LOG_DIR", tmp_path)` silently stops
+    # redirecting it, leaking fixture rows into the real production log
+    # `weekly-report.py` and the `*/30` cron both read (found in E-11
+    # ruling-1 review: 4 real rows appended by a single test run).
+    if log_dir is None:
+        log_dir = LOG_DIR
     log_dir.mkdir(parents=True, exist_ok=True)
     today = datetime.now(timezone.utc).date().isoformat()
     log_file = log_dir / f"{today}.jsonl"
@@ -1292,6 +1639,25 @@ def queue_funnel(clusters: list[Cluster]) -> dict[str, int]:
             "frozen": frozen, "thin": thin}
 
 
+def faq_stream_status() -> dict:
+    """The FAQ stream's own zero-cause fields for queue_empty (T-0142-03).
+
+    Before this, an empty FAQ queue reused queue_funnel()'s bank counters
+    (clusters_total/covered/frozen/thin) even though the real cause lives in
+    the cohort ledger, not the keyword bank -- harmless only because
+    `faq_reopen` carried the true reason as a sibling key, but a fast read of
+    the log line itself pointed at the wrong queue entirely.
+    """
+    if not FAQ_LEDGER.exists():
+        return {"stream": "faq", "cohort": None, "due": None}
+    led = json.loads(FAQ_LEDGER.read_text(encoding="utf-8"))
+    cohorts = led.get("cohorts", [])
+    if not cohorts:
+        return {"stream": "faq", "cohort": None, "due": None}
+    last = cohorts[-1]
+    return {"stream": "faq", "cohort": len(cohorts), "due": last.get("verdict_due_14")}
+
+
 FAQ_LEDGER = ROOT / "logs" / "pseo" / "faq-cohorts.json"
 FAQ_RATE_FILE = ROOT / "config" / "pseo-faq-rate.txt"
 FAQ_CAP_MIN, FAQ_CAP_MAX = 1, 3      # operator's ruling 2026-08-13
@@ -1329,16 +1695,31 @@ def faq_child_queue() -> list[Cluster]:
 
     A child of a cold parent inherits nothing, so the ledger is the only
     source: it was built from questions on pages agents measurably fetch.
+
+    Dedup reads a RECORDED fact (the path write_page actually returned),
+    never a recomputed slug. Two independent slugify() implementations
+    (word-boundary here, blind [:60] in the old writer) used to disagree on
+    long questions, so "item['slug'] in {existing filenames}" could be False
+    forever for a page that was already on disk under a different name —
+    write_page kept re-writing the SAME (mismatched) file every tick,
+    reporting success, for 15 days straight. Comparing a stored path against
+    the filesystem cannot repeat that defect even if a third slugify()
+    appears somewhere: there is nothing left to recompute.
     """
     if not FAQ_LEDGER.exists():
         return []
     led = json.loads(FAQ_LEDGER.read_text(encoding="utf-8"))
-    have = existing_slugs()
     out: list[Cluster] = []
-    for cohort in led.get("cohorts", []):
+    retired = retired_slugs()
+    for ci, cohort in enumerate(led.get("cohorts", [])):
+        if cohort.get("voided"):
+            continue        # a voided cohort's open rows are never written
         for item in cohort["items"]:
-            if item.get("refused") or item["slug"] in have:
+            pub = item.get("published")
+            if item.get("refused") or (pub and (ROOT / pub["path"]).exists()):
                 continue
+            if item["slug"] in retired or slugify(item["question"]) in retired:
+                continue    # SEO-11
             parent_kw = item["parent"].strip("/").split("/")[-1].replace("-", " ")
             primary = KeywordRow(code=f"FAQ-{item['slug'][:12]}", bucket="L",
                                  bucket_name="FAQ", keyword=item["question"])
@@ -1354,8 +1735,41 @@ def faq_child_queue() -> list[Cluster]:
                         pattern="P-FAQ", url_segment="faq")
             c.faq_parent = item["parent"]      # type: ignore[attr-defined]
             c.faq_slug = item["slug"]          # type: ignore[attr-defined]
+            c.faq_cohort = ci                  # type: ignore[attr-defined]
             out.append(c)
     return out
+
+
+def faq_child_queue_with_reopen(dry_run: bool) -> tuple[list, "dict | None"]:
+    """faq_child_queue(), auto-opening the next cohort when it comes back
+    empty (2026-09-14, A4 step 5 rework).
+
+    THE STALL THIS CLOSES: cohort 1 finished printing 2026-09-05 (every item
+    published or refused) and nothing ever opened cohort 2 — `faq-children.py
+    --cohort 20 --write` was a manual command, never wired to any cron. The
+    original A4 plan added a NEW weekly cron line for this; that would still
+    leave up to 6 days of stall between a cohort finishing mid-week and the
+    next Monday reopening it. This tick already fires every 30 minutes under
+    the existing, already-installed `15,45 * * * *` crontab entry, so
+    checking "is the last cohort fully consumed, and is the tap open" right
+    here reopens within the hour, and needs no cron this sandbox is blocked
+    from installing.
+
+    Never runs under --dry-run: a dry run must never write the cohort
+    ledger. -> (queue, reopen_result) where reopen_result is None if reopen
+    was never attempted (queue was already non-empty, or dry_run), else the
+    dict open_next_cohort() returned ({"event": "opened", ...} or
+    {"event": "cohort_refused", "reason": ...}) — carried into the
+    queue_empty log line so a refusal states its cause (Y55).
+    """
+    queue = faq_child_queue()
+    if queue or dry_run:
+        return queue, None
+    reopen = _faq_module().open_next_cohort(only_if_consumed=True,
+                                            writer_sha=writer_sha())
+    if reopen["event"] == "opened":
+        queue = faq_child_queue()
+    return queue, reopen
 
 
 def _parent_text(parent_path: str) -> str:
@@ -1397,34 +1811,159 @@ def faq_delta_gate(result) -> dict:
     return fc.judge(_payload_text(result.payload), parent)
 
 
-def mark_faq_refused(slug: str, verdict: dict) -> None:
+def _faq_ledger_txn(mutate) -> None:
+    """Read-modify-write FAQ_LEDGER under an exclusive flock.
+
+    Found the hard way, not designed in advance: a manual ledger repair and
+    a live cron tick both did a bare read/modify/write on this same file
+    within the same ~3-minute generation window, and whichever wrote last
+    silently won, discarding the other's fact. Same flock pattern as
+    probabilistic_gate()'s sentinel file, blocking (not LOCK_NB) because the
+    critical section here is a few milliseconds of JSON, not a scheduling
+    decision worth skipping.
+    """
+    import fcntl
     if not FAQ_LEDGER.exists():
         return
+    lock_path = FAQ_LEDGER.with_suffix(".json.lock")
+    with open(lock_path, "a+") as lock_fh:
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX)
+        try:
+            led = json.loads(FAQ_LEDGER.read_text(encoding="utf-8"))
+            mutate(led)
+            FAQ_LEDGER.write_text(json.dumps(led, indent=1, ensure_ascii=False) + "\n",
+                                  encoding="utf-8")
+        finally:
+            fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
+
+
+def writer_sha() -> str:
+    """Identity of the generator: sha256 of the cached system prompt. A G36
+    refusal is a property of THIS writer, so it may be retried once the writer
+    changes (faq-children.select) and never before."""
+    import hashlib
+    return hashlib.sha256(build_cached_system_prompt().encode("utf-8")).hexdigest()[:16]
+
+
+def mark_faq_refused(slug: str, verdict: dict, cohort: Optional[int] = None,
+                     gate: str = "delta", sha: Optional[str] = None) -> None:
+    """Record a refusal on the item, in the cohort being worked (`cohort`, an
+    index) — never by slug across every cohort, which overwrote cohort 2's own
+    record when cohort 3 re-bought the same question. `gate` + `writer_sha`
+    let select() tell a topic property (delta) from a generator property (G36)."""
+    def _mutate(led: dict) -> None:
+        for ci, c in enumerate(led.get("cohorts", [])):
+            if cohort is not None and ci != cohort:
+                continue
+            for item in c["items"]:
+                if item["slug"] == slug:
+                    item["refused"] = {
+                        "on": datetime.now(timezone.utc).date().isoformat(),
+                        "overlap": verdict.get("overlap"),
+                        "new_facts": verdict.get("new_fact_count"),
+                        "reasons": verdict.get("reasons", []),
+                        "gate": gate,
+                        "writer_sha": sha,
+                    }
+    _faq_ledger_txn(_mutate)
+
+
+# --- per-day attempt cap + G36 breaker (CCH-FAQ-G36-0929, edit 3) -----------
+# A refusal returns the publication slot, so the daily cap of 1-3 stopped
+# bounding paid generation calls (8 calls against a cap of 3 on 09-28).
+FAQ_ATTEMPT_CAP = FAQ_CAP_MAX + 2
+FAQ_G36_BREAKER = 3
+
+
+def _faq_attempts_path() -> Path:
+    today = datetime.now(timezone.utc).date().isoformat()
+    return _state_file(f"pseo-faq-attempts-{today}.json")
+
+
+def _faq_attempts() -> dict:
+    try:
+        return json.loads(_faq_attempts_path().read_text())
+    except Exception:
+        return {"refusals": 0, "g36_streak": 0}
+
+
+def faq_breaker() -> Optional[str]:
+    """Reason to skip generation for the rest of the UTC day, else None."""
+    a = _faq_attempts()
+    if a["g36_streak"] >= FAQ_G36_BREAKER:
+        return "g36_breaker"
+    if a["refusals"] >= FAQ_ATTEMPT_CAP:
+        return "attempt_cap"
+    return None
+
+
+def faq_note_attempt(refused_gate: Optional[str]) -> None:
+    """Count a refusal (gate name) or reset the streak (None = published)."""
+    a = _faq_attempts()
+    if refused_gate is None:
+        a["g36_streak"] = 0
+    else:
+        a["refusals"] += 1
+        a["g36_streak"] = a["g36_streak"] + 1 if refused_gate == "G36" else 0
+        if a["g36_streak"] == FAQ_G36_BREAKER:
+            telegram_lib.alert(f"faq g36_breaker: {FAQ_G36_BREAKER} G36 refusals in a row — "
+                               f"FAQ stream paused until the next UTC day")
+    _faq_attempts_path().write_text(json.dumps(a))
+
+
+def mark_faq_published(slug: str, path: Path) -> None:
+    """Record the ACTUAL file the writer produced. Never recomputed later.
+
+    `path` is write_page()'s own return value, so this cannot drift from
+    what the writer really did — even a future slugify change cannot make
+    this dedup lie, because it never recalculates anything.
+    """
+    def _mutate(led: dict) -> None:
+        for cohort in led.get("cohorts", []):
+            for item in cohort["items"]:
+                if item["slug"] == slug:
+                    item["published"] = {
+                        "on": datetime.now(timezone.utc).date().isoformat(),
+                        "path": str(path.relative_to(ROOT)),
+                    }
+    _faq_ledger_txn(_mutate)
+
+
+def faq_published_count() -> int:
+    """Metric for the no-progress guard: how many cohort items are DONE."""
+    if not FAQ_LEDGER.exists():
+        return 0
     led = json.loads(FAQ_LEDGER.read_text(encoding="utf-8"))
-    for cohort in led.get("cohorts", []):
-        for item in cohort["items"]:
-            if item["slug"] == slug:
-                item["refused"] = {
-                    "on": datetime.now(timezone.utc).date().isoformat(),
-                    "overlap": verdict.get("overlap"),
-                    "new_facts": verdict.get("new_fact_count"),
-                    "reasons": verdict.get("reasons", []),
-                }
-    FAQ_LEDGER.write_text(json.dumps(led, indent=1, ensure_ascii=False) + "\n",
-                          encoding="utf-8")
+    return sum(1 for cohort in led.get("cohorts", []) for item in cohort["items"]
+               if item.get("published"))
+
+
+# slug -> applies_to.product a `current` fact must carry before the page may print (KW-04, row C44)
+_FACT_GATED = {"coinbase-one-card": "one"}
 
 
 def build_queue(
     clusters: list[Cluster],
     only_new: bool,
     upgrade_thin: bool,
+    skip_refused: bool = False,
 ) -> list[Cluster]:
     have = existing_slugs()
+    cooling = _bank_refused_recently() if skip_refused else set()
+    retired = retired_slugs()
     out: list[Cluster] = []
     for c in clusters:
         slug = slugify(c.primary.keyword)
+        if slug in retired:
+            continue          # SEO-11: a retired URL stays retired
         if slug in FROZEN_SLUGS:
             continue          # AEO-4: converting pages are never re-queued
+        if slug in cooling:
+            continue          # KW-04b: refused <24h ago; only the conveyor skips, a human --limit run never does
+        if slug in _FACT_GATED and not any(
+                f["status"] == "current" and (f.get("applies_to") or {}).get("product") == _FACT_GATED[slug]
+                for f in facts_lib.load_all()):
+            continue          # C44: no page without >=1 current issuer fact for that product
         if upgrade_thin:
             if slug in have and is_thin(slug):
                 out.append(c)
@@ -1567,8 +2106,37 @@ def _main(argv: list[str]) -> int:
         pass
 
     args = parse_args(argv)
+
+    # E-02: the operator's kill-switch, checked before EVERYTHING else --
+    # including --dry-run, which the plan's own acceptance test exercises
+    # this under. Unlike fleet_paused below, this one fires even in
+    # dry-run mode: a dry run is used to prove the switch works without
+    # spending anything, and the point of a stop-cran is that nothing
+    # downstream of it runs, dry-run or not.
+    if not pseo_enabled():
+        print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
+        print("[pseo-tick] skip: pseo_disabled (PSEO_ENABLED=false)")
+        return 0
+
     if args.full_rebuild:
         args.only_new = False
+
+    # T-0125: fleet pause is a distinct outcome from a generator failure --
+    # checked BEFORE the probabilistic gate (and before any bulk-mode model
+    # call) so a paused window never consumes a daily-count slot or resets
+    # the cooldown timer for a call that was never going to happen. Skipped
+    # under --dry-run, which never reaches call_claude_cli() anyway (see
+    # the early return further down) and is used for gate testing.
+    if not args.dry_run:
+        paused_until = fleet_paused_until_epoch()
+        if paused_until is not None and paused_until > time.time():
+            remaining_min = int((paused_until - time.time() + 59) // 60)
+            until_iso = datetime.fromtimestamp(paused_until, tz=timezone.utc).isoformat()
+            reason, by = fleet_pause_reason_by()
+            print(f"[pseo-tick] skip: fleet_paused (until {until_iso}, {remaining_min}min left)")
+            print(f"  reason: {reason}")
+            print(f"  by: {by}")
+            return 0
 
     rate = read_rate(args.rate_file, args.limit)
     if args.faq_children and args.limit is None:
@@ -1579,6 +2147,13 @@ def _main(argv: list[str]) -> int:
         if not args.probabilistic:
             print(f"[pseo] FAQ stream — today's cap is {rate} "
                   f"(derived from the date, same for every tick today)")
+
+    if args.faq_children and not args.dry_run:
+        why = faq_breaker()
+        if why:
+            print(json.dumps({"event": "skip", "reason": why}))
+            print(f"[pseo-tick] skip: {why}")
+            return 0
 
     # ---- Probabilistic gate (cron-tick mode) ----
     # Fires every ~5 min via crontab. Most ticks short-circuit cheaply.
@@ -1608,12 +2183,14 @@ def _main(argv: list[str]) -> int:
     if not args.probabilistic:
         print(f"[pseo] built {len(clusters)} clusters")
 
+    faq_reopen: dict | None = None
     if args.faq_children:
-        queue = faq_child_queue()
+        queue, faq_reopen = faq_child_queue_with_reopen(args.dry_run)
         if not args.probabilistic:
             print(f"[pseo] FAQ cohort queue: {len(queue)} unpublished, unrefused")
     else:
-        queue = build_queue(clusters, args.only_new, args.upgrade_thin)
+        queue = build_queue(clusters, args.only_new, args.upgrade_thin,
+                            skip_refused=args.probabilistic)
     if not args.probabilistic:
         print(f"[pseo] queue size: {len(queue)} (after filters)")
     queue = queue[:per_run_limit]
@@ -1639,21 +2216,29 @@ def _main(argv: list[str]) -> int:
         if args.probabilistic and not args.dry_run:
             _decrement_daily_count()
             _SLOT["claimed"] = False
+        extra = {"faq_reopen": faq_reopen} if args.faq_children else {}
+        funnel = faq_stream_status() if args.faq_children else queue_funnel(clusters)
         print(json.dumps({
             "event": "queue_empty",
             "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),
             "slot_returned": bool(args.probabilistic and not args.dry_run),
-            **queue_funnel(clusters),
+            **funnel,
+            **extra,
         }, ensure_ascii=False))
         print("[pseo] queue empty — nothing to generate")
+        pipeline_name = "pseo-faq-children" if args.faq_children else "pseo-pages"
+        metric = faq_published_count() if args.faq_children else len(existing_slugs())
+        no_progress_guard.check(pipeline_name, metric=metric, queue_nonempty=False)
         return 0
 
     # ---- Live run (Max plan via Claude Code CLI, no API key needed) ----
-    if not Path("/usr/bin/claude").exists():
+    if not Path(CLAUDE_BIN).exists():
         print("ERROR: /usr/bin/claude not found (Claude Code CLI required)", file=sys.stderr)
         return 2
 
     cached_system = build_cached_system_prompt()
+    import hashlib
+    writer_sha_ = hashlib.sha256(cached_system.encode("utf-8")).hexdigest()[:16]
     if not args.probabilistic:
         print(f"[pseo] cached system prompt: ~{len(cached_system) // 4} tokens (rough)")
     if not UNSPLASH_KEY:
@@ -1663,10 +2248,47 @@ def _main(argv: list[str]) -> int:
     total_cost = 0.0
     succeeded = 0
     failed = 0
+    queue_had_candidates = bool(queue)
     for i, cluster in enumerate(queue):
         if time.time() > deadline:
             print(f"[pseo] runtime cap reached after {i} pages — stopping")
             break
+        if args.faq_children and faq_breaker():
+            print(f"[pseo] skip: {faq_breaker()} — stopping before the next paid call")
+            break
+        if args.faq_children:
+            # Selector sibling: rows already in a cohort never passed today's
+            # select() filter. Refuse before spending anything (T-0140 rule).
+            bad = _faq_module().reject_reason(cluster.primary.keyword)
+            if bad:
+                sel_slug = getattr(cluster, "faq_slug", slugify(cluster.primary.keyword))
+                _emit({"event": "refused", "gate": "selector", "slug": sel_slug, "reason": bad})
+                mark_faq_refused(sel_slug, {"reasons": [bad]},
+                                 getattr(cluster, "faq_cohort", None), "selector", writer_sha_)
+                if args.probabilistic and _SLOT["claimed"]:
+                    _decrement_daily_count()
+                    _SLOT["claimed"] = False
+                continue
+        # AEO-4-style last line of defence, but BEFORE spending anything.
+        # Whoever is about to write checks the exact path it will write, first.
+        target_check = would_overwrite(cluster)
+        if target_check is not None:
+            failed += 1
+            slug_check = slugify(cluster.primary.keyword)
+            _emit({"event": "would_overwrite", "slug": slug_check,
+                   "path": str(target_check.relative_to(ROOT))})
+            telegram_lib.alert(
+                f"would_overwrite: {slug_check} already exists on disk, "
+                f"refused before spending on generation"
+            )
+            if args.probabilistic and _SLOT["claimed"]:
+                _decrement_daily_count()
+                _SLOT["claimed"] = False
+            if args.faq_children:
+                # The file is real; the ledger just did not know it yet.
+                # Record the fact now so this slot is not refused forever.
+                mark_faq_published(getattr(cluster, "faq_slug", slug_check), target_check)
+            continue
         result = generate_page(cached_system, cluster, args.model)
         log_usage(result)
         total_cost += result.cost_usd
@@ -1701,16 +2323,97 @@ def _main(argv: list[str]) -> int:
                     # to length (Y58). The slot is returned: a refusal is not a
                     # publication, and eating the day's cap on it would silence
                     # the stream for the rest of the day.
-                    mark_faq_refused(slug_, verdict)
+                    mark_faq_refused(slug_, verdict, getattr(result.cluster, "faq_cohort", None),
+                                     "delta", writer_sha_)
+                    faq_note_attempt("delta")
                     if args.probabilistic and _SLOT["claimed"]:
                         _decrement_daily_count()
                         _SLOT["claimed"] = False
                     continue
+            # G37 (CCH-HUM-04): copy-edit the flagged sentences. Runs AFTER the
+            # delta gate and BEFORE G36, so G36 judges the REWRITTEN text.
+            hslug = getattr(cluster, "faq_slug", "") or slugify(cluster.primary.keyword)
+            orig_payload = result.payload
+            hres = humanize_gate.humanize(result.payload)
+            result.payload = hres.payload
+            total_cost += hres.cost_usd
+            hrow = {
+                "event": "humanize", "slug": hslug,
+                "stream": "faq" if args.faq_children else "bank",
+                "flags_before": hres.flags_before, "flags_after": hres.flags_after,
+                "rewritten": hres.rewritten, "accepted": hres.accepted,
+                "rejected": hres.rejected, "refused_reason": hres.refused_reason,
+                "cost_usd": round(hres.cost_usd, 6),
+                "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+            }
+            print(json.dumps(hrow, ensure_ascii=False))
+            _hdir = LOG_DIR.parent / "humanize"   # LOG_DIR read at CALL time (log_usage rule)
+            _hdir.mkdir(parents=True, exist_ok=True)
+            with (_hdir / f"{_dt.datetime.now(_dt.timezone.utc).date().isoformat()}.jsonl").open(
+                    "a", encoding="utf-8") as _hf:
+                _hf.write(json.dumps(hrow, ensure_ascii=False) + "\n")
+            if hres.refused_reason:
+                failed += 1
+                _emit({"event": "refused", "gate": "G37", "slug": hslug,
+                       "reasons": [hres.refused_reason]})
+                telegram_lib.alert(f"refused: {hres.refused_reason} — {hslug} not written (G37)")
+                if not args.faq_children:
+                    _mark_bank_refused(hslug)
+                if args.faq_children:
+                    mark_faq_refused(hslug, {"reasons": [hres.refused_reason]},
+                                     getattr(result.cluster, "faq_cohort", None),
+                                     "G37", writer_sha_)
+                    faq_note_attempt("G37")
+                if args.probabilistic and _SLOT["claimed"]:
+                    _decrement_daily_count()
+                    _SLOT["claimed"] = False
+                continue
+            # G36 (E-11): every money number the reader will see must come
+            # from a verified fact. BEFORE write_page, for both streams —
+            # a refusal must leave no file behind (Y63: the page is the
+            # thing a reader believes, so the check belongs on the last
+            # side of the door, not after it).
+            gate_slug = slugify(cluster.primary.keyword)
+            unbacked = money_gate.unbacked(_payload_text(result.payload))
+            if unbacked:
+                failed += 1
+                _emit({"event": "refused", "gate": "G36", "slug": gate_slug,
+                       "reasons": money_gate.reasons(unbacked),
+                       "context": _g36_context(_payload_text(result.payload), unbacked)})
+                telegram_lib.alert(
+                    f"refused: unbacked_number:{unbacked[0]} — {gate_slug} not written "
+                    f"({len(unbacked)} unbacked token(s), G36)"
+                )
+                if not args.faq_children:
+                    _mark_bank_refused(gate_slug)
+                if args.faq_children:
+                    # Close the topic like the delta gate does. Leaving it open
+                    # re-buys the same refusal every tick — the 15-day carousel
+                    # shape, with a Haiku call each time.
+                    mark_faq_refused(getattr(result.cluster, "faq_slug", gate_slug),
+                                     {"reasons": money_gate.reasons(unbacked)},
+                                     getattr(result.cluster, "faq_cohort", None),
+                                     "G36", writer_sha_)
+                    faq_note_attempt("G36")
+                if args.probabilistic and _SLOT["claimed"]:
+                    _decrement_daily_count()
+                    _SLOT["claimed"] = False
+                continue
             path = write_page(result, images)
             _SLOT["claimed"] = False        # spent: a page exists
+            if hres.rewritten:              # G37 blind audit: sampled, after a real write only
+                total_cost += (humanize_gate.audit_pair(hslug, orig_payload, hres.payload,
+                                                        log_dir=_hdir) or {}).get("cost_usd", 0.0)
+            if args.faq_children:
+                # Record the FACT the writer just produced. This is the only
+                # place the ledger learns a slug is done — never a recompute.
+                mark_faq_published(getattr(cluster, "faq_slug", ""), path)
+                faq_note_attempt(None)
         except Exception as e:
             failed += 1
-            print(f"[pseo] FAIL write {i+1}/{len(queue)}: {e}")
+            _emit({"event": "failed", "stage": "write",
+                   "slug": slugify(cluster.primary.keyword),
+                   "error": f"{type(e).__name__}: {e}"})
             if args.probabilistic:
                 _decrement_daily_count()
             continue
@@ -1724,6 +2427,19 @@ def _main(argv: list[str]) -> int:
     if not args.probabilistic or succeeded > 0:
         print(f"[pseo] done: succeeded={succeeded} failed={failed} "
               f"total_cost=${total_cost:.4f}")
+
+    # General watchdog (LAW: "successful" and "made progress" are not the
+    # same claim). Applies to this pipeline in BOTH modes it runs: the FAQ
+    # children stream and the bank/pSEO stream share this one guard.
+    pipeline_name = "pseo-faq-children" if args.faq_children else "pseo-pages"
+    metric = faq_published_count() if args.faq_children else len(existing_slugs())
+    if no_progress_guard.check(pipeline_name, metric=metric,
+                               queue_nonempty=queue_had_candidates):
+        telegram_lib.alert(
+            f"no_progress: {pipeline_name} reported success 3 runs running "
+            f"with a non-empty queue and metric stuck at {metric}"
+        )
+        return 1
     return 0 if failed == 0 else 1
 
 

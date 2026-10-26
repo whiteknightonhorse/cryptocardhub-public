@@ -194,11 +194,21 @@ def test_the_wiring_delivers_the_page_link_to_the_uploader(ledger, catalog,
         "voiceover": "words", "body": "b.", "cta": "c",
         "thumbnail_hook": "CHEAPEST | WE CHECKED",
     })
-    monkeypatch.setattr(tts_edge, "synthesize", lambda *a, **k: {"voice": "v"})
+    # T-0142-02 (G39): main.py ffprobes voice_path/final.mp4 right after synth
+    # and render, so both mocks must leave real files behind. Force the edge
+    # provider regardless of a live TTS_PROVIDER=elevenlabs in the real .env —
+    # otherwise main.py routes to the unmocked tts_eleven.synthesize, which
+    # writes its own ~1s dry-run placeholder and G39 (correctly) flags the
+    # mismatch against this test's separately-mocked render() duration.
+    from tests.conftest import write_stub_media
+    monkeypatch.setattr(pipeline_main._config, "tts_provider", lambda: "edge")
+    monkeypatch.setattr(tts_edge, "synthesize",
+                         lambda voiceover, platform, out_path, **k: write_stub_media(out_path, 2.0) and {"voice": "v"})
     monkeypatch.setattr(fetch_visuals, "fetch", lambda *a, **k: [{"path": "x"}])
     monkeypatch.setattr(fetch_music, "fetch", lambda *a, **k: {"track": "m"})
     monkeypatch.setattr(captions, "align", lambda *a, **k: [{"word": "words"}])
-    monkeypatch.setattr(pipeline_main.render, "render", lambda **k: None)
+    monkeypatch.setattr(pipeline_main.render, "render",
+                         lambda **k: write_stub_media(k["out_path"], 2.5))
     monkeypatch.setattr(telegram_preview, "send", lambda *a, **k: None)
 
     seen: dict[str, str] = {}

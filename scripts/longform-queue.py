@@ -70,9 +70,11 @@ def _eligible() -> list[dict]:
     return out
 
 
-def _sessions_by_slug() -> dict[str, int]:
-    """Human sessions per landing page, 28 days. Empty dict if GA4 is unreachable —
-    an unavailable measurement must not silently become a zero ranking."""
+def _sessions_by_slug() -> dict[str, int] | None:
+    """Human sessions per landing page, 28 days. None if GA4 is unreachable —
+    NEVER an empty dict: build() used to read {} as "every page truly has
+    zero sessions" and silently rank on bucket priority alone, which is a
+    ranking DECISION made on the instrument's silence, not on its answer."""
     try:
         sys.path.insert(0, str(ROOT / "scripts"))
         import importlib.util
@@ -93,13 +95,27 @@ def _sessions_by_slug() -> dict[str, int]:
         return out
     except Exception as e:  # noqa: BLE001
         print(f"[longform-queue] GA4 unavailable ({type(e).__name__}: {e}) — "
-              f"ranking on bucket priority alone", file=sys.stderr)
-        return {}
+              f"refusing to rank blind", file=sys.stderr)
+        try:
+            sys.path.insert(0, str(ROOT / "scripts"))
+            import telegram_lib
+            telegram_lib.alert(
+                f"instrument_dead: longform-queue GA4 unreachable "
+                f"({type(e).__name__}: {str(e)[:200]}) — queue NOT rebuilt, old queue kept"
+            )
+        except Exception:
+            pass
+        return None
 
 
-def build() -> dict:
+def build() -> dict | None:
+    """Returns None (refuse) if GA4 is dead — a stale queue is a known,
+    inspectable state; a queue silently ranked on bucket priority alone
+    looks identical to a healthy GA4-ranked one and is not."""
     pages = _eligible()
     sessions = _sessions_by_slug()
+    if sessions is None:
+        return None
 
     def key(p: dict) -> tuple:
         prio = BUCKET_PRIORITY.index(p["bucket"]) if p["bucket"] in BUCKET_PRIORITY \
@@ -118,7 +134,7 @@ def build() -> dict:
         queue.append(p["slug"])
     return {
         "built_on": date.today().isoformat(),
-        "ranked_by": "ga4_human_sessions_28d" if sessions else "bucket_priority_only",
+        "ranked_by": "ga4_human_sessions_28d",
         "eligible": len(pages),
         "per_bucket_cap": cap,
         "slugs": queue,
@@ -130,6 +146,10 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     blob = build()
+    if blob is None:
+        print("[longform-queue] instrument_dead: GA4 unreachable, refusing to rank",
+              file=sys.stderr)
+        return 1
     print(json.dumps({k: v for k, v in blob.items() if k != "slugs"}, indent=2))
     print(f"first 10: {blob['slugs'][:10]}")
     if not args.dry_run:

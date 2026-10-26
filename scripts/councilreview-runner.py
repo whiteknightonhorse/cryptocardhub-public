@@ -53,50 +53,16 @@ def run_council(model: str = DEFAULT_MODEL, timeout_s: int = 300) -> dict:
         + "\n```\n"
     )
 
-    # Both prompts go via tempfile (system) + stdin (user) to avoid argv-length
-    # hangs we hit in initial Claude-CLI testing.
-    import tempfile
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".md", delete=False, encoding="utf-8"
-    ) as sp_file:
-        sp_file.write(system_prompt)
-        sp_path = sp_file.name
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("pseo_generate", ROOT / "scripts" / "pseo-generate.py")
+    pg = importlib.util.module_from_spec(spec)
+    sys.modules["pseo_generate"] = pg  # its @dataclass needs this pre-registered
+    spec.loader.exec_module(pg)
     try:
-        cmd = [
-            "/usr/bin/claude",
-            "--print",
-            "--model", model,
-            "--append-system-prompt-file", sp_path,
-            "--disable-slash-commands",
-            "--max-turns", "1",
-            "--output-format", "json",
-            "--exclude-dynamic-system-prompt-sections",
-        ]
-        proc = subprocess.run(
-            cmd,
-            input=user_msg,
-            capture_output=True,
-            text=True,
-            timeout=timeout_s,
-        )
-        if proc.returncode != 0:
-            raise SystemExit(
-                f"claude CLI exit {proc.returncode}: stderr={proc.stderr[:500]!r}"
-            )
-        cli_data = json.loads(proc.stdout)
-        if cli_data.get("is_error"):
-            raise SystemExit(f"claude is_error: {cli_data.get('result', '')[:300]}")
-        return {
-            "report": cli_data.get("result", ""),
-            "usage": cli_data.get("usage", {}),
-            "cost_usd": cli_data.get("total_cost_usd", 0.0),
-        }
-    finally:
-        try:
-            import os as _os
-            _os.unlink(sp_path)
-        except OSError:
-            pass
+        report, usage, cost = pg.call_claude_cli(system_prompt, user_msg, model, timeout_s)
+    except RuntimeError as e:
+        raise SystemExit(str(e))
+    return {"report": report, "usage": usage, "cost_usd": cost}
 
 
 VERDICT_RE = re.compile(

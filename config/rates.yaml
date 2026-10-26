@@ -23,7 +23,7 @@ source:
   url: "https://help.ether.fi/en/articles/262374-how-does-cashback-work"
   title: "How does cashback work? | ether.fi Help Center"
   parser: intercom_tables
-  verified: "2026-08-23"
+  verified: "2026-10-26"
 
 # Cells are read row-major from each level's table: three header cells, then
 # (band, usd_rate, eur_rate) triples. The band text is compared verbatim,
@@ -31,39 +31,47 @@ source:
 # catch — and a normalised comparison would hide a $2,000 -> $1,500 move.
 levels:
   core:
-    - band: "USD: First $2,000 / EUR: First $800"
+    - band: "USD: First $2,000 / EUR: First $800 (USD equivalent, not €)"
       usd: "3%"
       eur: "3%"
-    - band: "USD: $2,001 – $3,000 / EUR: $801 – $1,500"
+    - band: "USD: $2,001 – $3,000 / EUR: $801 – $1,500 (USD equivalent, not €)"
       usd: "1%"
       eur: "1%"
-    - band: "USD: Above $3,000 / EUR: Above $1,500"
+    - band: "USD: Above $3,000 / EUR: Above $1,500 (USD equivalent, not €)"
       usd: "0.5%"
       eur: "0.1%"
   luxe:
-    - band: "USD: First $10,000 / EUR: First $3,000"
+    - band: "USD: First $10,000 / EUR: First $3,000 (USD equivalent, not €)"
       usd: "3%"
       eur: "3%"
-    - band: "USD: $10,001 – $20,000 / EUR: $3,001 – $6,000"
+    - band: "USD: $10,001 – $20,000 / EUR: $3,001 – $6,000 (USD equivalent, not €)"
       usd: "1%"
       eur: "1%"
-    - band: "USD: Above $20,000 / EUR: Above $6,000"
+    - band: "USD: Above $20,000 / EUR: Above $6,000 (USD equivalent, not €)"
       usd: "0.5%"
       eur: "0.1%"
   pinnacle:
-    - band: "USD: First $50,000 / EUR: First $16,000"
+    - band: "USD: First $50,000 / EUR: First $16,000 (USD equivalent, not €)"
       usd: "3%"
       eur: "3%"
-    - band: "USD: $50,001 – $80,000 / EUR: $16,001 – $26,000"
+    - band: "USD: $50,001 – $80,000 / EUR: $16,001 – $26,000 (USD equivalent, not €)"
       usd: "1%"
       eur: "1%"
-    - band: "USD: Above $80,000 / EUR: Above $26,000"
+    - band: "USD: Above $80,000 / EUR: Above $26,000 (USD equivalent, not €)"
       usd: "0.5%"
       eur: "0.1%"
   business:
     - band: "All spend"
       usd: "1%"
       eur: "0%"
+
+# Facts that live in the article's PROSE, not its tables — never merely
+# copied here, `null` means "never verified against the issuer", not "zero".
+# Filled in by the operator with `availability-check.py --accept <id>`, same
+# one-command law as every other fact in this file: the checker finds the
+# number and quotes where it read it, the operator approves the write.
+lock_days: 7
+min_claim_usd: 5
 
 # Category bonuses. The issuer's cashback article lists NONE, and the one that
 # existed has lapsed. A promo row without `expires:` is a defect by definition:

@@ -21,6 +21,7 @@ import json
 import math
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -29,7 +30,15 @@ from . import _config, compliance, pattern_selector
 _ROOT = _config.root()
 _SYS_PROMPT = (_ROOT / "templates" / "script_system_prompt.md").read_text(encoding="utf-8")
 
-WRITER_MODEL = os.environ.get("WRITER_MODEL", "claude-haiku-4-5-20251001")
+# E-20 (VG_MODE=h1): H1 scripts are written FROM config/facts/etherfi.yaml's
+# rendered `current`/`beta` facts, not from SKILL.md prose — cross-tree import,
+# same pattern scripts/money_gate.py already uses for the reverse direction.
+_SCRIPTS_DIR = _ROOT.parent / "scripts"
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
+import facts_lib  # noqa: E402 -- LAW #ONE-PLACE: the one fact loader (E-07a)
+
+WRITER_MODEL = os.environ.get("WRITER_MODEL", "claude-haiku-5-5")
 assert "haiku" in WRITER_MODEL, "Writer must be Haiku class for cost (CLAUDE.md §0.2)"
 
 # --- Y49 P1-2: script-length floor -------------------------------------------
@@ -49,6 +58,23 @@ def min_words(topic: dict[str, Any]) -> int:
     """Lower word bound for `topic`, derived from its duration band."""
     band = topic.get("duration_band") or [topic.get("target_seconds", 0.0)]
     return math.ceil(max(0.0, float(band[0]) - _RENDER_TAIL_SECONDS) * _WORDS_PER_SECOND)
+
+
+# --- T-0142-02: script-length ceiling, symmetric to the floor above ---------
+# Root cause of the 66.9 s H1 render (topic_2133956, 2026-09-23): the writer
+# received TWO length signals — the topic's own duration_band ([30, 45] for
+# H1/youtube) and pattern_selector's creative tuple, which had picked
+# duration_long_60_90 ([60, 90], now unselectable per pattern_selector's own
+# _duration_compatible filter) — and composed 175 words for the second one
+# while render() silently cut the output down to the first. A word ceiling
+# here is the second of three independent gates on the same law (selector,
+# writer, render-artifact) — brother of slugify: one law expressed once would
+# have been enough, but the config axis and the enrichment band were never
+# the same read, so this measures the artifact instead of trusting either.
+def max_words(topic: dict[str, Any]) -> int:
+    """Upper word bound for `topic`, derived from its duration band."""
+    band = topic.get("duration_band") or [topic.get("target_seconds", 0.0)]
+    return math.floor(max(0.0, float(band[-1]) - _RENDER_TAIL_SECONDS) * _WORDS_PER_SECOND)
 
 
 def _word_count(script: dict[str, Any]) -> int:
@@ -78,10 +104,17 @@ def _build_user_prompt(topic: dict[str, Any], creative: dict[str, Any] | None = 
         "country_gate": region_advice,
     }
     payload_json = json.dumps(payload, ensure_ascii=False, indent=2)
-    if creative is None:
+    parts = [payload_json]
+    if topic.get("pool") == "h1":
+        # Same rendered facts block SKILL.md carries (facts_lib.render) — one
+        # rendering, two readers, so the writer can never see a number the
+        # skill file itself would refuse to print.
+        parts.append(facts_lib.render(facts_lib.load()))
+    if creative is not None:
+        parts.append(pattern_selector.format_for_prompt(creative))
+    if len(parts) == 1:
         return payload_json
-    creative_block = pattern_selector.format_for_prompt(creative)
-    return f"{payload_json}\n\n{creative_block}\n"
+    return "\n\n".join(parts) + "\n"
 
 
 def _mock_script(topic: dict[str, Any]) -> dict[str, Any]:
@@ -143,6 +176,7 @@ def write(topic: dict[str, Any], dry_run: bool = False,
                 creative = pattern_selector.select(
                     platform=topic["platform"],
                     topic_class=topic.get("class"),
+                    duration_band=topic.get("duration_band"),
                 )
             except FileNotFoundError:
                 # shorts-analysis catalog not installed — proceed without
@@ -162,11 +196,52 @@ def write(topic: dict[str, Any], dry_run: bool = False,
             if _word_count(script) < floor:
                 print(f"[write_script] still {_word_count(script)}w < {floor}w after "
                       f"one retry — accepting the short script", flush=True)
+        ceiling = max_words(topic)
+        if _word_count(script) > ceiling:
+            print(f"[write_script] voiceover {_word_count(script)}w > ceiling {ceiling}w "
+                  f"— regenerating once", flush=True)
+            retry = _call_claude(topic, creative, note=(
+                f"The previous draft was too long. The voiceover MUST contain at "
+                f"most {ceiling} words (target {topic.get('target_words', ceiling)}). "
+                f"Cut to the essential point — do not summarize, remove content."
+            ))
+            if _word_count(retry) <= _word_count(script):
+                script = retry
+            if _word_count(script) > ceiling:
+                print(f"[write_script] still {_word_count(script)}w > {ceiling}w after "
+                      f"one retry — accepting the long script", flush=True)
         if creative is not None:
             script["_creative_patterns"] = creative["tuple"]
             script["_creative_phase"] = creative["phase"]
     compliance.scan_script(script, platform=topic["platform"])
     return script
+
+
+def check_facts_gate(script: dict[str, Any]) -> None:
+    """G35 (E-20): refuse an H1 script that states a `disputed` or `expired`
+    ether.fi fact as settled.
+
+    The same law longform.py's `refuse_expired_claims` enforces for the
+    dining/groceries promo pattern, applied here against facts_lib's
+    structured model instead of a SKILL.md text pattern — H1 scripts are
+    written FROM `facts.yaml`'s rendered `current` facts (see
+    `_build_user_prompt`), so this checks the writer actually stayed inside
+    what it was given. Runs right after script generation and before TTS
+    (D7's step order) because a voiceover cannot be corrected after upload.
+    """
+    facts = facts_lib.load()
+    stale = facts_lib.stale_numeric_tokens(facts)
+    if not stale:
+        return
+    text = " ".join(str(script.get(k, "")) for k in ("hook", "body", "cta", "voiceover"))
+    hits = [t for t in stale if t in text]
+    if hits:
+        raise RuntimeError(
+            f"G35: REFUSING to publish — script states {hits!r}, a value "
+            f"marked disputed/expired in config/facts/etherfi.yaml. A "
+            f"voiceover cannot be edited after upload; regenerate from the "
+            f"current facts instead."
+        )
 
 
 def _call_claude(topic: dict[str, Any], creative: dict[str, Any] | None,
@@ -185,7 +260,7 @@ def _call_claude(topic: dict[str, Any], creative: dict[str, Any] | None,
     # main=Haiku so fallback is omitted entirely (a transient API error just
     # causes a retry on the next cron tick — same effective behavior).
     cmd = [
-        "claude", "--print",
+        "claude", "--print", "--tools", "",
         "--append-system-prompt-file", str(sys_prompt_path),
         "--no-session-persistence",
         "--model", WRITER_MODEL,

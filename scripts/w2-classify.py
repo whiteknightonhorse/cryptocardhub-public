@@ -35,10 +35,11 @@ THREE LAWS, EACH BOUGHT WITH A MISTAKE
    returned "0 duplicate pairs", and only the control (median Jaccard 0.20,
    max 0.64) proved that was the site and not the parser.
 
-Usage:
-    w2-classify.py                  # classify, write logs/aeo/w2-<week>.json
-    w2-classify.py --controls       # ...and print the distributions
-    w2-classify.py --week 2026-W32
+Usage (T-0138: run through the venv — `google-analytics-data` is not
+importable from the system python3 that the bare shebang would pick up):
+    video-generator/venv/bin/python scripts/w2-classify.py                  # classify, write logs/aeo/w2-<week>.json
+    video-generator/venv/bin/python scripts/w2-classify.py --controls       # ...and print the distributions
+    video-generator/venv/bin/python scripts/w2-classify.py --week 2026-W32
 """
 from __future__ import annotations
 
@@ -164,6 +165,15 @@ def ga4_sessions(since: str, until: str) -> dict[str, int] | None:
     except Exception as e:  # noqa: BLE001
         print(f"[w2] GA4 unavailable ({type(e).__name__}: {e}) — refusing to classify",
               file=sys.stderr)
+        try:
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import telegram_lib
+            telegram_lib.alert(
+                f"instrument_dead: w2-classify GA4 unreachable "
+                f"({type(e).__name__}: {str(e)[:200]}) — classification refused"
+            )
+        except Exception:
+            pass
         return None
     out: dict[str, int] = {}
     for dims, mets in rows:

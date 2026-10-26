@@ -2,11 +2,30 @@
 write the live state/ or logs/ of a running channel."""
 from __future__ import annotations
 import json
+import subprocess
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 
 from pipeline import analytics, pattern_selector
+
+
+def write_stub_media(path, seconds: float):
+    """Write a short silent audio placeholder to `path` — codec chosen by
+    extension so ffmpeg's muxer accepts it (mp3 wants libmp3lame, mp4 wants
+    aac). One place for every test that mocks a TTS/render step but still
+    needs a real file on disk for a downstream ffprobe-duration gate
+    (T-0142-02, G39) — a second hand-rolled copy is the slugify trap."""
+    path = Path(path)
+    codec = "aac" if path.suffix == ".mp4" else "libmp3lame"
+    args = ["ffmpeg", "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
+            "-t", f"{seconds}", "-c:a", codec]
+    if codec == "libmp3lame":
+        args += ["-q:a", "9"]
+    args.append(str(path))
+    subprocess.run(args, capture_output=True, check=True, timeout=120)
+    return path
 
 
 @pytest.fixture

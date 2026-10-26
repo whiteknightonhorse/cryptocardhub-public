@@ -801,6 +801,7 @@ hr {
 
 /* Article hero image: 16:9 with rounded corners + overlay */
 .article-hero-image {
+  margin: 0; /* reset UA default figure margin (1em 40px) that shifted the hero image right vs the text column */
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
@@ -1408,3 +1409,9 @@ hr {
   .article-snapshot { padding: 16px; }
   .callout-section, .related-links { padding: 16px 18px; }
 }
+
+/* ---- Breadcrumbs ---- */
+.breadcrumbs { max-width: 800px; margin: 12px auto 0; padding: 0 16px; font-size: 0.8rem; color: var(--on-surface-variant); }
+.breadcrumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; }
+.breadcrumbs li + li::before { content: "/"; margin-right: 6px; }
+.breadcrumbs a { color: var(--on-surface-variant); }

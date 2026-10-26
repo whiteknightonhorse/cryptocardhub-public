@@ -28,10 +28,12 @@ Runs against dist/, like every gate here (Y50: measure the served artifact).
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 DIST = Path(__file__).resolve().parent.parent / "dist"
 
@@ -81,6 +83,8 @@ LITERAL_BOLD = re.compile(r"\*\*[^*\n]{1,80}\*\*")
 LITERAL_LINK = re.compile(r"\[[^\]\n]{1,120}\]\((?:https?://|/|<<)[^)\s]{0,160}\)")
 PLACEHOLDER = re.compile(r"<<[A-Z][A-Z0-9_]*>>")
 ETHFI_TYPO = re.compile(r"\beth\.fi\b", re.I)
+DEAD_PLASMA_HOST = re.compile(r"help\.plasma\.org")
+MAX_DEAD_PLASMA_HOST = 0
 
 
 def _visible_text(html: str) -> str:
@@ -106,6 +110,19 @@ def _hits(rx, files, extract):
     out = []
     for f in files:
         text = extract(f.read_text(encoding="utf-8", errors="replace"))
+        for m in rx.finditer(text):
+            out.append((str(f.parent.relative_to(DIST)), m.group(0)[:70]))
+    return out
+
+
+def _raw_hits(rx, files):
+    """Unlike `_hits`, reads the raw HTML/markdown bytes -- not the stripped
+    visible text. A dead host lives inside an `href` attribute, which
+    `_visible_text` discards as part of the tag; a reader's click still
+    resolves against it even though the URL string is never shown as text."""
+    out = []
+    for f in files:
+        text = f.read_text(encoding="utf-8", errors="replace")
         for m in rx.finditer(text):
             out.append((str(f.parent.relative_to(DIST)), m.group(0)[:70]))
     return out
@@ -160,6 +177,21 @@ def test_the_issuer_name_is_not_misspelled():
 
 # --- the answer engines' copy ----------------------------------------------
 
+def test_no_dead_plasma_host_reaches_the_reader():
+    """T-0142-08 ruling-2: `help.plasma.org` is a reconstructed guess that has
+    never resolved (NXDOMAIN both locally and at 1.1.1.1) -- 6 geo pages
+    (india, turkey, arizona, nevada, georgia, washington) linked their Plasma
+    One row to it with a "checked <date>" stamp under a link nobody had
+    actually opened (T-0134's trap). The real host is
+    intercom.help/plasma-6c43763cd799/en/articles/14703938. Checked against
+    the raw HTML, not the stripped visible text, because the string a reader
+    would never notice is the one baked into the href they click."""
+    _report("dead help.plasma.org host", _raw_hits(DEAD_PLASMA_HOST, _pages()),
+            MAX_DEAD_PLASMA_HOST)
+    _report("dead help.plasma.org host in a sidecar",
+            _raw_hits(DEAD_PLASMA_HOST, _sidecars()), MAX_DEAD_PLASMA_HOST)
+
+
 def test_sidecars_keep_markdown_but_never_a_placeholder():
     """Markdown is the native syntax of a .md sidecar — bold and links there are
     correct and must NOT be 'fixed'. Only an unsubstituted placeholder or the
@@ -194,3 +226,205 @@ def test_the_known_list_is_not_stale():
     assert not gone, (
         f"{len(gone)} KNOWN entries no longer occur and must be removed from "
         f"the list: {gone[:4]}")
+
+
+# --- E-17: Product/Offer schema on reviews, sourced from facts -------------
+#
+# FABLE_DEFYCARD_PART2.md section E, wave 3: bucket === 'reviews' pages whose
+# resolved partner has a facts file get a Product/Offer block; every number
+# in it must trace back to config/facts/<partner>.yaml, never aggregateRating
+# (DefyCard collects no reviews of its own -- a fabricated rating is scaled
+# content abuse, see seo-site/src/pages/[bucket]/[slug].astro's own comment
+# on crypto-card-for-small-business.md, a pre-existing instance of exactly
+# that, out of this task's scope to fix).
+#
+# The law is read straight out of config/facts/etherfi.yaml with yaml.safe_load
+# -- never through facts_lib.py/facts.mjs, the code under test -- so a mutation
+# to either loader cannot move both sides of the comparison (Y49/Y54's rule).
+
+FACTS = DIST.parent.parent / "config" / "facts" / "etherfi.yaml"
+CARD_PRICE_FACT_ID = "etherfi.fee.physical_card.core"
+
+
+def _ld_json_blocks(path):
+    html = path.read_text(encoding="utf-8")
+    out = []
+    for block in re.findall(r'type="application/ld\+json"[^>]*>(.*?)</script>', html, re.S):
+        try:
+            out.append(json.loads(block))
+        except json.JSONDecodeError:
+            continue
+    return out
+
+
+def _product_schemas(bucket, slug):
+    path = DIST / bucket / slug / "index.html"
+    if not path.exists():
+        pytest.skip(f"{bucket}/{slug} not built")
+    return [d for d in _ld_json_blocks(path)
+            if isinstance(d, dict) and d.get("@type") == "Product"]
+
+
+def _core_card_price_fact():
+    data = yaml.safe_load(FACTS.read_text(encoding="utf-8"))
+    fact = next(f for f in data["facts"] if f["id"] == CARD_PRICE_FACT_ID)
+    assert fact["status"] == "current", "fixture fact is not publishable -- fix the fixture, not the test"
+    return fact
+
+
+def test_ether_fi_review_page_carries_a_product_offer_matching_facts():
+    """The literal accepted by E-17: /reviews/ether-fi-cash-review/ ships a
+    Product whose offers.price is the physical-card fee straight out of
+    config/facts/etherfi.yaml -- not a hand-typed number that can drift from
+    it (Y49/Y54: the law is the literal read from the fact file, not a value
+    the renderer computes)."""
+    fact = _core_card_price_fact()
+    schemas = _product_schemas("reviews", "ether-fi-cash-review")
+    assert len(schemas) == 1, f"expected exactly 1 Product block, found {len(schemas)}"
+    product = schemas[0]
+    assert product["offers"]["price"] == fact["value"], (product["offers"]["price"], fact["value"])
+    assert product["offers"]["priceCurrency"] == fact["unit"]
+    assert "aggregateRating" not in product
+
+
+def test_every_ether_fi_review_variant_gets_the_schema():
+    """Not just the one slug the acceptance literal names -- every review page
+    that is actually about ether.fi Cash (ether-fi-cash-review-2026, -uk)."""
+    fact = _core_card_price_fact()
+    for slug in ("ether-fi-cash-review", "ether-fi-cash-review-2026", "ether-fi-cash-review-uk"):
+        schemas = _product_schemas("reviews", slug)
+        assert len(schemas) == 1, f"{slug}: expected 1 Product block, found {len(schemas)}"
+        assert schemas[0]["offers"]["price"] == fact["value"], slug
+
+
+def test_competitor_review_pages_get_no_product_schema():
+    """`primary_partner` defaults to ether.fi on every /reviews/ page that
+    doesn't set it explicitly (PROGRESS.md#T-w3-17-product-offer-schema-reviews
+    -- true for all 28 review pages in this corpus today), so trusting that
+    default alone would stamp an "ether.fi Cash" Product onto a RedotPay
+    review. None of these partners have a config/facts/<slug>.yaml, and the
+    acceptance criterion is explicit: no facts, no schema."""
+    checked = 0
+    for slug in ("redotpay-review", "crypto-com-card-review", "binance-card-review",
+                 "coinbase-card-review", "nexo-card-review-2026", "bybit-card-review-2026",
+                 "gnosis-pay-review", "metamask-card-review", "wirex-card-review"):
+        path = DIST / "reviews" / slug / "index.html"
+        if not path.exists():
+            continue
+        checked += 1
+        schemas = _product_schemas("reviews", slug)
+        assert schemas == [], f"{slug}: got a Product schema, expected none (no facts for this partner)"
+    assert checked >= 5, f"only {checked} competitor review pages found to check"
+
+
+def test_no_product_schema_ever_carries_an_aggregate_rating():
+    """The acceptance literal, checked across every Product block the build
+    produces, not just the one page named in the plan."""
+    found = 0
+    for path in _pages():
+        for d in _ld_json_blocks(path):
+            if isinstance(d, dict) and d.get("@type") == "Product":
+                found += 1
+                assert "aggregateRating" not in d, str(path.relative_to(DIST))
+    assert found >= 3, f"only found {found} Product blocks across the build -- fixture drifted"
+
+
+# CCH-PIN-00: og:image must be absolute (Pinterest Save / Rich Pins read it).
+def test_og_image_is_absolute_on_every_page():
+    bad = []
+    for f in _pages():
+        m = re.search(r'<meta property="og:image" content="([^"]*)"', f.read_text(errors="ignore"))
+        if m and not m.group(1).startswith("https://defycard.com/assets/"):
+            bad.append((str(f.parent.relative_to(DIST)), m.group(1)[:80]))
+    assert not bad, bad[:10]
+
+
+# --- CCH-KW-05: hot keywords on existing pages ------------------------------
+# Expected values are LITERALS (Y49): never read back from the source files.
+# A title moved without its schema headline is the defect this pins.
+KW05_TITLES = {
+    ("reviews", "coinbase-card-review"):
+        "Coinbase Card Review 2026: the Coinbase debit card's fees & cashback",
+    ("hub", "best-crypto-credit-card"):
+        "Best Crypto Credit Card 2026: Crypto Rewards Credit Cards Ranked",
+    ("reviews", "crypto-com-card-review"):
+        "Crypto.com Card Review 2026: Cashback Rates, Fees & Alternatives",
+}
+
+
+@pytest.mark.parametrize("key", sorted(KW05_TITLES))
+def test_kw05_title_and_jsonld_headline_agree(key):
+    import html as _html
+    bucket, slug = key
+    path = DIST / bucket / slug / "index.html"
+    if not path.exists():
+        pytest.skip(f"{bucket}/{slug} not built")
+    text = path.read_text(encoding="utf-8")
+    title = _html.unescape(re.search(r"<title>(.*?)</title>", text, re.S).group(1))
+    assert title == KW05_TITLES[key]
+    headlines = [d.get("headline") for d in _ld_json_blocks(path)
+                 if isinstance(d, dict) and d.get("@type") == "Article"]
+    assert headlines == [KW05_TITLES[key]]
+
+
+def test_kw05_reviews_index_h1():
+    path = DIST / "reviews" / "index.html"
+    if not path.exists():
+        pytest.skip("reviews index not built")
+    h1 = re.search(r"<h1[^>]*>(.*?)</h1>", path.read_text(encoding="utf-8"), re.S).group(1)
+    assert h1.strip() == "Crypto card reviews"
+
+
+# --- CCH-KW-02: one section, one heading -----------------------------------
+
+_H2 = re.compile(r"<h2\b[^>]*>(.*?)</h2>", re.S | re.I)
+
+
+def _h2_key(raw: str) -> str:
+    t = re.sub(r"\s+", " ", _TAGS.sub(" ", raw)).strip().lower().rstrip(" :.?!")
+    t = t.removeprefix("the ")
+    return "faq" if t == "frequently asked questions" else t
+
+
+def test_no_page_renders_the_same_h2_twice():
+    bad = []
+    for f in _pages():
+        seen, dup = set(), set()
+        for m in _H2.finditer(f.read_text(encoding="utf-8", errors="replace")):
+            k = _h2_key(m.group(1))
+            (dup if k in seen else seen).add(k)
+        if dup:
+            bad.append((str(f.parent.relative_to(DIST)), sorted(dup)))
+    assert not bad, f"{len(bad)} pages repeat an <h2>: {bad[:6]}"
+
+
+# CCH-SEO-10: entity plumbing. sameAs reaches the Organization; no author is
+# invented (entity.author null => no byline anywhere); authorSchema is pure and
+# unit-tested by node because a one-page rebuild with a fake author is too heavy.
+def test_cch_seo_10_organization_sameas_and_no_byline_without_author():
+    home = DIST / "index.html"
+    if not home.is_file():
+        pytest.skip("dist/ not built")
+    orgs = [n for d in _ld_json_blocks(home) for n in (d.get("@graph", []) if isinstance(d, dict) else [])
+            if n.get("@type") == "Organization"]
+    assert orgs and "https://www.youtube.com/@defycard" in orgs[0]["sameAs"]
+    assert "https://github.com/defycard-com" in orgs[0]["sameAs"]
+    for path in _pages():
+        assert 'class="byline"' not in path.read_text(encoding="utf-8"), str(path.relative_to(DIST))
+
+
+def test_cch_seo_10_author_schema_two_literal_cases():
+    import subprocess
+    lib = Path(__file__).resolve().parent.parent / "src" / "lib" / "entity.mjs"
+    js = (
+        f"import {{authorSchema}} from '{lib}';"
+        "const org={'@type':'Organization',name:'DefyCard'};"
+        "console.log(JSON.stringify([authorSchema({author:null},org),"
+        "authorSchema({author:{name:'Jane Roe',url:'https://example.com/jane',sameAs:['https://x.com/jane']}},org)]))"
+    )
+    out = subprocess.run(["node", "--input-type=module", "-e", js], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out) == [
+        {"@type": "Organization", "name": "DefyCard"},
+        {"@type": "Person", "name": "Jane Roe", "url": "https://example.com/jane",
+         "sameAs": ["https://x.com/jane"]},
+    ]

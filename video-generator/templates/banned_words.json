@@ -1,6 +1,6 @@
 {
   "$schema": "banned-words-v1",
-  "version": "2026-05-05",
+  "version": "2026-09-21",
   "source": [
     "competitor-analysis/SKILL.md §8.3 (FTC enforcement era 2026)",
     "write-article/SKILL.md §1.2 (statically blocked phrase list)",
@@ -44,16 +44,15 @@
       "you should sell"
     ],
     "gambling_vocab": [
-      "bet",
-      "betting",
       "wager",
       "wagering",
-      "gamble",
-      "gambling",
       "sportsbook",
       "odds on",
       "place your bet",
-      "put money on"
+      "put money on",
+      "sports betting",
+      "place a bet",
+      "online casino"
     ],
     "regulatory_compliance_traps": [
       "FDIC insured",
@@ -73,8 +72,6 @@
     "will definitely":     "is published to",
     "no risk":             "limited risk per the issuer's terms",
     "100% sure":           "verified per issuer help center",
-    "bet":                 "position",
-    "betting":             "trading",
     "buy signal":          "research entry",
     "sell signal":         "research exit",
     "investment advice":   "informational research"

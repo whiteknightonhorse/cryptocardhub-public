@@ -7,9 +7,45 @@
 # fixed is not a reason to skip the redirect: one closes production of new
 # hits, the other honours the memory that already exists.
 #
-# Exact-match only. Format: <from-path> <to-path>
+# Exact-match only. Format: <from-path> <to-path|410>
 /compare/ether-fi-vs-crypto-com/	/compare/ether-fi-cash-vs-crypto-com/
 /reviews/ether-fi-cash/	/reviews/ether-fi-cash-review/
 /how-to/get-a-crypto-card/	/how-to/how-to-get-a-crypto-card/
 /reviews/crypto-com-card/	/reviews/crypto-com-card-review/
 /reviews/bybit-card/	/reviews/bybit-card-review/
+
+# CCH-SEO-03 — every URL a crawler remembers answers 301 or 410, never 404.
+# Second column `410` = gone: no same-topic live page exists (a 301 into a wrong
+# topic is worse than a 404). Videos: not in src/content/videos, page not built.
+/compare/multi-currency-crypto-cards/	/for/crypto-card-for-multi-currency/
+/compare/best-crypto-cards-2026/	/hub/best-crypto-card-2026/
+/education/what-is-self-custody/	/learn/what-is-a-self-custody-card/
+/learn/non-custodial-vs-custodial/	/learn/custodial-vs-non-custodial-card/
+/help/crypto-card-spending-limits/	/how-to/how-to-set-spending-limit-crypto-card/
+/how-to/reduce-fx-fees/	/for/crypto-card-with-no-fx-fees/
+/how-to/crypto-card-cashback-explained/	/learn/how-does-crypto-cashback-work/
+/how-to/crypto-card-for-hotels/	/for/crypto-card-for-hotels/
+/how-to/crypto-card-kyc-requirements/	/learn/what-is-kyc-for-crypto-cards/
+/how-to/crypto-card-kyc/	/learn/what-is-kyc-for-crypto-cards/
+/how-to/crypto-card-regulations/	/learn/are-crypto-cards-regulated/
+/how-to/gnosis-pay-alternatives/	/help/gnosis-pay-alternative/
+/how-to/non-custodial-cards-explained/	/learn/what-is-a-non-custodial-crypto-card/
+/how-to/non-custodial-security/	/faq/is-non-custodial-card-safer/
+/hub/reviews/crypto-com-card/	/reviews/crypto-com-card-review/
+/learn/mica-compliant-crypto-cards/	/learn/mica-compliant-vs-non-compliant-crypto-card/
+/learn/self-custody-vs-custodial/	/learn/self-custody-card-vs-exchange-card/
+/reviews/coinbase-card/	/reviews/coinbase-card-review/
+/compare/ether-fi-cash-vs-redotpay/	410
+/videos/fPMl-F4ecIg/	410
+/videos/571-AMmO5e8/	410
+/videos/eTPznhHYf8I/	410
+/education/crypto-card-guide/	/learn/what-is-a-crypto-card/
+/how-to/apply-ether-fi-card/	/how-to/how-to-set-up-ether-fi-cash/
+/reviews/nuri-card/	/help/nuri-card-alternative/
+
+# CCH-SEO-09 — near-duplicate consolidation: weaker page 301s to the stronger.
+/learn/self-custody-spending-vs-exchange-spending/	/learn/self-custody-card-vs-exchange-card/
+/how-to/how-to-use-crypto-card-for-travel/	/how-to/how-to-use-crypto-card-abroad/
+/how-to/how-to-use-crypto-card-on-uber/	/for/crypto-card-for-uber/
+/learn/what-is-account-abstraction/	/learn/what-is-a-smart-account-crypto-card/
+/faq/is-ether-fi-cash-a-debit-card/	/faq/is-ether-fi-cash-a-credit-card/

@@ -19,9 +19,14 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
+import { ranked } from '../../lib/related.mjs';
 import BucketSiblings from '../../components/BucketSiblings.astro';
-import { primaryPartnerFor, partnerUrl, resolveAffiliate, mdField } from '../../lib/affiliates.mjs';
+import VerifiedBadge from '../../components/VerifiedBadge.astro';
+import { primaryPartnerFor, partnerUrl, resolveAffiliate, mdField, PARTNERS, NO_CARD_CTA } from '../../lib/affiliates.mjs';
+import entity from '../../data/entity.json';
+import { authorSchema } from '../../lib/entity.mjs';
 import { dateModifiedFor } from '../../lib/freshness.mjs';
+import { factsForPartner, factById } from '../../lib/facts.mjs';
 
 export async function getStaticPaths() {
   const pages = await getCollection('pseo');
@@ -32,6 +37,14 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
+
+// CCH-SEO-05 hub→spoke: a hub lists its cluster (score ≥ 0.2, cap 30); every
+// other page names its best hub (score ≥ 0.15) in one "Part of:" line.
+const allPages = await getCollection('pseo');
+const CLUSTER_MIN = 0.2, PART_OF_MIN = 0.15, CLUSTER_MAX = 30;
+const isHub = entry.data.bucket === 'hub';
+const cluster = isHub ? ranked(entry, allPages, CLUSTER_MIN, false).slice(0, CLUSTER_MAX) : [];
+const partOf = isHub ? null : ranked(entry, allPages.filter((e) => e.data.bucket === 'hub'), PART_OF_MIN, false)[0] || null;
 const { Content } = await render(entry);
 
 // Cross-collection link to videos: any video whose target_pseo_slug points
@@ -51,11 +64,94 @@ const heroVideo = articleVideos[0] || null;
 // pages for jurisdictions where ether.fi is unavailable (config/availability.yaml)
 // route to the fallback partner — otherwise every CTA here sent the reader to a
 // card they cannot be issued.
+//
+// T-0142-15: `primary_partner === 'none'` is a legitimate value — no card this
+// site tracks can currently be issued to this page's readers (e.g. india,
+// turkey). Routing to NO_CARD_CTA instead of throwing on `partnerUrl('none')`
+// keeps the page indexable and honest rather than pretending a card exists.
 const partner = primaryPartnerFor(entry.data);
-const affiliateUrl = partnerUrl(partner);
+const affiliateUrl = partner === 'none' ? NO_CARD_CTA : partnerUrl(partner);
 
 // Defensive substitutions (generator usually does this at gen time)
 const intro = resolveAffiliate(entry.data.intro_paragraph || '', partner);
+
+// E-17: Product/Offer schema on review pages, sourced ONLY from
+// config/facts/<partner>.yaml — never hand-authored, so a number here cannot
+// drift from the number a reader sees elsewhere on the site.
+//
+// `partner` above is the page's CTA partner (Y50) and defaults to
+// DEFAULT_PARTNER whenever a page doesn't set `primary_partner` explicitly —
+// which, as of this task, is EVERY /reviews/ page, including reviews of
+// RedotPay, Crypto.com and 20+ other cards that have nothing to do with
+// ether.fi (PROGRESS.md#T-w3-17-product-offer-schema-reviews). Trusting
+// `partner` alone would stamp an "ether.fi Cash" Product onto a RedotPay
+// review — a schema/content mismatch, exactly the class of bug this ledger
+// keeps finding (Y50/Y53/Y54: the partner is a property of the PAGE, not a
+// fallback default). So this also requires the slug to actually name the
+// partner the facts describe, derived from the partner's own display name —
+// no new frontmatter, no partner allow-list to keep in sync by hand.
+const CARD_PRICE_FACT_ID = 'etherfi.fee.physical_card.core';
+function slugifyPartnerName(name) {
+  return String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+const partnerFacts =
+  entry.data.bucket === 'reviews' &&
+  entry.data.slug.startsWith(slugifyPartnerName(PARTNERS[partner]?.name || ''))
+    ? factsForPartner(partner)
+    : null;
+const cardPriceFact = partnerFacts ? factById(partnerFacts, CARD_PRICE_FACT_ID) : null;
+
+// T-0142-06: the "verified against the issuer" badge. Same content-relevance
+// problem as the Product schema above (a page can default to `partner ===
+// 'etherfi'` without being ABOUT ether.fi — e.g. is-crypto-com-card-safe.md,
+// bucket faq, no primary_partner set, so it silently inherits the site
+// default) — badging it with ether.fi's facts would be the exact class of
+// mismatch Y50/Y53/Y54 keep paying for. The `startsWith` check above only
+// fits the "<partner>-review" naming reviews use; how-to/faq slugs are
+// phrased as questions ("does-…", "is-…"), so this widens to `includes` on
+// just the partner's brand word instead of its full product name.
+const BADGE_BUCKETS = new Set(['reviews', 'how-to', 'faq']);
+const badgeBrandToken = slugifyPartnerName(
+  String(PARTNERS.etherfi?.name || '').split(/\s+/)[0] || ''
+);
+const isEtherfiContentPage =
+  partner === 'etherfi' &&
+  BADGE_BUCKETS.has(entry.data.bucket) &&
+  badgeBrandToken.length > 0 &&
+  entry.data.slug.includes(badgeBrandToken);
+const badgeFactCandidate = isEtherfiContentPage
+  ? factById(factsForPartner('etherfi'), CARD_PRICE_FACT_ID)
+  : null;
+// Ruling T-0142-06 names `status: current` specifically — `beta` facts print
+// with their own "(beta)" caveat elsewhere and are not what "verified" claims.
+const badgeFact = badgeFactCandidate?.status === 'current' ? badgeFactCandidate : null;
+// T-0142-06 REVIEW-FIX (ruling-2): the badge must state the number it backs,
+// not just a bare date — a bare date silently endorsed whatever figure sat
+// above it, including stale copy this exact fact's own `history` calls wrong
+// ("$40 refundable deposit" vs the fact's current value, 50). CARD_PRICE_FACT_ID
+// is always the Core-tier physical-card fee, so the label is fixed to match —
+// generalizing it is unneeded until the badge is ever passed a second fact id.
+const badgeClaim = badgeFact ? `Core physical card fee: $${badgeFact.value}` : null;
+// No aggregateRating, ever — DefyCard collects no reviews of its own, and a
+// fabricated rating is exactly the scaled-content-abuse pattern seo2026 warns
+// against (one already shipped by accident: crypto-card-for-small-business.md's
+// hand-authored schema_article.mainEntity, out of this task's scope to fix).
+const productSchema = cardPriceFact
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: PARTNERS[partner].name,
+      brand: { '@type': 'Brand', name: PARTNERS[partner].name },
+      url: `${import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com'}/${entry.data.bucket}/${entry.data.slug}/`,
+      offers: {
+        '@type': 'Offer',
+        price: cardPriceFact.value,
+        priceCurrency: cardPriceFact.unit,
+        url: affiliateUrl,
+        availability: 'https://schema.org/InStock',
+      },
+    }
+  : null;
 
 const snapshot = entry.data.snapshot_bullets || [];
 const watchList = entry.data.what_to_watch || entry.data.stakes_bullets || [];
@@ -142,11 +238,12 @@ const enrichedArticle = schemaArticle
                         (schemaArticle as any).datePublished)
         || (schemaArticle as any).dateModified
         || (schemaArticle as any).datePublished,
-      image: heroImage?.src ? [heroImage.src] : (schemaArticle as any).image,
+      image: heroImage?.src ? [new URL(heroImage.src, siteOrigin).toString()] : (schemaArticle as any).image,
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': `${siteOrigin}/${entry.data.bucket}/${entry.data.slug}/`,
       },
+      ...(entity.author ? { author: authorSchema(entity, (schemaArticle as any).author) } : {}),
       publisher: (schemaArticle as any).publisher || {
         '@type': 'Organization',
         '@id': `${siteOrigin}/#org`,
@@ -197,7 +294,13 @@ const enrichedArticle = schemaArticle
           )}
         </p>
       )}
+      {entity.author && (
+        <p class="byline">By {entity.author.url ? <a href={entity.author.url}>{entity.author.name}</a> : entity.author.name} · Reviewed {lastReviewed}</p>
+      )}
       <p class="lead" set:html={mdField(intro)}></p>
+      {partOf && (
+        <p class="part-of">Part of: <a href={`/hub/${partOf.data.slug}/`}>{partOf.data.h1}</a></p>
+      )}
     </section>
 
     {/* 1.5 ARTICLE-LINKED VIDEO — appears only when a published YT short
@@ -250,6 +353,9 @@ const enrichedArticle = schemaArticle
             </li>
           ))}
         </ul>
+        {badgeFact && (
+          <VerifiedBadge claim={badgeClaim} verifiedAt={badgeFact.verified_at} sourceUrl={badgeFact.source_url} />
+        )}
       </section>
     )}
 
@@ -282,10 +388,18 @@ const enrichedArticle = schemaArticle
 
     <!-- 6. PRIMARY AFFILIATE CTA -->
     <section class="article-cta article-cta--primary">
-      <a class="cta" href={affiliateUrl} rel="sponsored noopener" target="_blank">
-        Get your DefyCard <span aria-hidden="true">→</span>
-      </a>
-      <p class="article-cta-fineprint">Terms apply. Capital at risk.</p>
+      {partner === 'none' ? (
+        <a class="cta" href={affiliateUrl}>
+          See where each card is available <span aria-hidden="true">→</span>
+        </a>
+      ) : (
+        <>
+          <a class="cta" href={affiliateUrl} rel="sponsored noopener" target="_blank">
+            Get your DefyCard <span aria-hidden="true">→</span>
+          </a>
+          <p class="article-cta-fineprint">Terms apply. Capital at risk.</p>
+        </>
+      )}
     </section>
 
     <!-- 7. FAQ ACCORDION -->
@@ -304,6 +418,17 @@ const enrichedArticle = schemaArticle
       </section>
     )}
 
+    {cluster.length > 0 && (
+      <section class="related-links hub-cluster" aria-labelledby="cluster-heading">
+        <h2 id="cluster-heading">In this guide cluster</h2>
+        <ul>
+          {cluster.map((e) => (
+            <li><a href={`/${e.data.bucket}/${e.data.slug}/`}><span>{e.data.h1}</span></a></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
     <!-- 8. RELATED GUIDES -->
     {relatedClusters.length > 0 && (
       <RelatedLinks
@@ -316,6 +441,7 @@ const enrichedArticle = schemaArticle
 
     <!-- 9. MORE FROM THIS SECTION -->
     <BucketSiblings
+      heading={/^##\s+related reading\s*$/im.test(entry.body || '') ? 'More related reading' : undefined}
       bucket={entry.data.bucket}
       excludeSlug={entry.data.slug}
       count={5}
@@ -341,5 +467,8 @@ const enrichedArticle = schemaArticle
   )}
   {schemaFaq && (
     <script type="application/ld+json" is:inline set:html={JSON.stringify(schemaFaq)} />
+  )}
+  {productSchema && (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(productSchema)} />
   )}
 </BaseLayout>

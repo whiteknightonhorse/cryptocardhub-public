@@ -96,6 +96,13 @@ def topic_used_recently(topic_id: int, channel: str) -> bool:
 #: достался другой теме, а не той же самой в 169-й раз.
 _FAILURE_TTL_HOURS = 36
 
+#: T-0140 (постановление ruling-1). Провал, который является СВОЙСТВОМ СТРАНИЦЫ (провайдер
+#: ответил, запрос детерминирован фронтматтером, повтор через 36ч даст тот же нуль и синтезирует
+#: озвучку заново впустую) остывает на порядок дольше — 14 суток, пока T-0141 не изменит сам
+#: запрос к стоку. `reason` несёт префикс "page:" вместо отдельного столбца: схема не меняется.
+_PAGE_PROPERTY_TTL_HOURS = 14 * 24
+_PAGE_PROPERTY_PREFIX = "page:"
+
 
 def topic_failed_recently(topic_id: int, channel: str) -> bool:
     """Падала ли тема так недавно, что выдавать её снова — значит повторить отказ.
@@ -104,18 +111,29 @@ def topic_failed_recently(topic_id: int, channel: str) -> bool:
     строки означает именно отсутствие зарегистрированного провала, а отказ базы поднимется
     исключением, а не вернётся как False.
     """
-    cutoff = (datetime.now(timezone.utc) - timedelta(hours=_FAILURE_TTL_HOURS)).isoformat()
     with _conn() as cx:
         row = cx.execute(
-            "SELECT last_failed FROM topic_failure WHERE topic_id=? AND channel=?",
+            "SELECT last_failed, reason FROM topic_failure WHERE topic_id=? AND channel=?",
             (topic_id, channel),
         ).fetchone()
-    return bool(row and row[0] >= cutoff)
+    if not row:
+        return False
+    last_failed, reason = row
+    ttl = _PAGE_PROPERTY_TTL_HOURS if (reason or "").startswith(_PAGE_PROPERTY_PREFIX) else _FAILURE_TTL_HOURS
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=ttl)).isoformat()
+    return last_failed >= cutoff
 
 
-def record_topic_failure(topic_id: int, channel: str, reason: str = "") -> None:
+def record_topic_failure(topic_id: int, channel: str, reason: str = "",
+                         page_property: bool = False) -> None:
     """Зарегистрировать провал слота на этой теме. Счётчик копится и не обнуляется успехом
-    соседней темы: по нему видно тему, которая падает систематически, а не разово."""
+    соседней темы: по нему видно тему, которая падает систематически, а не разово.
+
+    `page_property=True` (T-0140) — провал есть свойство страницы (см. `_zero_cause` в
+    `fetch_visuals.py`), не преходящая поломка машины: `reason` получает префикс "page:",
+    и `topic_failed_recently` даёт ей `_PAGE_PROPERTY_TTL_HOURS` вместо `_FAILURE_TTL_HOURS`.
+    """
+    stored = (_PAGE_PROPERTY_PREFIX + reason) if page_property else reason
     with _conn() as cx:
         cx.execute(
             """INSERT INTO topic_failure(topic_id, channel, last_failed, fails, reason)
@@ -124,7 +142,7 @@ def record_topic_failure(topic_id: int, channel: str, reason: str = "") -> None:
                  last_failed=excluded.last_failed,
                  fails=topic_failure.fails + 1,
                  reason=excluded.reason""",
-            (topic_id, channel, _now(), reason[:200]),
+            (topic_id, channel, _now(), stored[:200]),
         )
 
 
@@ -134,6 +152,25 @@ def record_topic(topic_id: int, channel: str) -> None:
             "INSERT OR REPLACE INTO topic_usage(topic_id, channel, last_used) VALUES (?, ?, ?)",
             (topic_id, channel, _now()),
         )
+
+
+def topic_ever_published(topic_id: int, channel: str) -> bool:
+    """Has ANY video ever gone out for this topic on this channel — no
+    cooldown window, permanent. E-20 (VG_MODE=h1): a hot pSEO page gets one
+    video, for good, the same law longform.py's `slug_published` already
+    enforces for long-form pages — unlike the 21-day rotation every other
+    topic source uses, H1 must never re-film a page it already covered.
+    `status='partial'` counts too: that status still means a publish attempt
+    actually went out (see main.py's log_publish call), just with an error
+    string in the result — not a safe page to re-film.
+    """
+    with _conn() as cx:
+        row = cx.execute(
+            "SELECT 1 FROM publish_log WHERE topic_id=? AND channel=? "
+            "AND status IN ('ok', 'partial') LIMIT 1",
+            (topic_id, channel),
+        ).fetchone()
+    return row is not None
 
 
 def media_used_recently(url: str) -> bool:

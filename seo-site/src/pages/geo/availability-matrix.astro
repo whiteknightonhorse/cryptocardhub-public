@@ -18,7 +18,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   publishedCards, jurisdictions, cellFor, geoSlugFor,
-  availabilityNote, STALE_AFTER_DAYS,
+  availabilityNote, defaultDeny, STALE_AFTER_DAYS,
 } from '../../lib/availability.mjs';
 import { primaryPartnerFor, partnerUrl, PARTNERS } from '../../lib/affiliates.mjs';
 
@@ -48,6 +48,15 @@ function verdict(card, name, kind) {
   if (v === null) return 'Not stated';
   return v ? 'Available' : 'Not available';
 }
+
+// A fact about the ISSUER'S publishing format, so it comes from the YAML like
+// every other fact on this page. ether.fi switched from "here is what is
+// blocked" to "here is what is allowed, and nothing else is" — the two
+// sentences say opposite things about a jurisdiction that is simply absent.
+const denyByDefault = defaultDeny(cards);
+const absentMeans = denyByDefault
+  ? 'Issuers on this page publish allow-lists: a jurisdiction that is not listed cannot apply.'
+  : 'Issuers on this page publish blocked-jurisdiction lists, so an absent entry means "not blocked".';
 ---
 <BaseLayout
   title={title}
@@ -126,11 +135,7 @@ function verdict(card, name, kind) {
         {usStates.length > 0 && (
           <>
             <h2>By US state</h2>
-            <p>
-              States not listed below are supported by every card in this table. Issuers
-              publish blocked-state lists, not allow-lists, so an absent state means
-              &ldquo;not blocked&rdquo;.
-            </p>
+            <p>{absentMeans}</p>
             <table class="matrix">
               <thead>
                 <tr>
@@ -157,8 +162,9 @@ function verdict(card, name, kind) {
     <section class="callout-section">
       <h2>How to read this table</h2>
       <ul>
-        <li><strong>Available</strong> — the issuer does not list your jurisdiction as restricted. Approval still depends on KYC.</li>
-        <li><strong>Not available</strong> — the issuer names your jurisdiction as restricted. Applying will not work.</li>
+        <li><strong>Available</strong> — the issuer states your jurisdiction is supported. Approval still depends on KYC.</li>
+        <li><strong>Not available</strong> — the issuer does not list your jurisdiction as supported. Applying will not work.</li>
+        <li>{absentMeans}</li>
         <li><strong>Not stated</strong> — the issuer publishes no list we could check. We do not guess.</li>
       </ul>
     </section>

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from pipeline import dedup, longform
+from pipeline import compliance, dedup, longform
 
 
 @pytest.fixture
@@ -146,3 +146,74 @@ def test_a_stale_queue_refuses_rather_than_publishing_old_rankings(monkeypatch, 
     monkeypatch.setattr(longform, "QUEUE_PATH", q)
     with pytest.raises(RuntimeError, match="stale queue"):
         longform.queue_slugs()
+
+
+# --- law 5 (T-0139 ruling-1 Q2): a page-level rejection skips to the next
+# candidate; a machine-level failure still kills the run -------------------
+
+def test_a_compliance_rejection_skips_to_the_next_candidate(monkeypatch, tmp_path):
+    """A page that fails compliance (free, pre-synthesis) must not stop the
+    run — the next queued candidate is tried and published instead."""
+    monkeypatch.setattr(longform, "queue_slugs", lambda: ["bad-slug", "good-slug"])
+    monkeypatch.setattr(longform, "out_dir",
+                        lambda slug, day=None: tmp_path / slug)
+
+    def fake_render_one(slug, *, dry_run=False, day=None):
+        if slug == "bad-slug":
+            raise compliance.ComplianceError("Banned phrases in script: ['sports betting']")
+        (tmp_path / slug).mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setattr(longform, "render_one", fake_render_one)
+    monkeypatch.setattr(longform, "refuse_expired_claims", lambda d, slug: None)
+    published = []
+    monkeypatch.setattr(longform, "publish_one",
+                        lambda slug, **kw: published.append(slug) or {"video_id": "OK"})
+
+    out = longform.publish_next()
+    assert out == {"video_id": "OK"}
+    assert published == ["good-slug"]
+
+    rows = _log_lines(tmp_path)
+    skip = next(r for r in rows if r.get("slug") == "bad-slug")
+    assert skip["action"] == "skip"
+    assert skip["reason"] == "ComplianceError"
+
+
+def test_a_machine_failure_still_kills_the_run(monkeypatch, tmp_path):
+    """TTS/render/upload/network failures are not page properties — they must
+    propagate, not be swallowed as a skip-and-continue."""
+    monkeypatch.setattr(longform, "queue_slugs", lambda: ["only-slug"])
+    monkeypatch.setattr(longform, "out_dir",
+                        lambda slug, day=None: tmp_path / slug)
+
+    def fake_render_one(slug, *, dry_run=False, day=None):
+        raise RuntimeError("eleven_quota exhausted")
+
+    monkeypatch.setattr(longform, "render_one", fake_render_one)
+    with pytest.raises(RuntimeError, match="eleven_quota"):
+        longform.publish_next()
+
+
+def test_render_cap_stops_at_three_after_repeated_expired_claims(monkeypatch, tmp_path):
+    """Four candidates that all fail the post-render expired-claim gate must
+    render at most MAX_RENDERS_PER_RUN times, not once per candidate — that
+    gate only fires after real synthesis, so it is the expensive case the cap
+    exists to bound."""
+    slugs = ["s1", "s2", "s3", "s4"]
+    monkeypatch.setattr(longform, "queue_slugs", lambda: list(slugs))
+    monkeypatch.setattr(longform, "out_dir",
+                        lambda slug, day=None: tmp_path / slug)
+    render_calls: list[str] = []
+
+    def fake_render_one(slug, *, dry_run=False, day=None):
+        render_calls.append(slug)
+
+    def fake_refuse(d, slug):
+        raise RuntimeError(f"{slug}: REFUSING to publish — expired claim")
+
+    monkeypatch.setattr(longform, "render_one", fake_render_one)
+    monkeypatch.setattr(longform, "refuse_expired_claims", fake_refuse)
+
+    with pytest.raises(RuntimeError, match="3 skip"):
+        longform.publish_next()
+    assert render_calls == ["s1", "s2", "s3"]

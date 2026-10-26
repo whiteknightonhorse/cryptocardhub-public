@@ -171,3 +171,49 @@ def test_dry_run_still_gets_placeholders(tmp_path):
     got = fetch_visuals.fetch("q", want=3, out_dir=tmp_path / "m5", dry_run=True)
     assert len(got) == 3
     assert all(g["source"] == "placeholder" for g in got)
+
+
+# --- T-0140 (ruling-1): NoVisualsError carries the cause, so a caller can ---
+# tell a page property (query structurally unfindable) apart from a machine
+# failure, without weakening Y58's refusal at all.
+
+def test_page_property_causes_is_pinned_to_empty_results_only():
+    assert fetch_visuals.PAGE_PROPERTY_CAUSES == frozenset({"empty_results"})
+
+
+def test_empty_results_raises_novisualserror_with_its_cause(tmp_path, monkeypatch):
+    monkeypatch.setattr(fetch_visuals, "_http_get", _api(n=0))
+    monkeypatch.setattr(dedup, "media_used_recently", lambda url: False)
+
+    with pytest.raises(fetch_visuals.NoVisualsError) as e:
+        fetch_visuals.fetch("q", want=4, out_dir=tmp_path / "m6")
+
+    assert isinstance(e.value, RuntimeError)
+    assert e.value.cause == "empty_results"
+    assert e.value.cause in fetch_visuals.PAGE_PROPERTY_CAUSES
+
+
+def test_all_deduped_is_a_novisualserror_but_not_a_page_property(tmp_path, monkeypatch):
+    monkeypatch.setattr(fetch_visuals, "_http_get", _api())
+    monkeypatch.setattr(dedup, "media_used_recently", lambda url: True)
+
+    with pytest.raises(fetch_visuals.NoVisualsError) as e:
+        fetch_visuals.fetch("q", want=4, out_dir=tmp_path / "m7")
+
+    assert e.value.cause == "all_deduped"
+    assert e.value.cause not in fetch_visuals.PAGE_PROPERTY_CAUSES
+
+
+def test_total_provider_failure_is_a_bare_runtimeerror_not_novisualserror(tmp_path, monkeypatch):
+    """Y58's other refusal (all three providers threw) is a machine failure —
+    it must stay the plain RuntimeError it always was, never the page-property
+    class, or a transient outage would get mistaken for a 14-day cooldown."""
+    def _boom(*a, **k):
+        raise ConnectionError("network down")
+    monkeypatch.setattr(fetch_visuals, "_http_get", _boom)
+
+    with pytest.raises(RuntimeError) as e:
+        fetch_visuals.fetch("q", want=4, out_dir=tmp_path / "m8")
+
+    assert not isinstance(e.value, fetch_visuals.NoVisualsError)
+    assert "all visual providers failed" in str(e.value)

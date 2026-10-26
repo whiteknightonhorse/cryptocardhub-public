@@ -1,0 +1,21 @@
+# keyword-placements-2026-10.tsv — CCH-KW-05: hot keywords on existing pages
+#
+# old<TAB>new. Literal raw bytes (corpus_edit.apply_table, both serializations).
+# title and schema_article.headline are the SAME literal, so one pair moves both.
+# No new number anywhere. 3 files: coinbase-card-review, best-crypto-credit-card, crypto-com-card-review.
+#
+# --- coinbase-card-review (secondary: coinbase debit card)
+Coinbase Card Review 2026: Fees, Features & Compare	Coinbase Card Review 2026: the Coinbase debit card's fees & cashback
+h1: "Coinbase Card Review 2026"\n	h1: "Coinbase Card Review 2026 (Coinbase debit card)"\n
+Coinbase Card review — cashback, fees, crypto spending features, and how it compares to ether.fi Cash and other crypto cards.	Coinbase Card review — cashback, fees, and spending features of the Coinbase debit card, and how it compares to ether.fi Cash and other crypto cards.
+supporting_keywords: ["coinbase card review 2026", "bybit card review"]	supporting_keywords: ["coinbase card review 2026", "bybit card review", "coinbase debit card"]
+\n## What is Coinbase Card?\n	\n## What is the Coinbase debit card?\n
+# --- best-crypto-credit-card (secondary: crypto rewards credit card)
+Best Crypto Credit Card 2026: Non-Custodial Rewards Ranked	Best Crypto Credit Card 2026: Crypto Rewards Credit Cards Ranked
+Find top cashback, FX fees, and geographic availability for 2026.	Find the top crypto rewards credit card cashback, FX fees, and geographic availability for 2026.
+supporting_keywords: ["crypto card comparison", "non-custodial crypto card"]	supporting_keywords: ["crypto card comparison", "non-custodial crypto card", "crypto rewards credit card"]
+\n## Cashback & Reward Stacking\n	\n## Crypto rewards credit cards: how cashback stacks\n
+# --- crypto-com-card-review (secondary: crypto.com credit card)
+Crypto.com card review: compare cashback rates, staking requirements, fees, and custody options. See how it stacks up vs. ether.fi and Coinbase in 2026.	Crypto.com card review: cashback rates, staking requirements, fees, custody, and how the Crypto.com credit card differs. See how it stacks up vs. ether.fi and Coinbase in 2026.
+supporting_keywords: ["crypto.com card review 2026", "coinbase card review"]	supporting_keywords: ["crypto.com card review 2026", "coinbase card review", "crypto.com credit card"]
+\n## What to Watch\n\n- **Staking-requirement shifts**	\n## Crypto.com credit card vs. the prepaid Visa card: two products\n\nTwo different products share the Crypto.com name. The U.S. Crypto.com Visa Signature credit card is issued by Comenity Capital Bank. The international Crypto.com Visa Card is a prepaid card. This review covers the prepaid card. The credit card's headline figures are disputed between issuer surfaces, so they are not printed here.\n\n## What to Watch\n\n- **Staking-requirement shifts**

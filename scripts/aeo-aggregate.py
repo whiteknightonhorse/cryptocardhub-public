@@ -32,6 +32,32 @@ under forged `OAI-SearchBot` / `PerplexityBot` user agents asking for /.env,
 Dropping either filter re-admits them and inflates the only number this whole
 programme is judged on.
 
+CLAIMED VS VERIFIED (added after the 654->99 investigation, 2026-09-01)
+------------------------------------------------------------------------
+The three conditions above only prove the UA STRING says "ChatGPT-User" etc.
+They do nothing to prove the request came from OpenAI/Anthropic/Perplexity's
+own infrastructure — a vulnerability scanner can type any string into a
+User-Agent header for free. A weekly total that mixed real answer-time agents
+with scanners spoofing that same header (resolving to generic Google
+Cloud / AWS ranges, not the vendor's own published ranges) is how a row read
+654 one week — a single counter standing for two populations at once.
+
+So every count this file produces now exists in TWO separate fields that are
+NEVER added together into one number:
+  * `ai_fetches`, `by_agent`, `by_bucket`, `by_page` (unprefixed)
+      = CLAIMED: the UA string matched. Unchanged behaviour, unchanged name —
+        this is exactly what the file always measured, now named honestly.
+  * `verified_ai_fetches`, `verified_by_agent`, `verified_by_bucket`,
+    `verified_by_page` = VERIFIED: claimed AND the source IP is inside that
+        agent's own published range file (checked with the stdlib `ipaddress`
+        module, cached locally so a network hiccup does not stall the cron):
+          ChatGPT-User    https://openai.com/chatgpt-user.json
+          Claude-User     https://claude.com/crawling/bots.json
+          Perplexity-User https://www.perplexity.com/perplexity-user.json
+A verdict, a target list or a report headline must read `verified_*`.
+`ai_fetches` etc. stay for comparison/transparency only — printing them as
+"the" number is the exact mistake this file existed to prevent once already.
+
 Usage:
     aeo-aggregate.py                      # the last COMPLETE ISO week
     aeo-aggregate.py --week 2026-W32
@@ -42,10 +68,13 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import ipaddress
 import json
 import re
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable
@@ -66,8 +95,21 @@ AI_ANSWER_AGENTS = ("ChatGPT-User", "Claude-User", "Perplexity-User")
 ARTICLE_BUCKETS = ("hub", "compare", "reviews", "how-to", "for", "tools",
                    "learn", "help", "geo", "news", "faq")
 
+# --- the law, part 3: what makes a claim VERIFIED ----------------------------
+# Each vendor publishes its own crawler/fetcher IP ranges as a small JSON file
+# (same {"prefixes": [{"ipv4Prefix": "a.b.c.d/nn"}, ...]} shape for all three,
+# confirmed by fetching them directly on 2026-09-01). An IP outside the range
+# means the UA string is unconfirmed — still counted as CLAIMED, never VERIFIED.
+BOT_RANGES_URL = {
+    "ChatGPT-User": "https://openai.com/chatgpt-user.json",
+    "Claude-User": "https://claude.com/crawling/bots.json",
+    "Perplexity-User": "https://www.perplexity.com/perplexity-user.json",
+}
+RANGES_DIR = AEO_DIR / "bot-ranges"
+RANGES_MAX_AGE_DAYS = 7  # vendors rotate ranges; re-fetch weekly, don't hammer them daily
+
 _LINE_RE = re.compile(
-    r'^\S+ \S+ \S+ \[([^\]]+)\] "(?:GET|HEAD) ([^ "]+)[^"]*" (\d{3}) \S+ "[^"]*" "([^"]*)"'
+    r'^(\S+) \S+ \S+ \[([^\]]+)\] "(?:GET|HEAD) ([^ "]+)[^"]*" (\d{3}) \S+ "[^"]*" "([^"]*)"'
 )
 _ARTICLE_RE = re.compile(
     r"^/(" + "|".join(re.escape(b) for b in ARTICLE_BUCKETS) + r")/[a-z0-9][a-z0-9-]*/$"
@@ -87,40 +129,147 @@ def agent_of(ua: str) -> str | None:
     return None
 
 
-def parse_line(line: str) -> dict[str, Any] | None:
-    """-> {ts, path, status, ua, agent} or None if it is not an AI article fetch.
+def parse_line(line: str, is_content_path=is_article_path) -> dict[str, Any] | None:
+    """-> {ts, path, status, ua, agent, ip} or None if not an AI article fetch.
 
     Returning None for *any* of the three conditions is the point: the gate
-    proves each one separately.
+    proves each one separately. `ip` is the CLAIM's subject, not yet judged —
+    verification happens later, once per unique IP, in `aggregate()`.
+
+    `is_content_path` defaults to defycard's own `is_article_path` but is
+    injectable: `/var/log/nginx/access.log` is confirmed (2026-09-01) to be
+    ONE shared file across every site on this box, undistinguished by Host —
+    apibase.pro's `/mcp` and defycard's `/reviews/...` land in the same log.
+    The control script for a neighbor site reuses this exact UA+status law
+    with that site's own known content paths instead.
     """
     m = _LINE_RE.match(line)
     if not m:
         return None
-    ts_raw, path, status, ua = m.groups()
+    ip, ts_raw, path, status, ua = m.groups()
     agent = agent_of(ua)
     if agent is None:
         return None
     if status != "200":
         return None
     path = path.split("?", 1)[0]
-    if not is_article_path(path):
+    if not is_content_path(path):
         return None
     try:
         ts = datetime.strptime(ts_raw.split()[0], "%d/%b/%Y:%H:%M:%S").date()
     except ValueError:
         return None
     return {"date": ts.isoformat(), "path": path, "status": 200,
-            "ua": ua, "agent": agent}
+            "ua": ua, "agent": agent, "ip": ip}
 
 
-def aggregate(lines: Iterable[str], since: date, until: date) -> dict[str, Any]:
-    """Fold log lines into one week's figures. `until` is inclusive."""
+# ---------------------------------------------------------------------------
+# Verification: is the claimed IP actually inside the vendor's own range?
+# ---------------------------------------------------------------------------
+
+def _http_get_json(url: str) -> dict[str, Any]:
+    req = urllib.request.Request(url, headers={"User-Agent": "defycard-aeo-verify/1.0"})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.loads(r.read().decode())
+
+
+def _cache_path(agent: str) -> Path:
+    return RANGES_DIR / f"{agent.lower().replace('-', '_')}.json"
+
+
+def fetch_bot_ranges(agent: str, *, fetcher=_http_get_json,
+                     now: float | None = None) -> tuple[list, dict[str, Any]]:
+    """-> (list of ip_network, meta). Empty list + source='unavailable' fails CLOSED
+    (an agent with no usable range list verifies nothing, it never verifies
+    everything) so a fetch outage can only ever undercount `verified`, never
+    silently inflate it back to `claimed`.
+
+    Cached under logs/aeo/bot-ranges/<agent>.json so a weekly cron does not
+    hit the vendor on every run, and a network hiccup falls back to the last
+    good copy instead of zeroing verification out for the week.
+    """
+    import time as _time
+    now = _time.time() if now is None else now
+    url = BOT_RANGES_URL.get(agent)
+    cache = _cache_path(agent)
+    cached = None
+    if cache.exists():
+        try:
+            cached = json.loads(cache.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            cached = None
+    stale = not cache.exists() or (now - cache.stat().st_mtime) > RANGES_MAX_AGE_DAYS * 86400
+    data, source = cached, "cache"
+    if url and stale:
+        try:
+            data = fetcher(url)
+            RANGES_DIR.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps(data), encoding="utf-8")
+            source = "live"
+        except (urllib.error.URLError, OSError, ValueError, TimeoutError):
+            data, source = cached, ("cache_stale" if cached else "unavailable")
+    elif not url:
+        source = "no_published_range_for_this_agent"
+    networks = []
+    for p in (data or {}).get("prefixes", []):
+        raw = p.get("ipv4Prefix") or p.get("ipv6Prefix")
+        if not raw:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(raw, strict=False))
+        except ValueError:
+            continue
+    if not networks:
+        source = "unavailable"
+    return networks, {"source": source, "prefix_count": len(networks)}
+
+
+def load_all_bot_ranges(*, fetcher=_http_get_json) -> tuple[dict[str, list], dict[str, Any]]:
+    ranges: dict[str, list] = {}
+    meta: dict[str, Any] = {}
+    for agent in AI_ANSWER_AGENTS:
+        ranges[agent], meta[agent] = fetch_bot_ranges(agent, fetcher=fetcher)
+    return ranges, meta
+
+
+def verify_ip(ip: str, agent: str, ranges: dict[str, list]) -> bool:
+    """Is `ip` inside the range list published BY THE VENDOR NAMED `agent`?
+
+    Fails closed on a malformed IP or an agent with no usable range list —
+    see `fetch_bot_ranges`'s docstring for why that direction is the safe one.
+    """
+    nets = ranges.get(agent) or []
+    if not nets:
+        return False
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return any(addr in n for n in nets)
+
+
+def aggregate(lines: Iterable[str], since: date, until: date,
+             ranges: dict[str, list] | None = None,
+             ranges_meta: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Fold log lines into one week's figures. `until` is inclusive.
+
+    `ranges` (agent -> list[ip_network]) drives the VERIFIED split; pass None
+    to skip verification entirely (existing callers/tests that only care about
+    CLAIMED behaviour keep working unchanged — `verified_*` keys are simply
+    absent, never a lying zero). `main()` supplies real ranges from
+    `load_all_bot_ranges()`; tests inject a fixed dict so no test hits network.
+    """
     by_agent: dict[str, int] = {a: 0 for a in AI_ANSWER_AGENTS}
     by_bucket: dict[str, int] = {}
     by_page: dict[str, int] = {}
+    v_by_agent: dict[str, int] = {a: 0 for a in AI_ANSWER_AGENTS}
+    v_by_bucket: dict[str, int] = {}
+    v_by_page: dict[str, int] = {}
     pages: set[str] = set()
+    v_pages: set[str] = set()
     days: set[str] = set()
     fetches = 0
+    v_fetches = 0
     for line in lines:
         rec = parse_line(line)
         if rec is None:
@@ -135,11 +284,20 @@ def aggregate(lines: Iterable[str], since: date, until: date) -> dict[str, Any]:
         days.add(rec["date"])
         bucket = rec["path"].split("/")[1] if rec["path"] != "/" else "(home)"
         by_bucket[bucket] = by_bucket.get(bucket, 0) + 1
+        if ranges is not None and verify_ip(rec["ip"], rec["agent"], ranges):
+            v_fetches += 1
+            v_by_agent[rec["agent"]] += 1
+            v_pages.add(rec["path"])
+            v_by_page[rec["path"]] = v_by_page.get(rec["path"], 0) + 1
+            v_by_bucket[bucket] = v_by_bucket.get(bucket, 0) + 1
     span = (until - since).days + 1
-    return {
+    out = {
         "since": since.isoformat(),
         "until": until.isoformat(),
         "days_covered": len(days),
+        # CLAIMED — UA string match only. See module docstring: never report
+        # this as "the" number, it is exactly the field that mixed real
+        # agents with spoofed scanners in the 654 row.
         "ai_fetches": fetches,
         "ai_fetches_per_day": round(fetches / span, 1),
         "ai_pages_fetched": len(pages),
@@ -149,6 +307,19 @@ def aggregate(lines: Iterable[str], since: date, until: date) -> dict[str, Any]:
         # works through. `ai_pages_fetched` is len(by_page) by construction.
         "by_page": dict(sorted(by_page.items(), key=lambda kv: (-kv[1], kv[0]))),
     }
+    if ranges is not None:
+        out.update({
+            # VERIFIED — claimed AND the source IP is in the vendor's own
+            # published range file. This is the field a verdict may use.
+            "verified_ai_fetches": v_fetches,
+            "verified_ai_fetches_per_day": round(v_fetches / span, 1),
+            "verified_ai_pages_fetched": len(v_pages),
+            "verified_by_agent": v_by_agent,
+            "verified_by_bucket": dict(sorted(v_by_bucket.items(), key=lambda kv: -kv[1])),
+            "verified_by_page": dict(sorted(v_by_page.items(), key=lambda kv: (-kv[1], kv[0]))),
+            "verification": ranges_meta or {},
+        })
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -282,7 +453,7 @@ def parse_404(line: str) -> dict[str, Any] | None:
     m = _LINE_RE.match(line)
     if not m:
         return None
-    ts_raw, path, status, ua = m.groups()
+    _ip, ts_raw, path, status, ua = m.groups()
     if status != "404":
         return None
     if agent_of(ua) is None:
@@ -335,8 +506,15 @@ def build_targets(agg: dict[str, Any], demand: dict[str, int],
     exactly one of them. A page fetched by agents but absent from disk (a stale
     URL still being served from an old build) lands in neither and is reported
     separately rather than silently folded into `hot`.
+
+    Prefers `verified_by_page` when the aggregate carries one (editorial time
+    should chase pages real agents fetched, not ones a scanner inflated) —
+    checked by KEY presence, not truthiness, so a week that is genuinely all-
+    unverified (`{}`) is not silently rewritten back into the claimed figures.
+    Callers that never verify (older history rows, existing tests) fall back
+    to plain `by_page` unchanged.
     """
-    by_page = agg.get("by_page") or {}
+    by_page = agg["verified_by_page"] if "verified_by_page" in agg else (agg.get("by_page") or {})
     hot = [{"path": p, "fetches": n} for p, n in by_page.items() if p in existing]
     fetched = {p for p in by_page if p in existing}
     cold = sorted(existing - fetched)
@@ -380,8 +558,9 @@ def main() -> int:
         week = a.week or last_complete_week(date.today())
         since, until = iso_week_bounds(week)
 
-    agg = aggregate(_read_logs(), since, until)
-    shown = {k: v for k, v in agg.items() if k != "by_page"}
+    ranges, ranges_meta = load_all_bot_ranges()
+    agg = aggregate(_read_logs(), since, until, ranges=ranges, ranges_meta=ranges_meta)
+    shown = {k: v for k, v in agg.items() if k not in ("by_page", "verified_by_page")}
     print(json.dumps({"week": week, **shown}, indent=2))
     if agg["ai_fetches"] == 0:
         print("[aeo] WARNING: 0 fetches — logs unreadable or window outside "
@@ -389,6 +568,9 @@ def main() -> int:
               "us' and that is a measurement failure, not a fact).",
               file=sys.stderr)
         return 1
+    print(f"[aeo] claimed={agg['ai_fetches']} verified={agg.get('verified_ai_fetches', 'n/a')} "
+          f"ranges=" + ", ".join(f"{k}:{v['source']}({v['prefix_count']})"
+                                 for k, v in ranges_meta.items()), file=sys.stderr)
     if not a.print_only:
         print(f"[aeo] wrote {write_week(week, agg)} + history line", file=sys.stderr)
 

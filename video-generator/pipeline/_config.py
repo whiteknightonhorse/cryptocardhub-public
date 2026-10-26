@@ -43,3 +43,14 @@ def cfg() -> dict[str, Any]:
 def root() -> Path:
     """Project root (the video-generator/ dir)."""
     return _ROOT
+
+
+def tts_provider() -> str:
+    """`TTS_PROVIDER` env var: "edge" (default) or "elevenlabs" (E-19)."""
+    return os.environ.get("TTS_PROVIDER", "edge")
+
+
+def vg_mode() -> str:
+    """`VG_MODE` env var: "default" (unchanged topic/schedule selection) or
+    "h1" (E-20: hot etherfi pSEO pages drive the topic, 3 slots/week)."""
+    return os.environ.get("VG_MODE", "default")

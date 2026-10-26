@@ -46,6 +46,10 @@ import urllib.request
 import yaml
 from bs4 import BeautifulSoup
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
+import humanize_gate  # noqa: E402 -- G37: copy-edit AI tells before the markdown emitter
+
 UNSPLASH_KEY = os.environ.get("UNSPLASH_ACCESS_KEY", "").strip()
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -56,10 +60,40 @@ LOG_DIR = ROOT / "logs" / "news"
 ASSETS_DIR = ROOT / "seo-site" / "public" / "assets" / "news"
 ASSETS_URL_PREFIX = "/assets/news"
 
-DEFAULT_MODEL = os.environ.get("WRITER_MODEL", "claude-haiku-4-5-20251001")
-assert "haiku" in DEFAULT_MODEL.lower(), (
-    f"WRITER_MODEL must be Haiku class for cost; got {DEFAULT_MODEL!r}"
-)
+FLEET_PAUSED_UNTIL_PATH = Path.home() / ".fleet-paused-until"
+
+
+def fleet_paused_until_epoch() -> Optional[int]:
+    """T-0125: _call_claude() below hits /usr/bin/claude by an ABSOLUTE
+    path, from a cron line that also invokes an absolute-path python
+    interpreter -- neither ever goes through PATH, so the ~/bin/claude
+    PATH-guard (T-0121) cannot see this call at all. Ported verbatim from
+    apibase's own content-machine/scripts/pseo-generate.py (T-15), which
+    itself mirrors ~/bin/claude's own pause-wrapper parsing (first line,
+    strip everything but digits) -- a missing/empty/malformed file means
+    "not paused", never a crash."""
+    if not FLEET_PAUSED_UNTIL_PATH.exists():
+        return None
+    try:
+        first_line = FLEET_PAUSED_UNTIL_PATH.read_text(encoding="utf-8").splitlines()[0]
+    except (OSError, IndexError):
+        return None
+    digits = re.sub(r"[^0-9]", "", first_line)
+    return int(digits) if digits else None
+
+def _load_pg():
+    # ONE model constant: pseo-generate.py owns it (and the Haiku-class assert).
+    import importlib.util
+    root = Path(__file__).resolve().parent.parent
+    spec = importlib.util.spec_from_file_location("pseo_generate", root / "scripts" / "pseo-generate.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["pseo_generate"] = mod   # pseo-generate.py's @dataclass needs this pre-registered
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_PG = _load_pg()
+DEFAULT_MODEL = _PG.DEFAULT_MODEL
 
 DEFAULT_FRESHNESS_HOURS = 36   # operator override via --freshness-hours
 
@@ -319,6 +353,7 @@ def _is_fresh(item: Item, hours: int) -> bool:
 SYSTEM_PROMPT = """You are the DefyCard senior editor. You produce 400-600-word
 news articles for crypto-card readers, in the same editorial register Bloomberg
 or The Information would use for a financial-product brief.
+""" + humanize_gate.voice_block() + """
 
 CONTRACT (P0 — never violate):
 
@@ -393,38 +428,8 @@ def _strip_fences(text: str) -> str:
 
 
 def _call_claude(item: Item, model: str) -> dict:
-    import tempfile
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as sp:
-        sp.write(SYSTEM_PROMPT)
-        sp_path = sp.name
-    try:
-        proc = subprocess.run(
-            [
-                "/usr/bin/claude", "--print",
-                "--model", model,
-                "--append-system-prompt-file", sp_path,
-                "--disable-slash-commands",
-                "--max-turns", "1",
-                "--output-format", "json",
-                "--exclude-dynamic-system-prompt-sections",
-            ],
-            input=_build_user_message(item),
-            capture_output=True, text=True, timeout=180,
-        )
-        if proc.returncode != 0:
-            raise RuntimeError(f"claude exit {proc.returncode}: {proc.stderr[:300]!r}")
-        cli = json.loads(proc.stdout)
-        if cli.get("is_error"):
-            raise RuntimeError(f"claude is_error: {str(cli.get('result',''))[:300]}")
-        text = (cli.get("result") or "").strip()
-        if not text:
-            raise RuntimeError(f"empty result; stop_reason={cli.get('stop_reason')!r}")
-        return json.loads(_strip_fences(text))
-    finally:
-        try:
-            os.unlink(sp_path)
-        except OSError:
-            pass
+    text, _usage, _cost = _PG.call_claude_cli(SYSTEM_PROMPT, _build_user_message(item), model, 180)
+    return json.loads(_strip_fences(text.strip()))
 
 
 # =============================================================================
@@ -522,6 +527,57 @@ def _log(rec: dict) -> None:
     (LOG_DIR / f"{datetime.now(timezone.utc):%Y-%m-%d}.jsonl").open("a").write(line + "\n")
 
 
+def _mark_seen(db, it: Item, status: str) -> None:
+    db.execute(
+        "INSERT OR REPLACE INTO news_seen "
+        "(url_hash, source_name, source_url, first_seen, status) "
+        "VALUES (?,?,?,?,?)",
+        (_url_hash(it.source_url), it.source_name, it.source_url,
+         datetime.now(timezone.utc).isoformat(), status))
+    db.commit()
+
+
+def _publish_item(it: Item, db, http: dict) -> bool:
+    """One candidate: fetch, write, G37 copy-edit, emit. True only if a page was written."""
+    try:
+        it.body = _fetch_full_body(it, http["user_agent"], http["timeout_s"])
+        if len(it.body) < 200:
+            _log({"event": "skip_short_body", "url": it.source_url, "len": len(it.body)})
+            _mark_seen(db, it, "rejected")
+            return False
+        payload = _call_claude(it, DEFAULT_MODEL)
+        # G37 (CCH-HUM-05): the emitter below must see the REWRITTEN payload.
+        hres = humanize_gate.humanize(payload)
+        _log({"event": "humanize", "url": it.source_url, "slug": payload.get("slug"),
+              "flags_before": hres.flags_before, "flags_after": hres.flags_after,
+              "rewritten": hres.rewritten, "refused_reason": hres.refused_reason,
+              "cost_usd": round(hres.cost_usd, 6)})
+        if hres.refused_reason:
+            _log({"event": "refused", "gate": "G37", "reason": hres.refused_reason,
+                  "url": it.source_url, "slug": payload.get("slug")})
+            _mark_seen(db, it, "rejected")
+            return False
+        payload = hres.payload
+        path = _write_article(payload, it)
+        _mark_seen(db, it, "published")
+        _log({"event": "published",
+              "slug": payload["slug"],
+              "source": it.source_name,
+              "url": it.source_url,
+              "title": payload["title"][:80],
+              "path": str(path)})
+        print(f"[news-ingest] published: {payload['title'][:80]} "
+              f"({it.source_name}) → {path.name}")
+        return True
+    except Exception as e:
+        _log({"event": "error", "url": it.source_url,
+              "error": f"{type(e).__name__}: {e}"})
+        print(f"[news-ingest] error on {it.source_url}: {e}", file=sys.stderr)
+        # Mark as rejected so we don't retry forever
+        _mark_seen(db, it, "rejected")
+        return False
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true",
@@ -530,6 +586,25 @@ def main() -> int:
     ap.add_argument("--freshness-hours", type=int, default=DEFAULT_FRESHNESS_HOURS,
                     help="how far back to consider an item fresh (default 36)")
     args = ap.parse_args()
+
+    # E-02: checked before EVERYTHING else, --dry-run included -- see the
+    # same check in pseo-generate.py's _main() for why.
+    if not pseo_enabled():
+        print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
+        print("[news-ingest] skip: pseo_disabled (PSEO_ENABLED=false)")
+        return 0
+
+    # T-0125: fleet pause checked before any fetch/model spend -- see
+    # fleet_paused_until_epoch()'s docstring for why the ~/bin/claude
+    # PATH-guard can't see this script's model call at all. Skipped under
+    # --dry-run, which never reaches _call_claude() anyway.
+    if not args.dry_run:
+        paused_until = fleet_paused_until_epoch()
+        if paused_until is not None and paused_until > time.time():
+            remaining_min = int((paused_until - time.time() + 59) // 60)
+            until_iso = datetime.fromtimestamp(paused_until, tz=timezone.utc).isoformat()
+            print(f"[news-ingest] skip: fleet_paused (until {until_iso}, {remaining_min}min left)")
+            return 0
 
     cfg = yaml.safe_load(SOURCES_FILE.read_text(encoding="utf-8"))
     sources = cfg["sources"]
@@ -578,51 +653,9 @@ def main() -> int:
     # Real run — fetch full bodies + Haiku rewrite
     written = 0
     for it in candidates:
-        h = _url_hash(it.source_url)
-        try:
-            it.body = _fetch_full_body(it, http["user_agent"], http["timeout_s"])
-            if len(it.body) < 200:
-                _log({"event": "skip_short_body", "url": it.source_url,
-                      "len": len(it.body)})
-                db.execute(
-                    "INSERT OR REPLACE INTO news_seen "
-                    "(url_hash, source_name, source_url, first_seen, status) "
-                    "VALUES (?,?,?,?,?)",
-                    (h, it.source_name, it.source_url,
-                     datetime.now(timezone.utc).isoformat(), "rejected"))
-                db.commit()
-                continue
-            payload = _call_claude(it, DEFAULT_MODEL)
-            path = _write_article(payload, it)
-            db.execute(
-                "INSERT OR REPLACE INTO news_seen "
-                "(url_hash, source_name, source_url, first_seen, status) "
-                "VALUES (?,?,?,?,?)",
-                (h, it.source_name, it.source_url,
-                 datetime.now(timezone.utc).isoformat(), "published"))
-            db.commit()
-            _log({"event": "published",
-                  "slug": payload["slug"],
-                  "source": it.source_name,
-                  "url": it.source_url,
-                  "title": payload["title"][:80],
-                  "path": str(path)})
+        if _publish_item(it, db, http):
             written += 1
-            print(f"[news-ingest] published: {payload['title'][:80]} "
-                  f"({it.source_name}) → {path.name}")
             time.sleep(2)  # be polite to source server between full-page fetches
-        except Exception as e:
-            _log({"event": "error", "url": it.source_url,
-                  "error": f"{type(e).__name__}: {e}"})
-            print(f"[news-ingest] error on {it.source_url}: {e}", file=sys.stderr)
-            # Mark as rejected so we don't retry forever
-            db.execute(
-                "INSERT OR REPLACE INTO news_seen "
-                "(url_hash, source_name, source_url, first_seen, status) "
-                "VALUES (?,?,?,?,?)",
-                (h, it.source_name, it.source_url,
-                 datetime.now(timezone.utc).isoformat(), "rejected"))
-            db.commit()
 
     print(f"[news-ingest] done: {written} published "
           f"({datetime.now(timezone.utc).isoformat()})")

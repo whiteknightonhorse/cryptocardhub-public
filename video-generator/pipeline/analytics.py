@@ -252,26 +252,74 @@ def pull_youtube_stats(video_id: str) -> dict[str, Any] | None:
 
 
 # -----------------------------------------------------------------------------
+# E-15: YouTube Analytics traffic sources (insightTrafficSourceType) — feeds
+# the H1 instrument's weekly EXT_URL snapshot (scripts/weekly-report.py).
+# -----------------------------------------------------------------------------
+
+def pull_traffic_sources(date_from: str, date_to: str) -> dict[str, Any]:
+    """{"status": "ok", "data": {source: views}} keyed by insightTrafficSourceType
+    (e.g. SHORTS, YT_SEARCH, EXT_URL), or {"status": "instrument_dead", "error"}.
+
+    Same status shape as pull_ga4_register_clicks — never a bare {}, so a
+    caller can't read "API unreachable" as "zero EXT_URL traffic." Confirmed
+    live 2026-09-14: this scope (yt-analytics.readonly) is already on
+    YOUTUBE_REFRESH_TOKEN and the call returns HTTP 200. impressions/CTR are
+    NOT available on this API at all ("Unknown identifier") — do not request
+    them here, that is a metrics gap, not a scope gap.
+    """
+    if not _have_yt_creds():
+        return {"status": "instrument_dead", "error": "YouTube OAuth creds missing"}
+    try:
+        from googleapiclient.discovery import build
+        creds = _yt_credentials()
+        yta = build("youtubeAnalytics", "v2", credentials=creds, cache_discovery=False)
+        r = yta.reports().query(
+            ids="channel==MINE",
+            startDate=date_from, endDate=date_to,
+            metrics="views",
+            dimensions="insightTrafficSourceType",
+        ).execute()
+        data = {row[0]: int(row[1]) for row in r.get("rows", [])}
+        return {"status": "ok", "data": data}
+    except Exception as e:
+        _log("traffic_sources_error", error=str(e)[:200])
+        return {"status": "instrument_dead", "error": f"{type(e).__name__}: {e}"[:300]}
+
+
+# -----------------------------------------------------------------------------
 # GA4 Reporting — per-utm_content register_click conversion
 # -----------------------------------------------------------------------------
 
-def pull_ga4_register_clicks(date_from: str, date_to: str) -> dict[str, int]:
-    """Returns a dict {utm_content: count} for register_click events in the date
-    range. utm_content carries the cta_bridge pattern_id so we can attribute.
+def pull_ga4_register_clicks(date_from: str, date_to: str) -> dict[str, Any]:
+    """{"status": "ok", "data": {utm_content: count}} for register_click
+    events, or {"status": "instrument_dead", "error": "..."}. NEVER a bare
+    {} — a caller that cannot tell "GA4 said zero conversions" apart from
+    "GA4 could not be reached" will silently score every pattern as if the
+    conversion side of it never happened, for as long as the instrument
+    stays broken (measured: 403 ACCESS_TOKEN_SCOPE_INSUFFICIENT on
+    analyticsdata.googleapis.com every time this ran, because it read GA4
+    through the YouTube OAuth token, which was never granted
+    analytics.readonly — a scope no amount of retrying adds).
 
-    Returns {} if GA4 reporting isn't configured (graceful degradation).
+    Uses the same read-only GA4 service-account key every project on this
+    box already uses for GA4 (scripts/weekly-report.py's _ga4_client()),
+    not the YouTube OAuth credentials — GA4 Data API and YouTube Data/
+    Analytics API are different APIs with different scopes, and the
+    service-account key already has the one this needs.
     """
     property_id = os.environ.get("GA4_PROPERTY_ID")
-    if not property_id or not _have_yt_creds():
-        return {}
+    ga4_sa = Path.home() / ".claude" / "ga4-sa.json"
+    if not property_id or not ga4_sa.exists():
+        return {"status": "instrument_dead",
+                "error": "GA4_PROPERTY_ID or ga4-sa.json missing"}
     try:
+        os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS", str(ga4_sa))
         from google.analytics.data_v1beta import BetaAnalyticsDataClient
         from google.analytics.data_v1beta.types import (
             DateRange, Dimension, Metric, RunReportRequest, FilterExpression,
             Filter,
         )
-        creds = _yt_credentials()
-        client = BetaAnalyticsDataClient(credentials=creds)
+        client = BetaAnalyticsDataClient()
         req = RunReportRequest(
             property=f"properties/{property_id}",
             date_ranges=[DateRange(start_date=date_from, end_date=date_to)],
@@ -288,10 +336,10 @@ def pull_ga4_register_clicks(date_from: str, date_to: str) -> dict[str, int]:
             utm = row.dimension_values[0].value or "unknown"
             cnt = int(row.metric_values[0].value or 0)
             out[utm] = out.get(utm, 0) + cnt
-        return out
+        return {"status": "ok", "data": out}
     except Exception as e:
         _log("ga4_error", error=str(e)[:200])
-        return {}
+        return {"status": "instrument_dead", "error": f"{type(e).__name__}: {e}"[:300]}
 
 
 # -----------------------------------------------------------------------------

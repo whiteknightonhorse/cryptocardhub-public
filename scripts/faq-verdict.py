@@ -24,7 +24,18 @@ WHAT THIS REFUSES TO DO
   cohort, the answer is UNMEASURABLE, not "failed". Only one such week exists
   today (2026-W32); `by_page` was added to the aggregate in Y63, so anything
   earlier has no per-page figures at all and the script says so instead of
-  quietly comparing against zero.
+  quietly comparing against zero;
+* judge on CLAIMED figures (2026-09-01, the 654->99 fix). `page_counts()`
+  reads `verified_by_page` ONLY — never the older `by_page`, which counts any
+  request whose User-Agent string merely claimed to be an answer-time agent,
+  scanners included. A week with no verified figures (pre-verification, or
+  raw logs since rotated past recovery) contributes no signal and the verdict
+  says UNMEASURABLE — this is exactly how the 2026-08-31 `fail` verdict on
+  cohort 1 was retracted rather than "corrected": its baseline week predates
+  verification and can never be re-measured, so that verdict can never be
+  re-issued as a number, only marked ОТОЗВАН-ГРЯЗНЫЕ-ДАННЫЕ. See
+  scripts/aeo-aggregate.py's module docstring for the verified/claimed split
+  itself, and ~/.claude/skills/cryptocardhub/SKILL.md for the retraction.
 
 Usage:
     faq-verdict.py                 # judge whatever is due
@@ -63,6 +74,24 @@ def weeks() -> list[dict]:
     return sorted(out, key=lambda r: r.get("since", ""))
 
 
+def page_counts(row: dict) -> dict | None:
+    """A cohort VERDICT is a conviction, and this file's whole reason to exist
+    (Y75) is that a child measured wrong can call cannibalisation a win. So —
+    unlike aeo-aggregate.py's `build_targets`, which may fall back to claimed
+    data for an editorial priority list — this returns ONLY `verified_by_page`,
+    never `by_page`. A week with no verified figures (aggregated before
+    verification existed, or whose raw logs have since rotated out of reach
+    and can never be re-verified) is None here: `daily_rate` treats that as no
+    signal, and `judge` reports UNMEASURABLE rather than trusting an unverified
+    claim. That is exactly the 2026-08-31 defect this file is retracting.
+
+    Checked by KEY presence: an empty `{}` (every claim that week failed
+    verification) IS signal — zero verified fetches — and must count, not be
+    treated as missing.
+    """
+    return row.get("verified_by_page")
+
+
 def daily_rate(rows: list[dict], paths: set[str]) -> tuple[float, int]:
     """-> (fetches per day across `paths`, days covered).
 
@@ -71,10 +100,10 @@ def daily_rate(rows: list[dict], paths: set[str]) -> tuple[float, int]:
     """
     total = days = 0
     for r in rows:
-        by_page = r.get("by_page")
-        if not by_page:
-            continue          # a week from before by_page existed carries no signal
-        total += sum(v for k, v in by_page.items() if k in paths)
+        by_page = page_counts(r)
+        if by_page is None:
+            continue          # no per-page figures at all for this week
+        total += sum(v for k, v in by_page.items() if k in paths)  # {} contributes 0, correctly
         days += int(r.get("days_covered") or 7)
     return (total / days if days else 0.0), days
 
@@ -105,12 +134,19 @@ def judge(cohort: dict, today: date, force: bool) -> dict:
                            f"is at +{WINDOW_14}"}
 
     parents = {i["parent"] for i in cohort["items"]}
-    children = {f"/faq/{i['slug']}/" for i in cohort["items"]}
+    # Only PUBLISHED items are children: a refused question has no URL, so it
+    # can never be fetched — counting it made the reach gate unreachable
+    # (cohort 2: 4 pages published, 16 refused, "0/20 fetched").
+    children = {f"/faq/{i['slug']}/" for i in cohort["items"] if i.get("published")}
+    if not children:
+        return {"status": "unmeasurable", "age_days": age, "window": window,
+                "summary": "no item of this cohort was published — there is no "
+                           "child to measure"}
 
     before, after = split_weeks(opened)
     base_rate, base_days = daily_rate(before, parents)
     if base_days == 0:
-        return {"status": "unmeasurable", "age_days": age,
+        return {"status": "unmeasurable", "age_days": age, "window": window,
                 "summary": "no complete week with per-page figures precedes the "
                            "cohort — a baseline cannot be built, and comparing "
                            "against zero would manufacture a verdict"}
@@ -123,7 +159,7 @@ def judge(cohort: dict, today: date, force: bool) -> dict:
 
     fetched = 0
     for r in after:
-        bp = r.get("by_page") or {}
+        bp = page_counts(r) or {}
         fetched = max(fetched, sum(1 for c in children if bp.get(c, 0) > 0))
     share = fetched / max(1, len(children))
 
@@ -175,6 +211,9 @@ def main() -> int:
     for n, cohort in enumerate(led.get("cohorts", []), 1):
         if a.cohort and n != a.cohort:
             continue
+        if cohort.get("voided"):
+            print(f"[verdict] cohort {n}: voided — {cohort['voided'].get('reason', '')}")
+            continue
         opened = date.fromisoformat(cohort["opened"])
         cohort.setdefault("verdict_due_14", (opened + timedelta(days=WINDOW_14)).isoformat())
         cohort.setdefault("verdict_due_28", (opened + timedelta(days=WINDOW_28)).isoformat())
@@ -190,7 +229,11 @@ def main() -> int:
         print(f"[verdict] cohort {n} (opened {cohort['opened']}, "
               f"due {cohort['verdict_due_14']}): {v['status']} — {v['summary']}")
 
-        if a.write and v["status"] in ("pass", "fail"):
+        # "unmeasurable" is recorded too (2026-09-01): a retraction is only
+        # complete once the re-run verdict actually lands in the ledger, not
+        # just printed once and lost. "too_early" / "no_data_yet" stay
+        # transient — they resolve themselves as weeks accumulate.
+        if a.write and v["status"] in ("pass", "fail", "unmeasurable"):
             key = f"verdict_{v['window']}"
             cohort[key] = v
             changed = True
@@ -203,21 +246,29 @@ def main() -> int:
     return 0
 
 
-def tap_is_open() -> tuple[bool, str]:
+def tap_is_open(led: dict | None = None) -> tuple[bool, str]:
     """May a NEW cohort be opened? Imported by faq-children.py.
 
     Fable's rule: cohort N+1 does not open until cohort N has been read at +14.
     The tap is not "how many pages may we print" but "how many hypotheses can
     we judge".
+
+    `led`: pass the ledger dict the CALLER already loaded (faq-children.py's
+    main() does, to check cohort_is_consumed against the same snapshot)
+    instead of re-reading LEDGER a second time — two reads of a file another
+    process can be writing under flock is exactly the kind of race this
+    project's ledgers have bitten it on before. None (default) re-reads
+    LEDGER itself, unchanged behaviour for every other caller.
     """
-    if not LEDGER.is_file():
-        return True, "no cohort yet"
-    led = json.loads(LEDGER.read_text(encoding="utf-8"))
+    if led is None:
+        if not LEDGER.is_file():
+            return True, "no cohort yet"
+        led = json.loads(LEDGER.read_text(encoding="utf-8"))
     cohorts = led.get("cohorts") or []
     if not cohorts:
         return True, "no cohort yet"
     last = cohorts[-1]
-    if last.get("verdict_14") or last.get("verdict_28"):
+    if last.get("voided") or last.get("verdict_14") or last.get("verdict_28"):
         return True, f"cohort {len(cohorts)} has been read"
     opened = last.get("opened", "?")
     due = last.get("verdict_due_14") or "?"

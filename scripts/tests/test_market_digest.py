@@ -96,6 +96,23 @@ def test_the_page_carries_a_verified_date():
     assert any("Last verified" in b for b in page["snapshot_bullets"])
 
 
+def test_links_to_the_changelog_when_it_already_exists(tmp_path, monkeypatch):
+    """E-16's own acceptance criterion: the digest must link to the
+    changelog page — but only once that page is actually on disk."""
+    monkeypatch.setattr(md, "CONTENT", tmp_path)
+    (tmp_path / "ether-fi-cash-changelog.md").write_text("x", encoding="utf-8")
+    page = md.build("2026-07", ROWS)
+    assert "/learn/ether-fi-cash-changelog/" in page["body_markdown"]
+
+
+def test_no_dead_link_when_the_changelog_page_does_not_exist(tmp_path, monkeypatch):
+    """The changelog page doesn't exist until its own ledger has an accepted
+    event (E-16) — linking to it anyway would be a dead internal link (G20)."""
+    monkeypatch.setattr(md, "CONTENT", tmp_path)
+    page = md.build("2026-07", ROWS)
+    assert "ether-fi-cash-changelog" not in page["body_markdown"]
+
+
 def test_a_month_that_already_has_a_digest_is_refused(tmp_path, monkeypatch, capsys):
     """Idempotent under a cron that may fire twice — a duplicate month would be
     two URLs for one intent, which is the cannibalisation the whole programme
