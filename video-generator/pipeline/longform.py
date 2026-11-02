@@ -42,7 +42,7 @@ from typing import Any
 import yaml
 
 from . import (_config, captions, compliance, fetch_music, fetch_visuals,
-               hashtag_strategy, main as pipeline_main, render, tts_edge)
+               hashtag_strategy, main as pipeline_main, render, tts_eleven)
 from . import dedup
 from .publish import youtube as pub_yt
 
@@ -78,6 +78,19 @@ GATE_MAX_SECONDS = 260.0
 NARRATION_WORDS_PER_SECOND = 2.16
 TARGET_WORDS = 470
 PILOT_VOICE = "en-US-GuyNeural"
+LONGFORM_QUOTA_FLOOR = 15_000  # ponytail: fixed floor; per-month Shorts forecast if it ever bites
+
+
+def _refuse_below_quota_floor(estimate: int) -> None:
+    """Keep chars for Shorts: refuse the slot (no Edge fallback) when this
+    narration would leave the shared ElevenLabs quota under the floor."""
+    key = os.environ.get("ELEVENLABS_API_KEY", "")
+    remaining = tts_eleven._check_quota(key, 0)["remaining"]
+    if remaining - estimate < LONGFORM_QUOTA_FLOOR:
+        raise RuntimeError(
+            f"eleven_quota_floor: {remaining} chars remaining, long-form needs "
+            f"~{estimate}, floor {LONGFORM_QUOTA_FLOOR} reserved for Shorts"
+        )
 
 # A page thinner than this is excluded from the pilot rather than padded out:
 # padding is exactly how the 38 s floor of Y49 produced voiceless b-roll.
@@ -334,13 +347,11 @@ def render_one(slug: str, *, dry_run: bool = False,
     (d / "script.json").write_text(json.dumps(script, indent=2), encoding="utf-8")
 
     voice_path = d / "voice.mp3"
-    # Always Edge, never TTS_PROVIDER (T-0139 Q4): NARRATION_WORDS_PER_SECOND
-    # and the [185, 260]s gate above were measured on this exact Edge voice —
-    # E-19's ElevenLabs swap was never re-measured against them, and the
-    # shared ElevenLabs quota (41502 chars/mo) has no room for long-form's
-    # ~2800 chars/video next to the Shorts pipeline it already carries.
-    voice_meta = tts_edge.synthesize(
-        script["voiceover"], "youtube", voice_path, voice=PILOT_VOICE,
+    # ElevenLabs brand voice (operator ruling 2026-10-28, outranks T-0139 Q4).
+    if not dry_run:
+        _refuse_below_quota_floor(len(script["voiceover"]))
+    voice_meta = tts_eleven.synthesize(
+        script["voiceover"], "youtube", voice_path, voice=None,
         dry_run=dry_run,
         dry_run_seconds=script["word_count"] / NARRATION_WORDS_PER_SECOND,
     )

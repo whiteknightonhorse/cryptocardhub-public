@@ -23,7 +23,7 @@ source:
   url: "https://help.ether.fi/en/articles/262374-how-does-cashback-work"
   title: "How does cashback work? | ether.fi Help Center"
   parser: intercom_tables
-  verified: "2026-10-26"
+  verified: "2026-11-02"
 
 # Cells are read row-major from each level's table: three header cells, then
 # (band, usd_rate, eur_rate) triples. The band text is compared verbatim,

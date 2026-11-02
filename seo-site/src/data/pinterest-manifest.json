@@ -8,6 +8,15 @@
     "title": "Binance Card Review 2026 — Features, Fees & Availability",
     "url": "https://defycard.com/reviews/binance-card/"
   },
+  "can-i-change-my-card-tier-after-signing-up": {
+    "added": "2026-10-27",
+    "bucket": "faq",
+    "bytes": 88904,
+    "description": "Yes. You can upgrade or downgrade ether.fi Cash tiers after signup. Here's how tier changes work, fee implications, and when they take effect.",
+    "image": "/assets/pins/can-i-change-my-card-tier-after-signing-up.jpg",
+    "title": "Can I Change My Card Tier After Signing Up?",
+    "url": "https://defycard.com/faq/can-i-change-my-card-tier-after-signing-up/"
+  },
   "can-i-earn-cashback-by-referring-friends": {
     "added": "2026-10-23",
     "bucket": "faq",
@@ -17,6 +26,15 @@
     "title": "Can I earn cashback by referring friends? (2026)",
     "url": "https://defycard.com/faq/can-i-earn-cashback-by-referring-friends/"
   },
+  "can-i-upgrade-or-downgrade-my-tier-later": {
+    "added": "2026-10-30",
+    "bucket": "faq",
+    "bytes": 164965,
+    "description": "Can I upgrade or downgrade my tier later on ether.fi Cash? Verified physical card fees, what we cannot confirm, and where to check tier-change rules.",
+    "image": "/assets/pins/can-i-upgrade-or-downgrade-my-tier-later.jpg",
+    "title": "Can I Upgrade or Downgrade My Tier Later? ether.fi Cash FAQ",
+    "url": "https://defycard.com/faq/can-i-upgrade-or-downgrade-my-tier-later/"
+  },
   "can-i-use-a-digital-id-instead-of-a-physical-government-id": {
     "added": "2026-10-26",
     "bucket": "faq",
@@ -25,6 +43,15 @@
     "image": "/assets/pins/can-i-use-a-digital-id-instead-of-a-physical-government-id.jpg",
     "title": "Can I Use a Digital ID Instead of a Physical Government ID?",
     "url": "https://defycard.com/faq/can-i-use-a-digital-id-instead-of-a-physical-government-id/"
+  },
+  "can-i-use-a-vpn-to-sign-up-from-a-prohibited-country": {
+    "added": "2026-10-28",
+    "bucket": "faq",
+    "bytes": 161665,
+    "description": "No — KYC verification defeats VPN signup. Learn why geographic restrictions exist and which crypto cards work in prohibited countries.",
+    "image": "/assets/pins/can-i-use-a-vpn-to-sign-up-from-a-prohibited-country.jpg",
+    "title": "Can I Use a VPN to Sign Up for ether.fi Cash?",
+    "url": "https://defycard.com/faq/can-i-use-a-vpn-to-sign-up-from-a-prohibited-country/"
   },
   "can-i-use-an-expired-government-id-for-kyc": {
     "added": "2026-10-25",
@@ -71,6 +98,15 @@
     "title": "Can I use paid ads to promote my ether.fi referral link?",
     "url": "https://defycard.com/faq/can-i-use-paid-ads-google-ads-meta-tiktok-to-promote-my/"
   },
+  "can-i-use-the-card-before-ordering-a-physical-card": {
+    "added": "2026-10-29",
+    "bucket": "faq",
+    "bytes": 111769,
+    "description": "Can I use the card before ordering a physical card? Our short answer, the physical card fee tiers, and how to set up ether.fi Cash. Fees verified 2026-08-13.",
+    "image": "/assets/pins/can-i-use-the-card-before-ordering-a-physical-card.jpg",
+    "title": "Can I use the card before ordering a physical card?",
+    "url": "https://defycard.com/faq/can-i-use-the-card-before-ordering-a-physical-card/"
+  },
   "credit-card-vs-crypto-card-for-daily-expenses": {
     "added": "2026-10-23",
     "bucket": "learn",
@@ -88,6 +124,15 @@
     "image": "/assets/pins/crypto-card-cashback-top-picks.jpg",
     "title": "Crypto Card Cashback: Top Picks 2026",
     "url": "https://defycard.com/hub/crypto-card-cashback-top-picks/"
+  },
+  "crypto-card-for-sending-money-home": {
+    "added": "2026-10-29",
+    "bucket": "for",
+    "bytes": 119671,
+    "description": "Send money home with zero FX on USD/EUR. Compare crypto cards for remittances—instant, secure, earn 3% cashback while you send.",
+    "image": "/assets/pins/crypto-card-for-sending-money-home.jpg",
+    "title": "Crypto Card for Sending Money Home: 0% FX + Cashback",
+    "url": "https://defycard.com/for/crypto-card-for-sending-money-home/"
   },
   "crypto-rebates-vs-cashback-which-is-better": {
     "added": "2026-10-24",
@@ -115,6 +160,15 @@
     "image": "/assets/pins/do-i-need-to-know-how-to-use-crypto-wallets-to-get-ether-fi.jpg",
     "title": "Do I Need to Know How to Use Crypto Wallets? ether.fi Cash",
     "url": "https://defycard.com/faq/do-i-need-to-know-how-to-use-crypto-wallets-to-get-ether-fi/"
+  },
+  "do-i-need-to-live-in-the-us-to-use-ether-fi-cash": {
+    "added": "2026-10-28",
+    "bucket": "faq",
+    "bytes": 147694,
+    "description": "Explore ether.fi Cash availability worldwide. Learn eligibility requirements, country restrictions, and whether you can use the card outside the US.",
+    "image": "/assets/pins/do-i-need-to-live-in-the-us-to-use-ether-fi-cash.jpg",
+    "title": "Do I Need to Live in the US to Use ether.fi Cash?",
+    "url": "https://defycard.com/faq/do-i-need-to-live-in-the-us-to-use-ether-fi-cash/"
   },
   "gemini-card-review": {
     "added": "2026-10-20",
@@ -161,6 +215,60 @@
     "title": "How Long Does Ether.fi Cash Take to Get Approved?",
     "url": "https://defycard.com/faq/how-long-does-it-take-to-get-approved-for-ether-fi-cash-in/"
   },
+  "how-long-does-kyc-approval-take": {
+    "added": "2026-10-28",
+    "bucket": "faq",
+    "bytes": 157596,
+    "description": "How long does KYC approval take for ether.fi Cash? We have no verified number, so this page shows what to check and where to confirm the wait.",
+    "image": "/assets/pins/how-long-does-kyc-approval-take.jpg",
+    "title": "How long does KYC approval take?",
+    "url": "https://defycard.com/faq/how-long-does-kyc-approval-take/"
+  },
+  "how-long-does-kyc-take": {
+    "added": "2026-10-27",
+    "bucket": "faq",
+    "bytes": 160948,
+    "description": "KYC timelines vary by location and verification method. Learn what to expect when signing up for ether.fi Cash and typical approval timeframes.",
+    "image": "/assets/pins/how-long-does-kyc-take.jpg",
+    "title": "How Long Does KYC Take for Ether.fi Cash?",
+    "url": "https://defycard.com/faq/how-long-does-kyc-take/"
+  },
+  "how-to-add-beneficiary-crypto-card": {
+    "added": "2026-10-29",
+    "bucket": "how-to",
+    "bytes": 73844,
+    "description": "Learn how to add beneficiary crypto card features to your ether.fi Cash account, use it for subscriptions, and refer friends to earn rewards.",
+    "image": "/assets/pins/how-to-add-beneficiary-crypto-card.jpg",
+    "title": "How to Add Your Beneficiary Crypto Card: ether.fi",
+    "url": "https://defycard.com/how-to/how-to-add-beneficiary-crypto-card/"
+  },
+  "how-to-check-crypto-card-balance": {
+    "added": "2026-10-30",
+    "bucket": "how-to",
+    "bytes": 159119,
+    "description": "Learn how to check your crypto card balance with ether.fi Cash. View real-time balances, track spending, earn cashback. Complete step-by-step guide.",
+    "image": "/assets/pins/how-to-check-crypto-card-balance.jpg",
+    "title": "How to Check Crypto Card Balance: ether.fi Cash Guide",
+    "url": "https://defycard.com/how-to/how-to-check-crypto-card-balance/"
+  },
+  "how-to-choose-crypto-card-alternative": {
+    "added": "2026-10-30",
+    "bucket": "how-to",
+    "bytes": 123134,
+    "description": "Learn how to select the best crypto card if ether.fi isn't available. Compare features, fees, custody, and KYC requirements across top platforms.",
+    "image": "/assets/pins/how-to-choose-crypto-card-alternative.jpg",
+    "title": "How to Choose a Crypto Card Alternative to ether.fi",
+    "url": "https://defycard.com/how-to/how-to-choose-crypto-card-alternative/"
+  },
+  "how-to-dispute-crypto-card-transaction": {
+    "added": "2026-10-30",
+    "bucket": "how-to",
+    "bytes": 248895,
+    "description": "Learn how to dispute a crypto card transaction, request chargebacks, and set spending limits. Step-by-step guide for ether.fi and other cards.",
+    "image": "/assets/pins/how-to-dispute-crypto-card-transaction.jpg",
+    "title": "How to Dispute a Crypto Card Transaction — 5 Steps",
+    "url": "https://defycard.com/how-to/how-to-dispute-crypto-card-transaction/"
+  },
   "how-to-earn-crypto-cash-back-with-a-debit-card": {
     "added": "2026-10-25",
     "bucket": "how-to",
@@ -169,6 +277,105 @@
     "image": "/assets/pins/how-to-earn-crypto-cash-back-with-a-debit-card.jpg",
     "title": "How to Earn Crypto Cashback With a Debit Card",
     "url": "https://defycard.com/how-to/how-to-earn-crypto-cash-back-with-a-debit-card/"
+  },
+  "how-to-earn-referral-bonus-crypto-com-card": {
+    "added": "2026-10-31",
+    "bucket": "how-to",
+    "bytes": 141482,
+    "description": "Step-by-step guide to earning referral bonuses on Crypto.com card. Plus tips to pay zero fees and check your balance.",
+    "image": "/assets/pins/how-to-earn-referral-bonus-crypto-com-card.jpg",
+    "title": "How to Earn a Referral Bonus on Your Crypto.com Card",
+    "url": "https://defycard.com/how-to/how-to-earn-referral-bonus-crypto-com-card/"
+  },
+  "how-to-get-a-crypto-card-in-dubai": {
+    "added": "2026-10-31",
+    "bucket": "how-to",
+    "bytes": 227743,
+    "description": "Get a crypto card in Dubai, Singapore, Philippines. Complete KYC guide, approval steps, cashback rates, and regional comparisons for crypto cards.",
+    "image": "/assets/pins/how-to-get-a-crypto-card-in-dubai.jpg",
+    "title": "How to Get a Crypto Card in Dubai: Step-by-Step 2026",
+    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-dubai/"
+  },
+  "how-to-get-a-crypto-card-in-eu": {
+    "added": "2026-10-31",
+    "bucket": "how-to",
+    "bytes": 164367,
+    "description": "Get ether.fi Cash in the EU: step-by-step guide to KYC, 0% FX on EUR/USD, up to 3% cashback, non-custodial staking. Verify eligibility and activate today.",
+    "image": "/assets/pins/how-to-get-a-crypto-card-in-eu.jpg",
+    "title": "How to Get a Crypto Card in the EU: ether.fi Cash",
+    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-eu/"
+  },
+  "how-to-get-a-crypto-card-in-india": {
+    "added": "2026-11-01",
+    "bucket": "how-to",
+    "bytes": 105880,
+    "description": "Step-by-step guide to getting a crypto card in India, Nigeria & Dubai. ether.fi Cash for UAE/Nigeria, Crypto.com & RedotPay for Indian residents.",
+    "image": "/assets/pins/how-to-get-a-crypto-card-in-india.jpg",
+    "title": "How to Get a Crypto Card in India: Best Regional Options & Alternatives",
+    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-india/"
+  },
+  "how-to-get-a-crypto-card-in-nigeria": {
+    "added": "2026-11-01",
+    "bucket": "how-to",
+    "bytes": 186755,
+    "description": "Complete guide to getting an ether.fi Cash crypto card in Nigeria. KYC requirements, setup steps, and how to earn up to 3% cashback on spending.",
+    "image": "/assets/pins/how-to-get-a-crypto-card-in-nigeria.jpg",
+    "title": "How to Get a Crypto Card in Nigeria — ether.fi Cash",
+    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-nigeria/"
+  },
+  "how-to-get-a-crypto-card-in-philippines": {
+    "added": "2026-11-01",
+    "bucket": "how-to",
+    "bytes": 125514,
+    "description": "Step-by-step guide to getting the ether.fi Cash card in the Philippines. KYC requirements, shipping times, and how to switch from older cards.",
+    "image": "/assets/pins/how-to-get-a-crypto-card-in-philippines.jpg",
+    "title": "How to Get a Crypto Card in Philippines: Complete Guide",
+    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-philippines/"
+  },
+  "how-to-get-a-crypto-card-in-singapore": {
+    "added": "2026-11-02",
+    "bucket": "how-to",
+    "bytes": 175053,
+    "description": "Learn how to get a crypto card in Singapore step-by-step. Compare ether.fi, Crypto.com & alternatives. Country availability, KYC process & fees explained.",
+    "image": "/assets/pins/how-to-get-a-crypto-card-in-singapore.jpg",
+    "title": "How to Get a Crypto Card in Singapore",
+    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-singapore/"
+  },
+  "how-to-migrate-from-crypto-com-card": {
+    "added": "2026-11-02",
+    "bucket": "how-to",
+    "bytes": 127311,
+    "description": "Switch from Crypto.com to a better crypto card. Learn how to choose alternatives, verify your identity, and transfer your balance safely in under an hour.",
+    "image": "/assets/pins/how-to-migrate-from-crypto-com-card.jpg",
+    "title": "How to Migrate From Crypto.com Card: Step-by-Step Guide",
+    "url": "https://defycard.com/how-to/how-to-migrate-from-crypto-com-card/"
+  },
+  "how-to-pay-zero-fees-crypto-card": {
+    "added": "2026-11-02",
+    "bucket": "how-to",
+    "bytes": 112434,
+    "description": "Master zero-fee crypto card spending with this step-by-step guide. Learn which cards waive fees, how to check balances, and start saving today.",
+    "image": "/assets/pins/how-to-pay-zero-fees-crypto-card.jpg",
+    "title": "How to Pay Zero Fees on Your Crypto Card",
+    "url": "https://defycard.com/how-to/how-to-pay-zero-fees-crypto-card/"
+  },
+  "how-to-replace-binance-card-europe": {
+    "added": "2026-10-28",
+    "bucket": "how-to",
+    "bytes": 129238,
+    "description": "Binance EU card discontinued Dec 2023. Migrate to ether.fi Cash in 10 minutes. Step-by-step guide + comparison of top alternatives for Europe.",
+    "image": "/assets/pins/how-to-replace-binance-card-europe.jpg",
+    "title": "How to Replace Binance Card in Europe: 2026 Migration Guide",
+    "url": "https://defycard.com/how-to/how-to-replace-binance-card-europe/"
+  },
+  "how-to-set-spending-limit-crypto-card": {
+    "added": "2026-10-29",
+    "bucket": "how-to",
+    "bytes": 158774,
+    "description": "Learn how to set spending limits on crypto cards, manage recurring payments, and control family spending with step-by-step guidance for ether.fi Cash.",
+    "image": "/assets/pins/how-to-set-spending-limit-crypto-card.jpg",
+    "title": "How to Set Spending Limits on Your Crypto Card: Full Guide",
+    "url": "https://defycard.com/how-to/how-to-set-spending-limit-crypto-card/"
   },
   "is-a-regulated-crypto-card-the-same-as-a-custodial-card": {
     "added": "2026-10-21",
@@ -215,6 +422,15 @@
     "title": "Is My Crypto Safe With ether.fi Cash? 2026 Review",
     "url": "https://defycard.com/faq/is-my-crypto-safe-with-ether-fi-cash/"
   },
+  "is-there-a-fee-to-open-an-account": {
+    "added": "2026-10-30",
+    "bucket": "faq",
+    "bytes": 110088,
+    "description": "Is there a fee to open an ether.fi Cash account? No account-opening fee is listed. Physical card fees by tier, with the checks to run before you apply.",
+    "image": "/assets/pins/is-there-a-fee-to-open-an-account.jpg",
+    "title": "Is there a fee to open an account? ether.fi Cash",
+    "url": "https://defycard.com/faq/is-there-a-fee-to-open-an-account/"
+  },
   "is-there-a-waitlist-for-ether-fi-cash-in-restricted": {
     "added": "2026-10-19",
     "bucket": "faq",
@@ -233,6 +449,15 @@
     "title": "Is uploading my government ID to ether.fi safe?",
     "url": "https://defycard.com/faq/is-uploading-my-government-id-to-ether-fi-safe/"
   },
+  "what-documents-do-i-need-for-kyc": {
+    "added": "2026-10-27",
+    "bucket": "faq",
+    "bytes": 144805,
+    "description": "What documents do I need for KYC with ether.fi Cash? Learn which IDs to prepare, common upload problems, and how to set up ether fi cash step by step.",
+    "image": "/assets/pins/what-documents-do-i-need-for-kyc.jpg",
+    "title": "What documents do I need for KYC? | ether.fi Cash",
+    "url": "https://defycard.com/faq/what-documents-do-i-need-for-kyc/"
+  },
   "what-happens-if-ether-fi-stops-supporting-my-country": {
     "added": "2026-10-22",
     "bucket": "faq",
@@ -241,6 +466,15 @@
     "image": "/assets/pins/what-happens-if-ether-fi-stops-supporting-my-country.jpg",
     "title": "What If ether.fi Stops Supporting Your Country?",
     "url": "https://defycard.com/faq/what-happens-if-ether-fi-stops-supporting-my-country/"
+  },
+  "what-happens-if-my-card-provider-shuts-down": {
+    "added": "2026-10-31",
+    "bucket": "faq",
+    "bytes": 95583,
+    "description": "What happens if my card provider shuts down? Custody and issuer terms decide your balance and card access. Read both clauses before you deposit.",
+    "image": "/assets/pins/what-happens-if-my-card-provider-shuts-down.jpg",
+    "title": "What Happens If My Card Provider Shuts Down?",
+    "url": "https://defycard.com/faq/what-happens-if-my-card-provider-shuts-down/"
   },
   "what-happens-if-my-referred-friend-signs-up-but-never": {
     "added": "2026-10-20",
@@ -251,6 +485,15 @@
     "title": "What Happens If My Referred Friend Signs Up but Never Reaches the $100 Threshold?",
     "url": "https://defycard.com/faq/what-happens-if-my-referred-friend-signs-up-but-never/"
   },
+  "what-happens-if-the-price-of-eth-drops-while-i-m-using-the": {
+    "added": "2026-10-31",
+    "bucket": "faq",
+    "bytes": 251583,
+    "description": "What happens if the price of ETH drops while using the card? See how ETH balances, cashback bands and card fees move for ether.fi Cash users.",
+    "image": "/assets/pins/what-happens-if-the-price-of-eth-drops-while-i-m-using-the.jpg",
+    "title": "What happens if the price of ETH drops while using the card?",
+    "url": "https://defycard.com/faq/what-happens-if-the-price-of-eth-drops-while-i-m-using-the/"
+  },
   "what-if-my-country-is-not-supported": {
     "added": "2026-10-26",
     "bucket": "faq",
@@ -259,6 +502,15 @@
     "image": "/assets/pins/what-if-my-country-is-not-supported.jpg",
     "title": "What If My Country Is Not Supported?",
     "url": "https://defycard.com/faq/what-if-my-country-is-not-supported/"
+  },
+  "what-if-my-kyc-application-is-rejected": {
+    "added": "2026-10-27",
+    "bucket": "faq",
+    "bytes": 166704,
+    "description": "DefyCard explains what to do if your ether.fi Cash KYC application is rejected. Learn how to reapply, fix common issues, and appeal the decision.",
+    "image": "/assets/pins/what-if-my-kyc-application-is-rejected.jpg",
+    "title": "What If My KYC Application Is Rejected: How to Appeal",
+    "url": "https://defycard.com/faq/what-if-my-kyc-application-is-rejected/"
   },
   "what-s-the-difference-between-a-crypto-debit-card-and-a": {
     "added": "2026-10-21",
@@ -286,6 +538,15 @@
     "image": "/assets/pins/when-do-referral-bonuses-and-commissions-arrive-in-my.jpg",
     "title": "When do referral bonuses and commissions arrive in my account?",
     "url": "https://defycard.com/faq/when-do-referral-bonuses-and-commissions-arrive-in-my/"
+  },
+  "which-card-earns-cashback-fastest": {
+    "added": "2026-10-31",
+    "bucket": "faq",
+    "bytes": 100418,
+    "description": "Which card earns cashback fastest? Gemini Credit pays 4% on gas, EV and transit. ether.fi Cash pays up to 3%, stepping down with spend. Check dates.",
+    "image": "/assets/pins/which-card-earns-cashback-fastest.jpg",
+    "title": "Which Card Earns Cashback Fastest? 2026 Comparison",
+    "url": "https://defycard.com/faq/which-card-earns-cashback-fastest/"
   },
   "which-card-has-the-lowest-fees-overall": {
     "added": "2026-10-23",

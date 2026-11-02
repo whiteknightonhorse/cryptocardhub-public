@@ -62,6 +62,12 @@ node -e "JSON.parse(require('fs').readFileSync('src/data/hero-variants.json','ut
 # rebuilding, so the matrix ships with a `verified` date that a check actually
 # produced. On a mismatch it writes an alert and edits nothing — the weekly
 # report surfaces the diff and a human decides what the new fact is.
+# CCH-DEPLOY-01: same lock as the deploy script -- never build seo-site/ concurrently.
+SEO_BUILD_LOCK="${SEO_BUILD_LOCK:-$HOME/locks/seo-build.lock}"
+mkdir -p "$(dirname "$SEO_BUILD_LOCK")"
+exec 9>"$SEO_BUILD_LOCK"
+flock -w "${SEO_BUILD_LOCK_WAIT:-1200}" 9 || { echo "ERROR: seo-build lock busy -- refusing to build" >&2; exit 9; }
+
 echo "==> [$(stamp)] availability re-check (issuer vs config/availability.yaml)"
 "$ROOT/video-generator/venv/bin/python" "$ROOT/scripts/availability-check.py" 2>&1 | tail -10 \
   || echo "WARN: availability check failed — matrix keeps the older verified date"

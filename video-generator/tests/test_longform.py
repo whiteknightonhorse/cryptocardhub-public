@@ -138,32 +138,42 @@ def test_a_thin_page_is_excluded_not_padded():
         longform.build_script({"slug": "thin", "intro_paragraph": "Two words."})
 
 
-def test_render_one_always_uses_edge_never_elevenlabs(tmp_path, monkeypatch):
-    """T-0139 ruling-1 Q4: NARRATION_WORDS_PER_SECOND and the [185, 260]s gate
-    are measured on the pinned Edge voice — TTS_PROVIDER=elevenlabs (E-19,
-    live for Shorts) must not steer long-form onto an unmeasured voice, and
-    must not touch the shared ElevenLabs quota at all."""
-    monkeypatch.setenv("TTS_PROVIDER", "elevenlabs")
+def test_render_one_uses_elevenlabs_brand_voice_never_edge(tmp_path, monkeypatch):
+    """Operator ruling 2026-10-28: long-form narrates with ElevenLabs
+    (voice=None = brand voice); Edge is never called; dry-run stays offline."""
     monkeypatch.setattr(longform, "out_dir", lambda slug, day=None: tmp_path / slug)
-    assert not hasattr(longform, "tts_eleven"), (
-        "longform must not import tts_eleven at all"
-    )
+    assert not hasattr(longform, "tts_edge")
     seen = {}
-    orig = longform.tts_edge.synthesize
+    orig = longform.tts_eleven.synthesize
 
     def _spy(*a, **k):
-        seen["voice"] = k.get("voice")
+        seen.update(k)
         return orig(*a, **k)
 
-    monkeypatch.setattr(longform.tts_edge, "synthesize", _spy)
+    def _no_net(*a, **k):
+        raise AssertionError("network touched in dry-run")
+
+    monkeypatch.setattr(longform.tts_eleven, "synthesize", _spy)
+    monkeypatch.setattr(longform.tts_eleven, "_http_get", _no_net)
+    monkeypatch.setattr(longform.tts_eleven, "_http_post", _no_net)
     longform.render_one(SLUG, dry_run=True, day="2026-08-11")
-    assert seen["voice"] == longform.PILOT_VOICE
+    assert seen["voice"] is None and seen["dry_run"] is True
+
+
+def test_refuses_when_quota_floor_would_be_breached(tmp_path, monkeypatch):
+    monkeypatch.setattr(longform, "out_dir", lambda slug, day=None: tmp_path / slug)
+    monkeypatch.setattr(longform.tts_eleven, "_check_quota",
+                        lambda key, n: {"limit": 41502, "count": 0, "remaining": 15_000})
+    monkeypatch.setattr(longform.tts_eleven, "synthesize",
+                        lambda *a, **k: pytest.fail("synthesized past the floor"))
+    with pytest.raises(RuntimeError, match="eleven_quota_floor"):
+        longform.render_one(SLUG, dry_run=False, day="2026-08-11")
 
 
 def test_short_narration_is_a_hard_failure(tmp_path, monkeypatch):
     """No 'accept short' branch: that is exactly how a long-form silently
     becomes a Short."""
-    monkeypatch.setattr(longform.tts_edge, "synthesize",
+    monkeypatch.setattr(longform.tts_eleven, "synthesize",
                         lambda *a, **k: _silence_stub(a, k))
     monkeypatch.setattr(longform, "out_dir", lambda slug, day=None: tmp_path / slug)
     with pytest.raises(RuntimeError, match="narration is"):

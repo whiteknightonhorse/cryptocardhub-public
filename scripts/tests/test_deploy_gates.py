@@ -3,7 +3,7 @@
 Two separate laws, because the first one alone was already satisfied on
 2026-09-14 and the money bug still had a clear path to production:
 
-  LAW 1  deploy.sh runs four pytest gates: G20 -> G34 -> G12 -> G37.
+  LAW 1  deploy.sh runs four pytest gates: G20 -> G34 -> G12 -> G49.
   LAW 2  all four run BEFORE `mv -Tf "$WEB_NEW" "$WEB"`.
 
 LAW 2 is the one that was broken. The 2b/2c gates sat *after* the atomic
@@ -29,7 +29,7 @@ EXPECTED_GATES = [
     "tests/test_internal_links.py",   # 2b — G20 dead internal links
     "tests/test_rendered_output.py",  # 2c — G34 raw markup reaching the reader
     "tests/test_partner_links.py",    # 2d — G12 a card the reader cannot be issued
-    "tests/test_url_retirement.py",   # 2e — G37 a remembered URL that would become a bare 404
+    "tests/test_url_retirement.py",   # 2e — G49 a remembered URL that would become a bare 404
 ]
 
 # LAW 2 — the line that hands the new copy to nginx. Every gate precedes it.

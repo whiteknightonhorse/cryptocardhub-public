@@ -142,7 +142,8 @@ def test_longform_asks_for_burned_captions(tmp_path, monkeypatch):
     from pipeline import longform
     monkeypatch.setattr(longform, "out_dir", lambda slug, day=None: tmp_path / slug)
     monkeypatch.setattr(longform, "probe_duration", lambda p: 200.0)
-    monkeypatch.setattr(longform.tts_edge, "synthesize", lambda *a, **k: {"voice": "x"})
+    monkeypatch.setattr(longform.tts_eleven, "synthesize", lambda *a, **k: {"voice": "x"})
+    monkeypatch.setattr(longform, "_refuse_below_quota_floor", lambda *a, **k: None)
     monkeypatch.setattr(longform.fetch_visuals, "fetch",
                         lambda *a, **k: [{"kind": "photo", "path": "p", "source": "t"}])
     monkeypatch.setattr(longform.fetch_music, "fetch", lambda *a, **k: {"track": "t"})

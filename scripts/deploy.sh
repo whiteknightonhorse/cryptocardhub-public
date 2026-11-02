@@ -56,6 +56,21 @@ if [[ "$AFFIL" == *\"* || "$AFFIL" == *\<* || "$AFFIL" == *\>* \
   exit 2
 fi
 
+# CCH-DEPLOY-01: one build lock for every `pnpm build` in seo-site/ (this script
+# and monthly-rebuild.sh). Two concurrent builds both rewrite dist/ and one reads
+# a half-written tree (ENOENT, or sameAs: []). Held on fd 9 until the script
+# exits, which covers build + gates 2b-2e (and the rsync that ships them).
+# Wait up to 20 min, then fail loudly -- never build without the lock.
+SEO_BUILD_LOCK="${SEO_BUILD_LOCK:-$HOME/locks/seo-build.lock}"
+SEO_BUILD_LOCK_WAIT="${SEO_BUILD_LOCK_WAIT:-1200}"
+mkdir -p "$(dirname "$SEO_BUILD_LOCK")"
+exec 9>"$SEO_BUILD_LOCK"
+if ! flock -w "$SEO_BUILD_LOCK_WAIT" 9; then
+  echo "ERROR: seo-build lock $SEO_BUILD_LOCK not free after ${SEO_BUILD_LOCK_WAIT}s -- refusing to build" >&2
+  exit 9
+fi
+echo "==> seo-build lock taken ($SEO_BUILD_LOCK)"
+
 echo "==> [0/5] sync YT publish_log → seo-site/src/content/videos/"
 # Bridges video-generator/state/published.db -> Astro content collection
 # so every build picks up newly-published shorts (videos page + sitemap).
@@ -139,7 +154,7 @@ if ! "$PYBIN" -m pytest "$SEO/tests/test_partner_links.py" -q; then
   exit 6
 fi
 
-echo "==> [2e/5] url-retirement gate (G37) — no URL the live sitemap names becomes a bare 404"
+echo "==> [2e/5] url-retirement gate (G49) — no URL the live sitemap names becomes a bare 404"
 # A URL once in the live sitemap is remembered by crawlers. The previous copy of
 # the site (LIVE_ROOT) is the ledger: its sitemaps vs the new dist + redirects.map.
 # A first deploy needs URL_RETIREMENT_FIRST_DEPLOY=1 set BY HAND — never here.

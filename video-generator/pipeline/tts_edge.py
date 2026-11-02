@@ -79,17 +79,19 @@ async def _synthesize_async(text: str, voice: str, rate: str,
     """
     import edge_tts  # noqa: WPS433 — local import keeps top-level light
 
-    # edge-tts 7.x defaults to SentenceBoundary (whole sentences). For
-    # caption-level word-by-word sync we MUST request WordBoundary.
-    communicate = edge_tts.Communicate(
-        text=text, voice=voice, rate=rate, boundary="WordBoundary",
-    )
     audio_chunks: list[bytes] = []
     word_boundaries: list[dict[str, float]] = []
     last_err: Exception | None = None
+    first_err: Exception | None = None
 
     for attempt in (1, 2):
         try:
+            # A Communicate streams only once: build a fresh one per attempt.
+            # edge-tts 7.x defaults to SentenceBoundary (whole sentences). For
+            # caption-level word-by-word sync we MUST request WordBoundary.
+            communicate = edge_tts.Communicate(
+                text=text, voice=voice, rate=rate, boundary="WordBoundary",
+            )
             audio_chunks.clear()
             word_boundaries.clear()
             async for chunk in communicate.stream():
@@ -107,9 +109,13 @@ async def _synthesize_async(text: str, voice: str, rate: str,
             break
         except Exception as e:
             last_err = e
-            if attempt == 2:
+            if attempt == 1:
+                first_err = e
+            else:
                 raise RuntimeError(
-                    f"edge-tts streaming failed twice: {type(e).__name__}: {e}"
+                    "edge-tts streaming failed twice: "
+                    f"first={type(first_err).__name__}: {first_err}; "
+                    f"second={type(e).__name__}: {e}"
                 ) from e
 
     if not audio_chunks:

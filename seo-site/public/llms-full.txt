@@ -16,7 +16,7 @@ For brand context, see `/llms.txt` (shorter overview — its inventory block is 
 - [Crypto Card Comparison](https://defycard.com/hub/crypto-card-comparison/) — Side-by-side comparison of major crypto cards with country availability matrix.
 - [Best Stablecoin Card](https://defycard.com/hub/best-stablecoin-card/) — USDC/USDT-native cards: settlement rails, FX fees, stablecoin acceptance.
 - [Crypto Card with Cashback](https://defycard.com/hub/crypto-card-with-cashback/) — Cashback structures explained — fixed vs tiered vs asset-back; how to maximise.
-- [Crypto Debit Card No Fees](https://defycard.com/hub/crypto-debit-card-no-fees/) — Cards with 0% issuance, 0% FX on USD/EUR, transparent ATM fee structure.
+- [Crypto Debit Card No Fees](https://defycard.com/hub/crypto-debit-card-no-fees/) — Cards with 0% issuance, 0% FX on EUR (beta), transparent ATM fee structure.
 - [Crypto Card No KYC](https://defycard.com/hub/crypto-card-no-kyc/) — KYC-light card options + regulatory caveats. Informational only — we don't recommend unlicensed products.
 - [Non-Custodial Crypto Card](https://defycard.com/hub/non-custodial-crypto-card/) — Self-custody model explained: ether.fi, Gnosis Pay, MetaMask Card. Trade-offs.
 - [DeFi Crypto Card](https://defycard.com/hub/defi-crypto-card/) — DeFi-native cards that link to wallets directly — pros, cons, fee mechanics.
