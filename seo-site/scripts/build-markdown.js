@@ -21,6 +21,7 @@ import {
   publishedCards, jurisdictions, cellFor, availabilityNote, defaultDeny,
 } from '../src/lib/availability.mjs';
 import { resolveAffiliate, primaryPartnerFor } from '../src/lib/affiliates.mjs';
+import { dateModifiedFor } from '../src/lib/freshness.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -142,16 +143,8 @@ async function buildArticleMarkdown(srcPath, slug) {
       lines.push('');
     }
   }
-  if (Array.isArray(fm.related_clusters) && fm.related_clusters.length) {
-    lines.push('## Related guides');
-    lines.push('');
-    for (const c of fm.related_clusters) {
-      // related_clusters can be slug or bucket/slug
-      lines.push(`- https://defycard.com/${c}/`);
-    }
-    lines.push('');
-  }
-  return { bucket: fm.bucket || 'hub', slug: fm.slug || slug, body: lines.join('\n') };
+  // CCH-MEDIUM-01: no related-links block -- the sidecar is the article body only.
+  return { bucket: fm.bucket || 'hub', slug: fm.slug || slug, body: lines.join('\n'), fm };
 }
 
 async function buildHomepageMarkdown() {
@@ -312,6 +305,40 @@ async function buildSitemapAlias() {
   console.log(`[build-markdown] /sitemap.xml alias written (${n} sub-sitemaps)`);
 }
 
+/**
+ * CCH-MEDIUM-01: /feed/pages.json -- the machine-readable page list the sales
+ * Medium mirror reads. Metadata only: no body text, no affiliate URLs.
+ * medium_eligible is the G37b verdict stored in each page's frontmatter
+ * (absent = false: an unlinted page is never offered).
+ */
+const FEED_MAX = 200;
+const ymd = (v) => (/^(\d{4}-\d{2}-\d{2})/.exec(String(v || '')) || [])[1] || null;
+
+function feedEntry(built) {
+  const fm = built.fm;
+  const published = ymd(fm.schema_article?.datePublished) || ymd(fm.news_published_at) || ymd(fm.generated_at);
+  if (!published) return null;
+  return {
+    url: `https://defycard.com/${built.bucket}/${built.slug}/`,
+    title: String(fm.title || fm.h1 || built.slug),
+    type: built.bucket,
+    date_published: published,
+    date_modified: dateModifiedFor(built.bucket, built.slug, published) || published,
+    words: built.body.split(/\s+/).filter(Boolean).length,
+    medium_eligible: fm.medium_eligible === true,
+  };
+}
+
+async function writePagesFeed(entries) {
+  const feed = entries.filter(Boolean)
+    .sort((a, b) => b.date_published.localeCompare(a.date_published) || a.url.localeCompare(b.url))
+    .slice(0, FEED_MAX);
+  const dir = join(DIST, 'feed');
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, 'pages.json'), JSON.stringify(feed, null, 1) + '\n', 'utf8');
+  console.log(`[build-markdown] feed/pages.json: ${feed.length} entries, ${feed.filter((e) => e.medium_eligible).length} medium_eligible`);
+}
+
 async function main() {
   console.log('[build-markdown] affiliate links resolved per-page via affiliates.mjs');
   if (!existsSync(DIST)) {
@@ -322,6 +349,7 @@ async function main() {
   // Walk content/pseo/*.md; emit dist/<bucket>/<slug>/index.md
   const entries = await readdir(PSEO_SRC, { withFileTypes: true });
   let count = 0;
+  const feedEntries = [];
   for (const e of entries) {
     if (!e.isFile() || !e.name.endsWith('.md')) continue;
     const srcPath = join(PSEO_SRC, e.name);
@@ -330,6 +358,7 @@ async function main() {
     const outDir = join(DIST, built.bucket, built.slug);
     await mkdir(outDir, { recursive: true });
     await writeFile(join(outDir, 'index.md'), built.body, 'utf8');
+    feedEntries.push(feedEntry(built));
     count++;
   }
 
@@ -337,6 +366,7 @@ async function main() {
   const home = await buildHomepageMarkdown();
   await writeFile(join(DIST, 'index.md'), home, 'utf8');
 
+  await writePagesFeed(feedEntries);
   await buildMatrixMarkdown();
   await buildLlmsInventory();
   await buildSitemapAlias();

@@ -1390,6 +1390,8 @@ def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
         "model": DEFAULT_MODEL,
         "pattern": cluster.pattern,
     }
+    if isinstance(p.get("medium_eligible"), bool):   # CCH-MEDIUM-01: the feed reads this
+        fm["medium_eligible"] = p["medium_eligible"]
     fm_lines = [emit_frontmatter(fm), "", body_md, ""]
     target.write_text("\n".join(fm_lines), encoding="utf-8")
     return target
@@ -2334,14 +2336,15 @@ def _main(argv: list[str]) -> int:
             # delta gate and BEFORE G36, so G36 judges the REWRITTEN text.
             hslug = getattr(cluster, "faq_slug", "") or slugify(cluster.primary.keyword)
             orig_payload = result.payload
-            hres = humanize_gate.humanize(result.payload)
-            result.payload = hres.payload
+            hres = humanize_gate.humanize(result.payload, g37b=True)
+            result.payload = {**hres.payload, "medium_eligible": hres.medium_eligible}   # G37b, never a blocker
             total_cost += hres.cost_usd
             hrow = {
                 "event": "humanize", "slug": hslug,
                 "stream": "faq" if args.faq_children else "bank",
                 "flags_before": hres.flags_before, "flags_after": hres.flags_after,
                 "rewritten": hres.rewritten, "accepted": hres.accepted,
+                "medium_eligible": hres.medium_eligible,
                 "rejected": hres.rejected, "refused_reason": hres.refused_reason,
                 "cost_usd": round(hres.cost_usd, 6),
                 "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),

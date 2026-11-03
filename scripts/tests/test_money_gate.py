@@ -170,7 +170,7 @@ def test_pseo_generate_writes_the_page_when_every_number_is_backed(monkeypatch, 
     """
     payload = dict(_PAYLOAD)
     payload["body_markdown"] = (
-        "## Payouts\n\nCashback unlocks after 7 days.\n\n<<AFFILIATE_BUTTON>>\n")
+        "## Payouts\n\nCashback arrives after 7 days.\n\n<<AFFILIATE_BUTTON>>\n")
     content = _wire(monkeypatch, tmp_path, payload)
     rc = pg.main(["--limit", "1"])
     assert [p.name for p in content.glob("*.md")] == ["money-gate-wiring-probe.md"]

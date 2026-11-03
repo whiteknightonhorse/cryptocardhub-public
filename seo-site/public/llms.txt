@@ -36,6 +36,8 @@ Mobile-heavy (≈68%) crypto-card seekers. Phase 1 = English-only (US, UK, IE, A
 
 - HTML for browsers: every URL above
 - Markdown for AI agents: same URL with `Accept: text/markdown` header (returns the article body without nav, ads, or sticky CTA)
+- Page list for machines: <https://defycard.com/feed/pages.json> (newest 200 pages: url, title, type, dates, words, medium_eligible; no body text)
+Medium (mirror of our articles): https://medium.com/@defycard
 
 ## Crawl policy
 

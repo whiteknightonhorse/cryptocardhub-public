@@ -88,6 +88,12 @@ flowchart LR
   MON -. reroute under-performers .-> KW
 ```
 
+### Pages feed and Medium eligibility
+
+`seo-site/scripts/build-markdown.js` (deploy step 1c) writes `dist/feed/pages.json`: a JSON array, newest `date_published` first, at most 200 entries, each `{url, title, type, date_published, date_modified, words, medium_eligible}`. `words` counts the whole markdown body (not style-lint's prose count). Metadata only: no body text, no affiliate URLs. nginx serves it as `application/json` to any UA with `Cache-Control: public, max-age=600`. The article body for each URL is the existing `Accept: text/markdown` copy (title as `# `, body only; no related-links block). Mirrors on Medium (canonical = the defycard.com page) come from the profile https://medium.com/@defycard, listed in the Organization JSON-LD `sameAs` (`seo-site/src/data/entity.json`) and in one `llms.txt` line; no footer link.
+
+`medium_eligible` is the G37b verdict stored in each page's frontmatter: `scripts/style-lint.py` (a verbatim copy of the sales file, never edited here) run by `humanize_gate.humanize(..., g37b=True)` after the G37 score. A RED lint adds its reasons to the one existing copy-edit call; both lints re-run on the result; still RED keeps the original text, publishes as today and sets `medium_eligible: false`. G37b never blocks a page. Existing pages were set once by `scripts/medium-eligible-backfill.py`. An absent field means false.
+
 ---
 
 ## 4. Publishing flow

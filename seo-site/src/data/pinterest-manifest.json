@@ -26,6 +26,15 @@
     "title": "Can I earn cashback by referring friends? (2026)",
     "url": "https://defycard.com/faq/can-i-earn-cashback-by-referring-friends/"
   },
+  "can-i-get-a-crypto-card-in-india-right-now": {
+    "added": "2026-11-03",
+    "bucket": "faq",
+    "bytes": 183952,
+    "description": "Can I get a crypto card in India right now? No ether.fi Cash is not open to Indian residents. Read the eligibility checks and safer steps before you apply.",
+    "image": "/assets/pins/can-i-get-a-crypto-card-in-india-right-now.jpg",
+    "title": "Can I Get a Crypto Card in India Right Now? (2026)",
+    "url": "https://defycard.com/faq/can-i-get-a-crypto-card-in-india-right-now/"
+  },
   "can-i-upgrade-or-downgrade-my-tier-later": {
     "added": "2026-10-30",
     "bucket": "faq",
@@ -359,6 +368,15 @@
     "title": "How to Pay Zero Fees on Your Crypto Card",
     "url": "https://defycard.com/how-to/how-to-pay-zero-fees-crypto-card/"
   },
+  "how-to-refer-friend-ether-fi": {
+    "added": "2026-11-03",
+    "bucket": "how-to",
+    "bytes": 164331,
+    "description": "Learn how to refer friends to ether.fi Cash and earn recurring commissions. Step-by-step guide with bonus tips for maximizing your referral earnings.",
+    "image": "/assets/pins/how-to-refer-friend-ether-fi.jpg",
+    "title": "How to Refer a Friend on ether.fi and Earn Cashback",
+    "url": "https://defycard.com/how-to/how-to-refer-friend-ether-fi/"
+  },
   "how-to-replace-binance-card-europe": {
     "added": "2026-10-28",
     "bucket": "how-to",
@@ -368,6 +386,15 @@
     "title": "How to Replace Binance Card in Europe: 2026 Migration Guide",
     "url": "https://defycard.com/how-to/how-to-replace-binance-card-europe/"
   },
+  "how-to-request-chargeback-crypto-card": {
+    "added": "2026-11-03",
+    "bucket": "how-to",
+    "bytes": 136647,
+    "description": "Learn how to request a chargeback on your crypto card, manage spending limits, and add beneficiaries for fraud protection. Full guide for ether.fi Cash users.",
+    "image": "/assets/pins/how-to-request-chargeback-crypto-card.jpg",
+    "title": "How to Request a Chargeback on Your Crypto Card",
+    "url": "https://defycard.com/how-to/how-to-request-chargeback-crypto-card/"
+  },
   "how-to-set-spending-limit-crypto-card": {
     "added": "2026-10-29",
     "bucket": "how-to",
@@ -376,6 +403,15 @@
     "image": "/assets/pins/how-to-set-spending-limit-crypto-card.jpg",
     "title": "How to Set Spending Limits on Your Crypto Card: Full Guide",
     "url": "https://defycard.com/how-to/how-to-set-spending-limit-crypto-card/"
+  },
+  "how-to-switch-from-gnosis-pay-to-ether-fi": {
+    "added": "2026-11-03",
+    "bucket": "how-to",
+    "bytes": 75106,
+    "description": "Learn how to migrate from Gnosis Pay, Crypto.com, or Binance cards to ether.fi Cash for non-custodial staking cashback. Step-by-step guide with zero downtime.",
+    "image": "/assets/pins/how-to-switch-from-gnosis-pay-to-ether-fi.jpg",
+    "title": "How to Switch from Gnosis Pay to ether.fi Cash Card",
+    "url": "https://defycard.com/how-to/how-to-switch-from-gnosis-pay-to-ether-fi/"
   },
   "is-a-regulated-crypto-card-the-same-as-a-custodial-card": {
     "added": "2026-10-21",
@@ -512,6 +548,24 @@
     "title": "What If My KYC Application Is Rejected: How to Appeal",
     "url": "https://defycard.com/faq/what-if-my-kyc-application-is-rejected/"
   },
+  "what-if-my-stablecoin-issuer-tether-circle-gets-regulated": {
+    "added": "2026-11-03",
+    "bucket": "faq",
+    "bytes": 253105,
+    "description": "What if my stablecoin issuer (Tether/Circle) gets regulated? A frozen token can freeze your card balance. Here is what to check before you deposit.",
+    "image": "/assets/pins/what-if-my-stablecoin-issuer-tether-circle-gets-regulated.jpg",
+    "title": "What if my stablecoin issuer (Tether/Circle) gets regulated?",
+    "url": "https://defycard.com/faq/what-if-my-stablecoin-issuer-tether-circle-gets-regulated/"
+  },
+  "what-s-the-cheapest-crypto-card-for-travel": {
+    "added": "2026-11-03",
+    "bucket": "faq",
+    "bytes": 166124,
+    "description": "What's the cheapest crypto card for travel? Compare ether.fi Cash FX, card fees and cashback rules, with a check date on every figure, before you book travel.",
+    "image": "/assets/pins/what-s-the-cheapest-crypto-card-for-travel.jpg",
+    "title": "What's the Cheapest Crypto Card for Travel? (2026)",
+    "url": "https://defycard.com/faq/what-s-the-cheapest-crypto-card-for-travel/"
+  },
   "what-s-the-difference-between-a-crypto-debit-card-and-a": {
     "added": "2026-10-21",
     "bucket": "faq",
@@ -557,6 +611,24 @@
     "title": "Which Card Has the Lowest Fees Overall? A 2026 Answer",
     "url": "https://defycard.com/faq/which-card-has-the-lowest-fees-overall/"
   },
+  "which-card-supports-the-most-stablecoins": {
+    "added": "2026-11-03",
+    "bucket": "faq",
+    "bytes": 243871,
+    "description": "Which card supports the most stablecoins? We list what our sources verify, what they do not, and where to check each issuer's current token list.",
+    "image": "/assets/pins/which-card-supports-the-most-stablecoins.jpg",
+    "title": "Which card supports the most stablecoins?",
+    "url": "https://defycard.com/faq/which-card-supports-the-most-stablecoins/"
+  },
+  "which-of-these-cards-explicitly-excludes-india": {
+    "added": "2026-11-03",
+    "bucket": "faq",
+    "bytes": 174367,
+    "description": "Which of these cards explicitly excludes India? Ether.fi Cash, per our availability record. Learn how to check any card's country list before you apply.",
+    "image": "/assets/pins/which-of-these-cards-explicitly-excludes-india.jpg",
+    "title": "Which of These Cards Explicitly Excludes India?",
+    "url": "https://defycard.com/faq/which-of-these-cards-explicitly-excludes-india/"
+  },
   "who-actually-issues-the-ether-fi-cash-card-is-it-ether-fi": {
     "added": "2026-10-23",
     "bucket": "faq",
@@ -565,6 +637,15 @@
     "image": "/assets/pins/who-actually-issues-the-ether-fi-cash-card-is-it-ether-fi.jpg",
     "title": "Who Issues the ether.fi Cash Card?",
     "url": "https://defycard.com/faq/who-actually-issues-the-ether-fi-cash-card-is-it-ether-fi/"
+  },
+  "why-doesn-t-ether-fi-cash-serve-india": {
+    "added": "2026-11-03",
+    "bucket": "faq",
+    "bytes": 262427,
+    "description": "Why doesn't ether.fi Cash serve India? It is not on the issuer's eligibility list, so Indian residents cannot get the card. Here is what to do next.",
+    "image": "/assets/pins/why-doesn-t-ether-fi-cash-serve-india.jpg",
+    "title": "Why Doesn't ether.fi Cash Serve India?",
+    "url": "https://defycard.com/faq/why-doesn-t-ether-fi-cash-serve-india/"
   },
   "will-opening-a-second-crypto-card-hurt-my-credit-score": {
     "added": "2026-10-20",

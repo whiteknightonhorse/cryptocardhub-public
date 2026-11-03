@@ -55,6 +55,8 @@ const pseo = defineCollection({
     ),
     model: z.string(),
     pattern: z.string(),
+    // CCH-MEDIUM-01: G37b (sales style-lint) verdict; read by scripts/build-markdown.js for /feed/pages.json
+    medium_eligible: z.boolean().optional(),
     // News-bucket only (optional for backward compat with hub/compare/etc.)
     // Populated by scripts/news-ingest.py — never by the static keyword
     // generator. Required for NewsArticle schema rendering + visible

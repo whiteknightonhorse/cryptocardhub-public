@@ -31,7 +31,9 @@ import importlib.util
 import json
 import re
 import statistics
+import subprocess
 import sys
+import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from dataclasses import dataclass, field
@@ -264,6 +266,8 @@ class HumanizeResult:
     refused_reason: str | None = None
     usage: dict = field(default_factory=dict)
     cost_usd: float = 0.0
+    medium_eligible: bool | None = None   # None = G37b not run
+    style_reasons: list = field(default_factory=list)
 
 
 def _money(t: str) -> Counter:
@@ -306,26 +310,137 @@ def _flagged_sentences(text: str) -> dict[str, set[str]]:
     return out
 
 
-def humanize(payload: dict[str, Any], call=None) -> HumanizeResult:
-    """ONE copy-edit call over the flagged sentences; never writes, never mutates `payload`."""
+# --- G37b: the sales style-lint.py as a second deterministic lint (CCH-MEDIUM-01) ---
+# style-lint.py is a VERBATIM copy of the sales file (md5 pinned in the tests);
+# drift is a sales-side change. It lints HTML, so the payload is projected to
+# <p>/<li>/<h2>/<h3> first. RED never blocks a page: it only decides medium_eligible.
+
+_STYLE_LINT = Path(__file__).resolve().parent / "style-lint.py"
+_MD_LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+_MD_LIST = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+(.*)")
+
+
+def _md_clean(t: str) -> str:
+    t = _MD_LINK.sub(r"\1", t)
+    return re.sub(r"\*\*|`|^>\s*", "", t).replace("*", "").strip()
+
+
+def _md_blocks(md: str) -> list[tuple[str, str]]:
+    """Markdown -> [(tag, text)]. Images, tables, rules, raw HTML and <<PLACEHOLDER>> lines are not prose."""
+    out: list[tuple[str, str]] = []
+    para: list[str] = []
+
+    def flush():
+        if para:
+            out.append(("p", _md_clean(" ".join(para))))
+            para.clear()
+    for line in md.splitlines():
+        st = line.strip()
+        if not st:
+            flush()
+        elif st.startswith(("![", "|", "<", "---", "<<")):
+            flush()
+        elif (h := re.match(r"(#{1,6})\s+(.*)", st)):
+            flush()
+            out.append((f"h{min(len(h.group(1)), 3)}" if len(h.group(1)) > 1 else "h1", _md_clean(h.group(2))))
+        elif (li := _MD_LIST.match(line)):
+            flush()
+            out.append(("li", _md_clean(li.group(1))))
+        else:
+            para.append(st)
+    flush()
+    return [(t, x) for t, x in out if x]
+
+
+def style_projection(payload: dict[str, Any]) -> str:
+    """The article prose the template renders (long_context_paragraph is not rendered), as minimal HTML for style-lint.py."""
+    blocks: list[tuple[str, str]] = []
+    if isinstance(payload.get("intro_paragraph"), str):
+        blocks += _md_blocks(payload["intro_paragraph"])
+    for b in payload.get("snapshot_bullets") or []:
+        blocks.append(("li", _md_clean(str(b))))
+    blocks += _md_blocks(payload.get("body_markdown") or "")
+    for k in ("what_to_watch", "bottom_line"):
+        blocks += [("li", _md_clean(str(b))) for b in payload.get(k) or []]
+    for q in payload.get("faq") or []:
+        if isinstance(q, dict):
+            blocks.append(("h3", _md_clean(str(q.get("q", "")))))
+            blocks += _md_blocks(str(q.get("a", "")))
+    return "\n".join(f"<{t}>{x.replace('&', '&amp;').replace('<', '&lt;')}</{t}>" for t, x in blocks if x)
+
+
+def style_lint(payload: dict[str, Any]) -> dict[str, Any]:
+    """{'green': bool, 'reasons': [...], ...} from `python3 -I scripts/style-lint.py --json`."""
+    with tempfile.TemporaryDirectory() as d:
+        f = Path(d) / "page.html"
+        f.write_text(style_projection(payload), encoding="utf-8")
+        r = subprocess.run([sys.executable, "-I", str(_STYLE_LINT), "--json", str(f)],
+                           capture_output=True, text=True, timeout=60)
+    if r.returncode not in (0, 1):
+        raise RuntimeError(f"style-lint rc={r.returncode}: {r.stderr[:200]}")
+    return next(iter(json.loads(r.stdout).values()))
+
+
+def _style_sentences(payload: dict[str, Any], reasons: list[str]) -> set[str]:
+    """Raw sentences of payload_fields that style-lint flags on their own (banned, '!', emoji, dashes; passive only if cited)."""
+    spec = importlib.util.spec_from_file_location("_style_lint", _STYLE_LINT)
+    sl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(sl)
+    bad: set[str] = set()
+    for text in payload_fields(payload):
+        for blk in re.split(r"\n+", text):
+            for s in sl.split_sentences(blk):
+                c = _md_clean(s)
+                if not sl.lint_blocks([("p", c)])["green"] or (
+                        any("passive" in r for r in reasons) and sl.PASSIVE.search(c)):
+                    bad.add(s.strip())
+    return bad
+
+
+def humanize(payload: dict[str, Any], call=None, g37b: bool = False) -> HumanizeResult:
+    """ONE copy-edit call over the flagged sentences; never writes, never mutates `payload`.
+
+    g37b=True adds the style-lint second lint (CCH-MEDIUM-01): RED style reasons join the
+    one call's prompt; both lints re-run on the result; still RED keeps the ORIGINAL (unless
+    G37 itself needed the rewrite) and sets medium_eligible=False. G37b never refuses a page."""
     pg = _load_pg()
     call = call or pg.call_claude_cli
     text = "\n\n".join(payload_fields(payload))
     before = lint(text)
     res = HumanizeResult(payload, len(before), len(before))
-    if score(text) <= THRESHOLD:
+    g37_needed = score(text) > THRESHOLD
+    reasons: list[str] = []
+    if g37b:
+        try:
+            sl = style_lint(payload)
+        except Exception:   # G37b never blocks; an unmeasured page stays medium_eligible=None (= not offered)
+            g37b = False
+        else:
+            reasons = sl["reasons"]
+            res.medium_eligible, res.style_reasons = sl["green"], reasons
+    if not g37_needed and not reasons:
         return res
-    flagged = _flagged_sentences(text)
+    flagged = _flagged_sentences(text) if g37_needed else {}
+    for s_ in sorted(_style_sentences(payload, reasons) if reasons else ()):
+        flagged.setdefault(s_, set()).add("style")
     items = list(flagged)
     res.sentences_flagged = len(items)
+    if not items:
+        return res
     user = "\n".join(f"{i} [{','.join(sorted(flagged[s]))}] {s}" for i, s in enumerate(items, 1))
+    system = VOICE_SPEC + _EDITOR_PROMPT
+    if reasons:
+        system += " Style-lint also reported (fix those too): " + "; ".join(reasons)[:600]
     try:
-        raw, res.usage, res.cost_usd = call(VOICE_SPEC + _EDITOR_PROMPT, user, pg.DEFAULT_MODEL)
+        raw, res.usage, res.cost_usd = call(system, user, pg.DEFAULT_MODEL)
         repl = json.loads(pg._strip_code_fences(raw))
     except (ValueError, TypeError) as e:   # unparseable = no replacements
         repl = {}
     except Exception as e:   # CLI/transport failure: loud, not a crash
-        res.refused_reason = f"G37:call_failed:{type(e).__name__}"
+        if g37_needed:
+            res.refused_reason = f"G37:call_failed:{type(e).__name__}"
+        else:   # G37b-only: the page stands as written, just not offered to Medium
+            res.medium_eligible = False
         return res
     if not isinstance(repl, dict):
         repl = {}
@@ -345,6 +460,16 @@ def humanize(payload: dict[str, Any], call=None) -> HumanizeResult:
         res.refused_reason = f"G37:score_after:{score(after_text):.2f}"
         res.flags_after = len(before)
         return res
+    if g37b:
+        sl2 = style_lint(new_payload)
+        res.style_reasons = sl2["reasons"]
+        if not sl2["green"]:
+            res.medium_eligible = False
+            if not g37_needed:   # the rewrite bought nothing for G37 and not for style: keep the original
+                res.flags_after = len(before)
+                return res
+        else:
+            res.medium_eligible = True
     res.payload, res.rewritten = new_payload, res.accepted > 0
     return res
 
