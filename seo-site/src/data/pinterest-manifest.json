@@ -89,6 +89,24 @@
     "title": "Can I Use ether.fi Cash if I Travel Internationally?",
     "url": "https://defycard.com/faq/can-i-use-ether-fi-cash-if-i-travel-internationally/"
   },
+  "can-i-use-ether-fi-cash-outside-the-us": {
+    "added": "2026-11-07",
+    "bucket": "faq",
+    "bytes": 165438,
+    "description": "Short answer: ether.fi Cash outside the US depends on your country of residence on the issuer's allow-list. Check cashback, FX and card fees first.",
+    "image": "/assets/pins/can-i-use-ether-fi-cash-outside-the-us.jpg",
+    "title": "Can I use ether.fi Cash outside the US? Short answer",
+    "url": "https://defycard.com/faq/can-i-use-ether-fi-cash-outside-the-us/"
+  },
+  "can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply": {
+    "added": "2026-11-09",
+    "bucket": "faq",
+    "bytes": 114964,
+    "description": "Can I use my ether.fi card globally, and what FX fees apply? Allow-list rules, the EUR FX rate on record, and cashback steps to check before travel.",
+    "image": "/assets/pins/can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply.jpg",
+    "title": "Can I use my ether.fi card globally, and what FX fees apply?",
+    "url": "https://defycard.com/faq/can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply/"
+  },
   "can-i-use-my-ether-fi-cash-card-in-countries-where-it-s": {
     "added": "2026-10-19",
     "bucket": "faq",
@@ -134,6 +152,69 @@
     "title": "Crypto Card Cashback: Top Picks 2026",
     "url": "https://defycard.com/hub/crypto-card-cashback-top-picks/"
   },
+  "crypto-card-for-btc-cashback": {
+    "added": "2026-11-05",
+    "bucket": "for",
+    "bytes": 129021,
+    "description": "Get up to 3% cashback while holding Bitcoin with ether.fi Cash card — self-custody, zero FX on USD/EUR, anti-bank spending",
+    "image": "/assets/pins/crypto-card-for-btc-cashback.jpg",
+    "title": "Crypto Card for BTC Cashback: Non-Custodial Spending Power",
+    "url": "https://defycard.com/for/crypto-card-for-btc-cashback/"
+  },
+  "crypto-card-for-charitable-giving": {
+    "added": "2026-11-06",
+    "bucket": "for",
+    "bytes": 167233,
+    "description": "Use a crypto card for charitable donations and remittances. Send money home instantly with 0% FX fees and earn 3% cashback. Self-custody, compliant, and transparent.",
+    "image": "/assets/pins/crypto-card-for-charitable-giving.jpg",
+    "title": "Crypto Card for Charitable Giving: Send Help with Instant Settlement",
+    "url": "https://defycard.com/for/crypto-card-for-charitable-giving/"
+  },
+  "crypto-card-for-daily-spending": {
+    "added": "2026-11-06",
+    "bucket": "for",
+    "bytes": 126509,
+    "description": "Spend crypto daily without selling. Earn up to 3% cashback. No KYC hassle. Compare crypto cards for everyday use in 2026.",
+    "image": "/assets/pins/crypto-card-for-daily-spending.jpg",
+    "title": "Crypto Card for Daily Spending: Spend Without Selling",
+    "url": "https://defycard.com/for/crypto-card-for-daily-spending/"
+  },
+  "crypto-card-for-emergency-fund": {
+    "added": "2026-11-04",
+    "bucket": "for",
+    "bytes": 131798,
+    "description": "Learn when a crypto card for emergency funds makes sense, plus 3 use cases (paying employees, charitable giving) and top cards to compare in 2026.",
+    "image": "/assets/pins/crypto-card-for-emergency-fund.jpg",
+    "title": "Crypto Card for Emergency Funds — When & How to Use It",
+    "url": "https://defycard.com/for/crypto-card-for-emergency-fund/"
+  },
+  "crypto-card-for-inflation-hedge": {
+    "added": "2026-11-06",
+    "bucket": "for",
+    "bytes": 185757,
+    "description": "Use a crypto card to spend ETH without selling during inflation. Earn up to 3% cashback while your assets grow. Hedge inflation the crypto way.",
+    "image": "/assets/pins/crypto-card-for-inflation-hedge.jpg",
+    "title": "Crypto Card for Inflation Hedge: Spend & Hold ETH",
+    "url": "https://defycard.com/for/crypto-card-for-inflation-hedge/"
+  },
+  "crypto-card-for-passive-income-while-spending": {
+    "added": "2026-11-07",
+    "bucket": "for",
+    "bytes": 73425,
+    "description": "Earn up to 3% cashback while your crypto stays staked. The ether.fi Cash card combines passive income with spending.",
+    "image": "/assets/pins/crypto-card-for-passive-income-while-spending.jpg",
+    "title": "Crypto Card for Passive Income While Spending",
+    "url": "https://defycard.com/for/crypto-card-for-passive-income-while-spending/"
+  },
+  "crypto-card-for-paying-employees": {
+    "added": "2026-11-07",
+    "bucket": "for",
+    "bytes": 163360,
+    "description": "Use a crypto card to pay employees globally without banks. Compare ether.fi Cash vs alternatives for freelancers, remote teams, and international payroll.",
+    "image": "/assets/pins/crypto-card-for-paying-employees.jpg",
+    "title": "Crypto Card for Paying Employees: Instant, Borderless Payroll",
+    "url": "https://defycard.com/for/crypto-card-for-paying-employees/"
+  },
   "crypto-card-for-sending-money-home": {
     "added": "2026-10-29",
     "bucket": "for",
@@ -142,6 +223,51 @@
     "image": "/assets/pins/crypto-card-for-sending-money-home.jpg",
     "title": "Crypto Card for Sending Money Home: 0% FX + Cashback",
     "url": "https://defycard.com/for/crypto-card-for-sending-money-home/"
+  },
+  "crypto-card-for-stablecoin-spending": {
+    "added": "2026-11-05",
+    "bucket": "for",
+    "bytes": 170342,
+    "description": "Spend USDC/USDT with a crypto card and earn up to 3% cashback to accumulate Bitcoin. Compare stablecoin spending strategies for self-custody investors.",
+    "image": "/assets/pins/crypto-card-for-stablecoin-spending.jpg",
+    "title": "Crypto Card for Stablecoin Spending: Earn Bitcoin Cashback",
+    "url": "https://defycard.com/for/crypto-card-for-stablecoin-spending/"
+  },
+  "crypto-card-for-usdc-spending": {
+    "added": "2026-11-07",
+    "bucket": "for",
+    "bytes": 125374,
+    "description": "Spend USDC with ether.fi Cash and earn up to 3% cashback instantly. Non-custodial, self-storage, 76+ countries. Get started now.",
+    "image": "/assets/pins/crypto-card-for-usdc-spending.jpg",
+    "title": "Crypto Card for USDC Spending: Earn While You Spend",
+    "url": "https://defycard.com/for/crypto-card-for-usdc-spending/"
+  },
+  "crypto-card-to-accumulate-bitcoin": {
+    "added": "2026-11-08",
+    "bucket": "for",
+    "bytes": 107797,
+    "description": "Get up to 3% cashback on your spending with a crypto card designed for Bitcoin accumulation. Discover how to build wealth while avoiding traditional banks.",
+    "image": "/assets/pins/crypto-card-to-accumulate-bitcoin.jpg",
+    "title": "Best Crypto Card to Accumulate Bitcoin",
+    "url": "https://defycard.com/for/crypto-card-to-accumulate-bitcoin/"
+  },
+  "crypto-card-to-avoid-banks": {
+    "added": "2026-11-08",
+    "bucket": "for",
+    "bytes": 239801,
+    "description": "Escape traditional banking with a crypto card to avoid banks. Spend crypto directly in self-custody, earn cashback—ether.fi vs. alternatives 2026.",
+    "image": "/assets/pins/crypto-card-to-avoid-banks.jpg",
+    "title": "Crypto Card to Avoid Banks: Self-Custody Spending",
+    "url": "https://defycard.com/for/crypto-card-to-avoid-banks/"
+  },
+  "crypto-card-to-spend-without-selling-crypto": {
+    "added": "2026-11-08",
+    "bucket": "for",
+    "bytes": 120621,
+    "description": "Spend crypto without liquidating. Keep your crypto staked while earning cashback and passive income via your crypto card.",
+    "image": "/assets/pins/crypto-card-to-spend-without-selling-crypto.jpg",
+    "title": "Crypto Card to Spend Without Selling Crypto",
+    "url": "https://defycard.com/for/crypto-card-to-spend-without-selling-crypto/"
   },
   "crypto-rebates-vs-cashback-which-is-better": {
     "added": "2026-10-24",
@@ -188,6 +314,15 @@
     "title": "Gemini Card Review 2026: Cashback Tiers, Cap and Fees",
     "url": "https://defycard.com/reviews/gemini-card-review/"
   },
+  "how-does-0-fx-fee-work-on-ether-fi": {
+    "added": "2026-11-07",
+    "bucket": "faq",
+    "bytes": 301813,
+    "description": "How does 0% FX fee work on ether.fi? The issuer adds no markup on qualifying conversions. Check the EUR beta line and cashback bands before you spend.",
+    "image": "/assets/pins/how-does-0-fx-fee-work-on-ether-fi.jpg",
+    "title": "How does 0% FX fee work on ether.fi?",
+    "url": "https://defycard.com/faq/how-does-0-fx-fee-work-on-ether-fi/"
+  },
   "how-does-the-rolling-90-day-tier-maintenance-system-work": {
     "added": "2026-10-19",
     "bucket": "faq",
@@ -196,6 +331,15 @@
     "image": "/assets/pins/how-does-the-rolling-90-day-tier-maintenance-system-work.jpg",
     "title": "How Does the Rolling 90-Day Tier Maintenance System Work?",
     "url": "https://defycard.com/faq/how-does-the-rolling-90-day-tier-maintenance-system-work/"
+  },
+  "how-long-does-a-chargeback-take-on-a-crypto-card": {
+    "added": "2026-11-09",
+    "bucket": "faq",
+    "bytes": 112587,
+    "description": "How long does a chargeback take on a crypto card? Timelines depend on the card network and dispute reason. Learn what to expect and how to file fast.",
+    "image": "/assets/pins/how-long-does-a-chargeback-take-on-a-crypto-card.jpg",
+    "title": "How Long Does a Chargeback Take on a Crypto Card?",
+    "url": "https://defycard.com/faq/how-long-does-a-chargeback-take-on-a-crypto-card/"
   },
   "how-long-does-it-take-to-get-a-physical-card": {
     "added": "2026-10-23",
@@ -269,6 +413,24 @@
     "title": "How to Choose a Crypto Card Alternative to ether.fi",
     "url": "https://defycard.com/how-to/how-to-choose-crypto-card-alternative/"
   },
+  "how-to-claim-ethfi-airdrop": {
+    "added": "2026-11-09",
+    "bucket": "how-to",
+    "bytes": 166012,
+    "description": "Step-by-step guide: claim your ether.fi airdrop, set up a Safe wallet, and activate your crypto card in the USA. Verify eligibility today.",
+    "image": "/assets/pins/how-to-claim-ethfi-airdrop.jpg",
+    "title": "How to Claim ether.fi Airdrop & Set Up Your Crypto Card",
+    "url": "https://defycard.com/how-to/how-to-claim-ethfi-airdrop/"
+  },
+  "how-to-connect-wallet-to-ether-fi-cash": {
+    "added": "2026-11-09",
+    "bucket": "how-to",
+    "bytes": 240852,
+    "description": "Step-by-step guide to linking your crypto wallet to ether.fi Cash, claiming your ETHFi airdrop, and setting up a secure wallet for crypto card spending.",
+    "image": "/assets/pins/how-to-connect-wallet-to-ether-fi-cash.jpg",
+    "title": "How to Connect Wallet to Ether.fi Cash Card in 3 Steps",
+    "url": "https://defycard.com/how-to/how-to-connect-wallet-to-ether-fi-cash/"
+  },
   "how-to-dispute-crypto-card-transaction": {
     "added": "2026-10-30",
     "bucket": "how-to",
@@ -295,6 +457,15 @@
     "image": "/assets/pins/how-to-earn-referral-bonus-crypto-com-card.jpg",
     "title": "How to Earn a Referral Bonus on Your Crypto.com Card",
     "url": "https://defycard.com/how-to/how-to-earn-referral-bonus-crypto-com-card/"
+  },
+  "how-to-get-a-crypto-card-in-australia": {
+    "added": "2026-11-09",
+    "bucket": "how-to",
+    "bytes": 128341,
+    "description": "Get a crypto card in Australia in 5 steps. 0% FX on EUR (beta), up to 3% cashback. Full KYC guide for ether.fi, Crypto.com, and alternatives.",
+    "image": "/assets/pins/how-to-get-a-crypto-card-in-australia.jpg",
+    "title": "How to Get a Crypto Card in Australia",
+    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-australia/"
   },
   "how-to-get-a-crypto-card-in-dubai": {
     "added": "2026-10-31",
@@ -404,6 +575,15 @@
     "title": "How to Set Spending Limits on Your Crypto Card: Full Guide",
     "url": "https://defycard.com/how-to/how-to-set-spending-limit-crypto-card/"
   },
+  "how-to-set-up-safe-wallet-for-crypto-card": {
+    "added": "2026-11-05",
+    "bucket": "how-to",
+    "bytes": 159427,
+    "description": "Step-by-step guide to setting up a secure wallet for crypto cards. Best practices for USA and UK users. Start earning cashback safely.",
+    "image": "/assets/pins/how-to-set-up-safe-wallet-for-crypto-card.jpg",
+    "title": "How to Set Up a Safe Wallet for Your Crypto Card",
+    "url": "https://defycard.com/how-to/how-to-set-up-safe-wallet-for-crypto-card/"
+  },
   "how-to-switch-from-gnosis-pay-to-ether-fi": {
     "added": "2026-11-03",
     "bucket": "how-to",
@@ -412,6 +592,24 @@
     "image": "/assets/pins/how-to-switch-from-gnosis-pay-to-ether-fi.jpg",
     "title": "How to Switch from Gnosis Pay to ether.fi Cash Card",
     "url": "https://defycard.com/how-to/how-to-switch-from-gnosis-pay-to-ether-fi/"
+  },
+  "how-to-transfer-balance-between-crypto-cards": {
+    "added": "2026-11-04",
+    "bucket": "how-to",
+    "bytes": 122589,
+    "description": "Learn how to transfer balance between crypto cards, dispute transactions, and request chargebacks. Step-by-step guide covering methods and best practices.",
+    "image": "/assets/pins/how-to-transfer-balance-between-crypto-cards.jpg",
+    "title": "How to Transfer Balance Between Crypto Cards",
+    "url": "https://defycard.com/how-to/how-to-transfer-balance-between-crypto-cards/"
+  },
+  "how-to-use-crypto-card-for-subscriptions": {
+    "added": "2026-11-04",
+    "bucket": "how-to",
+    "bytes": 108235,
+    "description": "Learn how to set up a crypto card for subscriptions and earn up to 3% cashback. Plus: how to refer a friend and unlock referral bonuses.",
+    "image": "/assets/pins/how-to-use-crypto-card-for-subscriptions.jpg",
+    "title": "How to Use a Crypto Card for Subscriptions in 2026",
+    "url": "https://defycard.com/how-to/how-to-use-crypto-card-for-subscriptions/"
   },
   "is-a-regulated-crypto-card-the-same-as-a-custodial-card": {
     "added": "2026-10-21",
@@ -430,6 +628,15 @@
     "image": "/assets/pins/is-ether-fi-available-in-my-country.jpg",
     "title": "Is Ether.fi Available in My Country?",
     "url": "https://defycard.com/faq/is-ether-fi-available-in-my-country/"
+  },
+  "is-ether-fi-cash-available-in-all-us-states": {
+    "added": "2026-11-08",
+    "bucket": "faq",
+    "bytes": 286991,
+    "description": "Is ether.fi Cash available in all US states? No. Eligibility is set state by state. Check the issuer's list, then compare fees and cashback before you apply.",
+    "image": "/assets/pins/is-ether-fi-cash-available-in-all-us-states.jpg",
+    "title": "Is ether.fi Cash available in all US states?",
+    "url": "https://defycard.com/faq/is-ether-fi-cash-available-in-all-us-states/"
   },
   "is-ether-fi-cash-available-in-my-country": {
     "added": "2026-10-22",
@@ -457,6 +664,15 @@
     "image": "/assets/pins/is-my-crypto-safe-with-ether-fi-cash.jpg",
     "title": "Is My Crypto Safe With ether.fi Cash? 2026 Review",
     "url": "https://defycard.com/faq/is-my-crypto-safe-with-ether-fi-cash/"
+  },
+  "is-self-custody-safer-than-custodial-cards": {
+    "added": "2026-11-07",
+    "bucket": "faq",
+    "bytes": 244619,
+    "description": "Is self-custody safer than custodial cards? Compare key control, recovery, freezes and fees to pick the best crypto card for self custody for your risk.",
+    "image": "/assets/pins/is-self-custody-safer-than-custodial-cards.jpg",
+    "title": "Is Self-Custody Safer Than Custodial Cards?",
+    "url": "https://defycard.com/faq/is-self-custody-safer-than-custodial-cards/"
   },
   "is-there-a-fee-to-open-an-account": {
     "added": "2026-10-30",
@@ -512,6 +728,15 @@
     "title": "What Happens If My Card Provider Shuts Down?",
     "url": "https://defycard.com/faq/what-happens-if-my-card-provider-shuts-down/"
   },
+  "what-happens-if-my-cro-stake-drops-below-the-tier-minimum": {
+    "added": "2026-11-06",
+    "bucket": "faq",
+    "bytes": 101325,
+    "description": "Yes, usually: a CRO stake below the tier minimum moves your Crypto.com card to a lower tier. Here is what changes and what we could not verify.",
+    "image": "/assets/pins/what-happens-if-my-cro-stake-drops-below-the-tier-minimum.jpg",
+    "title": "What happens if my CRO stake drops below the tier minimum?",
+    "url": "https://defycard.com/faq/what-happens-if-my-cro-stake-drops-below-the-tier-minimum/"
+  },
   "what-happens-if-my-referred-friend-signs-up-but-never": {
     "added": "2026-10-20",
     "bucket": "faq",
@@ -557,6 +782,15 @@
     "title": "What if my stablecoin issuer (Tether/Circle) gets regulated?",
     "url": "https://defycard.com/faq/what-if-my-stablecoin-issuer-tether-circle-gets-regulated/"
   },
+  "what-is-a-self-custody-crypto-card": {
+    "added": "2026-11-06",
+    "bucket": "faq",
+    "bytes": 247666,
+    "description": "What is a self-custody crypto card? You hold the keys to the wallet that funds it. Learn the tradeoffs, fees and country checks before you sign up.",
+    "image": "/assets/pins/what-is-a-self-custody-crypto-card.jpg",
+    "title": "What is a self-custody crypto card? A plain answer",
+    "url": "https://defycard.com/faq/what-is-a-self-custody-crypto-card/"
+  },
   "what-s-the-cheapest-crypto-card-for-travel": {
     "added": "2026-11-03",
     "bucket": "faq",
@@ -574,6 +808,15 @@
     "image": "/assets/pins/what-s-the-difference-between-a-crypto-debit-card-and-a.jpg",
     "title": "What's the Difference: Crypto Debit vs Crypto Credit Card?",
     "url": "https://defycard.com/faq/what-s-the-difference-between-a-crypto-debit-card-and-a/"
+  },
+  "what-s-the-difference-between-ether-fi-cash-and-ether-fi-s": {
+    "added": "2026-11-09",
+    "bucket": "faq",
+    "bytes": 115399,
+    "description": "ether.fi Cash pays cashback when you spend. ether.fi's staking product earns yield on staked ETH. Compare the two before you choose which one fits your goal.",
+    "image": "/assets/pins/what-s-the-difference-between-ether-fi-cash-and-ether-fi-s.jpg",
+    "title": "What's the difference between ether.fi Cash and staking?",
+    "url": "https://defycard.com/faq/what-s-the-difference-between-ether-fi-cash-and-ether-fi-s/"
   },
   "what-s-the-fastest-way-to-get-a-crypto-card-that-actually": {
     "added": "2026-10-20",
@@ -610,6 +853,15 @@
     "image": "/assets/pins/which-card-has-the-lowest-fees-overall.jpg",
     "title": "Which Card Has the Lowest Fees Overall? A 2026 Answer",
     "url": "https://defycard.com/faq/which-card-has-the-lowest-fees-overall/"
+  },
+  "which-card-is-best-for-international-travel": {
+    "added": "2026-11-06",
+    "bucket": "faq",
+    "bytes": 160381,
+    "description": "Which card is best for international travel? Compare FX fees, cashback steps and card costs, and check country eligibility before you sign up.",
+    "image": "/assets/pins/which-card-is-best-for-international-travel.jpg",
+    "title": "Which Card Is Best for International Travel?",
+    "url": "https://defycard.com/faq/which-card-is-best-for-international-travel/"
   },
   "which-card-supports-the-most-stablecoins": {
     "added": "2026-11-03",
@@ -655,5 +907,14 @@
     "image": "/assets/pins/will-opening-a-second-crypto-card-hurt-my-credit-score.jpg",
     "title": "Will opening a second crypto card hurt my credit score?",
     "url": "https://defycard.com/faq/will-opening-a-second-crypto-card-hurt-my-credit-score/"
+  },
+  "will-this-page-change-if-an-issuer-starts-serving-india": {
+    "added": "2026-11-04",
+    "bucket": "faq",
+    "bytes": 177541,
+    "description": "Will this page change if an issuer starts serving India? Yes, once the issuer adds India to its allow-list. The URL stays put and the fallback holds.",
+    "image": "/assets/pins/will-this-page-change-if-an-issuer-starts-serving-india.jpg",
+    "title": "Will this page change if an issuer starts serving India?",
+    "url": "https://defycard.com/faq/will-this-page-change-if-an-issuer-starts-serving-india/"
   }
 }
