@@ -187,3 +187,41 @@ def test_a_field_without_the_button_is_returned_untouched():
     for text in ("**Cashback:** up to 3%", "plain text", "[a](/faq/x/)"):
         out, n = pg.normalize_field(text)
         assert n == 0 and out == text
+
+
+# --- CCH-SEO-23: the WRITTEN file never carries a non-rooted / paren-wrapped href
+
+def test_written_file_has_no_unrooted_href(monkeypatch, tmp_path, capsys):
+    """Reads the file write_page puts on disk, not the helper (Y53). Mutation:
+    make validate_internal_links return its input -> red."""
+    monkeypatch.setattr(pg, "CONTENT_DIR", tmp_path)
+    monkeypatch.setattr(pg, "localize_images", lambda imgs, slug: imgs)
+    monkeypatch.setattr(pg, "assert_not_frozen", lambda s: None)
+    monkeypatch.setattr(pg, "validate_intro", lambda i, v: None)
+    monkeypatch.setattr(pg, "existing_paths", lambda: {"/geo/best-crypto-card-florida/", "/compare/"})
+
+    class _KW:
+        keyword = "best crypto card slugtest"
+        bucket = next(iter(pg.BUCKET_META))
+        volume = 10
+        intent = "commercial"
+
+    class _Cluster:
+        primary = _KW()
+        supporting: list = []
+        pattern = "t"
+
+    class _Res:
+        cluster = _Cluster()
+        payload = {
+            "title": "t", "meta_description": "d", "h1": "h",
+            "body_markdown": ("See [FL](geo/best-crypto-card-florida/), [paren]((/compare/)), "
+                              "[rel](../compare/x/), [ok](/geo/best-crypto-card-florida/) "
+                              "and [out](https://example.org/a)."),
+        }
+        usage: dict = {}
+
+    out = pg.write_page(_Res(), []).read_text(encoding="utf-8")
+    assert "](geo/" not in out and "((/" not in out and "](../" not in out
+    assert "See FL," in out and "[ok](/geo/best-crypto-card-florida/)" in out
+    assert "[out](https://example.org/a)" in out

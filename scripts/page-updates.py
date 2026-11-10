@@ -54,6 +54,7 @@ from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
 import money_gate  # noqa: E402 -- G36: a number in money copy must come from a fact
 import humanize_gate  # noqa: E402 -- G37: copy-edit AI tells before G36 sees the text
 import telegram_lib  # noqa: E402
+import api_batch as ab  # noqa: E402 -- API-CREDITS-1108/3b batch lane
 
 ROOT = Path(__file__).resolve().parent.parent
 LEDGER = ROOT / "logs" / "pseo" / "page-updates.jsonl"
@@ -61,6 +62,12 @@ ETHERFI_FACTS = ROOT / ".claude" / "skills" / "etherfi" / "SKILL.md"
 FACTS_BYTE_LIMIT = 7000    # Y69: pseo-generate.py's own writer sees only SKILL.md[:7000]; match it
 
 WEEKLY_CAP = 5
+JOB = "page-updates"
+MAX_TOKENS = 1500   # a 120-220 word section
+
+
+class NotCollected(Exception):
+    """collect run: this candidate has no finished batch result; skip it, no ledger row."""
 
 
 def _load(name: str, relpath: str):
@@ -196,6 +203,9 @@ def build_prompt(query: str, page_body: str, facts: str) -> tuple[str, str]:
 
 def write_update_section(query: str, page_body: str) -> str:
     system, user = build_prompt(query, page_body, load_facts())
+    if ab.enabled(JOB) and ab.submit(JOB, ab.cid("pu", query, page_body), {}, system, user,
+                                     MAX_TOKENS, pg.DEFAULT_MODEL):
+        raise ab.Deferred
     raw, _usage, _cost = pg.call_claude_cli(system_prompt=system, user_message=user)
     return pg._strip_code_fences(raw).strip()
 
@@ -219,8 +229,9 @@ def apply_updates(dry_run: bool, writer=write_update_section,
     applied_count = 0
     done_pairs = {(r.get("slug"), r.get("query")) for r in _ledger_rows()
                   if r.get("event") == "applied"}
+    submitted = 0
     for c in candidates:
-        if applied_count >= room:
+        if applied_count + submitted >= room:
             break
         slug = slug_for_path(c["path"])
         # Law (KW-01): a (slug, query) pair applied once is never applied again.
@@ -245,7 +256,13 @@ def apply_updates(dry_run: bool, writer=write_update_section,
                             "date": now.isoformat(), "query": c["query"], "slug": slug})
             continue
 
-        section = writer(c["query"], body)
+        try:
+            section = writer(c["query"], body)
+        except ab.Deferred:     # on the batch lane: counts against the weekly room, no ledger row yet
+            submitted += 1
+            continue
+        except NotCollected:
+            continue
         # G37 (CCH-HUM-05): copy-edit flagged sentences BEFORE G36, so G36 judges
         # the text that will actually be written. The write below uses `section`
         # AFTER this rebind -- never the writer's raw output.
@@ -300,6 +317,21 @@ def apply_updates(dry_run: bool, writer=write_update_section,
     return {"applied": applied_count, "entries": entries, "room": room}
 
 
+def collect_batches() -> int:
+    """Collector tick: finished batch results go through the SAME apply_updates (humanizer,
+    G36, delta gate, write, ledger) with the batch text standing in for the writer call."""
+    def handle(results):
+        texts = {i: pg._strip_code_fences(t).strip() for i, (_r, t) in results.items() if t}
+
+        def writer(query, body):
+            t = texts.get(ab.cid("pu", query, body))   # a page edited since submit no longer matches
+            if t is None:
+                raise NotCollected
+            return t
+        apply_updates(dry_run=False, writer=writer)
+    return ab.collect(JOB, handle)
+
+
 # ---------------------------------------------------------------------------
 # Verdict: +14 / +28 readback
 # ---------------------------------------------------------------------------
@@ -345,6 +377,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true", help="show, write nothing")
+    ap.add_argument("--collect", action="store_true", help="finish ended batch-lane results (collector cron)")
     ap.add_argument("--verdict", action="store_true", help="+14/+28 readback instead of applying")
     a = ap.parse_args()
 
@@ -353,6 +386,10 @@ def main() -> int:
     if not pseo_enabled():
         print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
         print("[page-updates] skip: pseo_disabled (PSEO_ENABLED=false)")
+        return 0
+
+    if a.collect:
+        print(f"[page-updates] collected {collect_batches()} batch(es)")
         return 0
 
     if a.verdict:
@@ -366,6 +403,8 @@ def main() -> int:
             _ledger_append(verdicts)
         return 0
 
+    if a.dry_run:
+        ab.disable()
     result = apply_updates(dry_run=a.dry_run)
     print(f"[page-updates] applied {result['applied']} (room {result['room']}/wk)")
     for e in result["entries"]:

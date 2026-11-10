@@ -19,6 +19,15 @@ export async function getStaticPaths() {
 }
 
 const { video } = Astro.props;
+const pseoPages = await getCollection('pseo');
+const guide = video.target_pseo_slug
+  ? pseoPages.find((p) => `${p.data.bucket}/${p.data.slug}` === video.target_pseo_slug)
+  : undefined;
+const description = (video.description || '').trim()
+  || (guide
+    ? `${video.title}. Short video for: ${guide.data.title}.`
+    : `${video.title}. A DefyCard short video on crypto cards.`);
+const ogImage = video.thumbnail_url || `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
 const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
 const pageUrl = `${siteOrigin}/videos/${video.id}/`;
 const breadcrumbs = [
@@ -31,8 +40,8 @@ const schemaVideo = {
   '@context': 'https://schema.org',
   '@type': 'VideoObject',
   name: video.title,
-  description: video.description,
-  thumbnailUrl: [video.thumbnail_url],
+  description,
+  thumbnailUrl: [ogImage],
   uploadDate: video.published_at,
   contentUrl: video.youtube_url,
   embedUrl: video.embed_url,
@@ -55,7 +64,8 @@ function shortDate(iso: string): string {
 ---
 <BaseLayout
   title={`${video.title} — DefyCard`}
-  description={video.description}
+  description={description}
+  ogImage={ogImage}
   activeNav="cards"
   breadcrumbs={breadcrumbs}
 >
@@ -88,9 +98,9 @@ function shortDate(iso: string): string {
       </section>
     )}
 
-    {video.target_pseo_slug && (
+    {guide && (
       <p class="video-related">
-        Related deep-dive: <a href={`/${video.target_pseo_slug}/`}>{video.target_pseo_slug}</a>
+        Full guide: <a href={`/${video.target_pseo_slug}/`}>{guide.data.title}</a>
       </p>
     )}
 

@@ -54,3 +54,8 @@ export function factsForPartner(slug) {
 export function factById(facts, id) {
   return (facts || []).find((f) => f.id === id) || null;
 }
+
+/** Number of issuers with a dated fact record (one file per issuer). */
+export function factIssuerCount() {
+  return fs.readdirSync(path.join(ROOT, 'config', 'facts')).filter((f) => f.endsWith('.yaml')).length;
+}

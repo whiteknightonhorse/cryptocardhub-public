@@ -14,7 +14,7 @@
  *   7. FAQ accordion (chevron rotate)
  *   8. Related Guides (curated)
  *   9. More from this section (bento grid)
- *  10. Last reviewed timestamp
+ *  10. Last updated timestamp
  */
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -459,7 +459,7 @@ const enrichedArticle = schemaArticle
     )}
 
     <!-- 10. LAST REVIEWED -->
-    <p class="page-meta">Last reviewed: {lastReviewed}</p>
+    <p class="page-meta">Last updated: {lastReviewed}</p>
   </article>
 
   {enrichedArticle && (

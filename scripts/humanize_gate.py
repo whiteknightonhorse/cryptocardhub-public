@@ -38,6 +38,9 @@ from collections import Counter
 from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import api_batch as ab  # noqa: E402 -- API-CREDITS-1108/3b batch lane
 from typing import Any
 
 import yaml
@@ -477,6 +480,8 @@ def humanize(payload: dict[str, Any], call=None, g37b: bool = False) -> Humanize
 # --- blind audit (CCH-HUM-07): a sampled instrument, never a blocker ---------
 
 _JUDGE_SYSTEM = "You are a blind judge."
+JUDGE_JOB = "judge"
+JUDGE_MAX_TOKENS = 16   # one token: 1, 2 or tie
 _JUDGE_ASK = "\n\nWhich text is better written? Answer with exactly one token: 1, 2 or tie."
 
 
@@ -498,30 +503,50 @@ def audit_pair(slug: str, original: dict[str, Any], rewritten: dict[str, Any],
     if not audit_sample(slug):
         return None
     pg = _load_pg()
+    batch = call is None and ab.enabled(JUDGE_JOB)
     call = call or pg.call_claude_cli
     pos = 1 if (_slug_hash(slug) // 10) % 2 == 0 else 2   # original's position, same hash
     a = "\n\n".join(payload_fields(original))
     b = "\n\n".join(payload_fields(rewritten))
     t1, t2 = (a, b) if pos == 1 else (b, a)
+    user = f"Text 1:\n{t1}\n\nText 2:\n{t2}{_JUDGE_ASK}"
     try:
-        raw, _usage, cost = call(_JUDGE_SYSTEM, f"Text 1:\n{t1}\n\nText 2:\n{t2}{_JUDGE_ASK}", pg.DEFAULT_MODEL)
-        ans = raw.strip().strip(".\"'`").lower()
-        if ans not in ("1", "2", "tie"):
-            return None
-        verdict = "tie" if ans == "tie" else ("original" if int(ans) == pos else "rewrite")
-        row = {"ts": datetime.now(timezone.utc).isoformat(), "slug": slug, "original_pos": pos,
-               "verdict": verdict, "cost_usd": round(cost, 6)}
-        d = log_dir or ROOT / "logs" / "humanize"
-        d.mkdir(parents=True, exist_ok=True)
-        with (d / "audit.jsonl").open("a", encoding="utf-8") as f:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
-        return row
+        if batch and ab.submit(JUDGE_JOB, ab.cid("aud", slug), {"slug": slug, "pos": pos}, _JUDGE_SYSTEM, user,
+                               JUDGE_MAX_TOKENS, pg.DEFAULT_MODEL):
+            return None   # instrument: the collector writes the row
+        raw, _usage, cost = call(_JUDGE_SYSTEM, user, pg.DEFAULT_MODEL)
+        return _write_audit_row(slug, pos, raw, cost, log_dir)
     except Exception:   # noqa: BLE001 -- an instrument, never a blocker
         return None
 
 
+def _write_audit_row(slug: str, pos: int, raw: str, cost: float, log_dir: Path | None = None) -> dict[str, Any] | None:
+    ans = raw.strip().strip(".\"'`").lower()
+    if ans not in ("1", "2", "tie"):
+        return None
+    verdict = "tie" if ans == "tie" else ("original" if int(ans) == pos else "rewrite")
+    row = {"ts": datetime.now(timezone.utc).isoformat(), "slug": slug, "original_pos": pos,
+           "verdict": verdict, "cost_usd": round(cost, 6)}
+    d = log_dir or ROOT / "logs" / "humanize"
+    d.mkdir(parents=True, exist_ok=True)
+    with (d / "audit.jsonl").open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return row
+
+
+def collect_batches() -> int:
+    """Collector tick: ended judge answers -> the same audit row (cost lives in the api ledger)."""
+    def handle(results):
+        for _i, (ref, t) in results.items():
+            if t:
+                _write_audit_row(ref["slug"], ref["pos"], t, 0.0)
+    return ab.collect(JUDGE_JOB, handle)
+
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--corpus":
+    if len(sys.argv) > 1 and sys.argv[1] == "--collect":
+        print(f"collected {collect_batches()} batch(es)")
+    elif len(sys.argv) > 1 and sys.argv[1] == "--corpus":
         for k, v in corpus_report().items():
             print(f"{k}: {v}")
     else:

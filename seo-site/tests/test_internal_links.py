@@ -58,6 +58,27 @@ EXPECTED_REDIRECTS = {
     "/how-to/how-to-use-crypto-card-on-uber/": "/for/crypto-card-for-uber/",
     "/learn/what-is-account-abstraction/": "/learn/what-is-a-smart-account-crypto-card/",
     "/faq/is-ether-fi-cash-a-debit-card/": "/faq/is-ether-fi-cash-a-credit-card/",
+    # DEFY-SEO-1110 (CCH-SEO-21)
+    "/reviews/crypto-com/": "/reviews/crypto-com-card-review/",
+    "/help/crypto-card-fees/": "/help/crypto-card-hidden-fees/",
+    "/how-to/minimize-crypto-card-fees/": "/help/crypto-card-hidden-fees/",
+    "/how-to/use-virtual-card/": "/learn/what-is-a-virtual-crypto-card/",
+    "/compare/crypto-card-refund-policies/": "/help/crypto-card-refund-not-received/",
+    "/compare/non-custodial-vs-custodial/": "/learn/custodial-vs-non-custodial-card/",
+    "/how-to/crypto-cashback-disputes/": "/help/crypto-card-cashback-wrong-amount/",
+    "/how-to/crypto-card-multi-chain/": "/learn/what-is-a-multi-chain-crypto-card/",
+    "/how-to/maximize-crypto-card-cashback/": "/how-to/how-to-maximize-crypto-card-cashback/",
+    "/reviews/binance-card-discontinued/": "/help/binance-card-europe-alternative/",
+    "/learn/ether-fi-countries/": "/geo/availability-matrix/",
+    "/news/ether-fi-expansion/": "/geo/availability-matrix/",
+    "/learn/crypto-card-security/": "/learn/are-crypto-cards-safe/",
+    "/learn/staking-rewards-explained/": "/learn/what-is-liquid-staking/",
+    "/compare/crypto-card-cashback/": "/hub/crypto-card-cashback-top-picks/",
+    "/compare/crypto-card-rankings/": "/hub/crypto-card-comparison/",
+    "/education/self-custody-crypto-cards/": "/learn/what-is-a-self-custody-card/",
+    "/compare/crypto-card-vs-apple-pay/": "/learn/crypto-card-vs-apple-pay/",
+    "/compare/crypto-gaming-cards/": "/for/crypto-card-for-gamers/",
+    "/how-to/track-crypto-cashback/": "/how-to/how-to-track-crypto-cashback/",
 }
 
 # CCH-SEO-03 — no same-topic live page: 410, never a 301 into a wrong topic.
@@ -66,6 +87,13 @@ EXPECTED_GONE = {
     "/videos/fPMl-F4ecIg/",
     "/videos/571-AMmO5e8/",
     "/videos/eTPznhHYf8I/",
+    # DEFY-SEO-1110 (CCH-SEO-21)
+    "/how-to/activate-crypto-card/",
+    "/how-to/secure-crypto-card-keys/",
+    "/compare/bybit-vs-ether-fi/",
+    "/compare/ether-fi-vs-bybit/",
+    "/videos/I6Gj1XGhf0U/",
+    "/videos/ZGgCMas1v48/",
 }
 
 _HREF = re.compile(r'href="(/[^"#?]*)"')
@@ -256,3 +284,35 @@ console.log(new Set(out).size);
     r = subprocess.run(["node", "--input-type=module", "-e", js, str(f), (ROOT / "src/lib/related.mjs").as_uri()],
                        capture_output=True, text=True)
     assert r.stdout.strip() == "1", r.stderr or r.stdout
+
+
+# --- CCH-SEO-23: resolve EVERY href the way a browser does -------------------
+# The two tests above only look at hrefs that already start with "/", so
+# `href="geo/x/"` and `href="(/how-to/x/)"` never reached them (allow-list).
+_ANY_ATTR_HREF = re.compile(r'<a\b[^>]*?\shref="([^"]*)"')
+
+
+def test_every_href_resolves_like_a_browser_to_a_built_file():
+    from urllib.parse import unquote, urljoin, urlsplit
+
+    served, redirects = _served_paths(), _parse_redirects()
+    base_host = "https://defycard.com"
+    dead: dict[str, set[str]] = {}
+    for p in DIST.rglob("*.html"):
+        page = "/" + str(p.relative_to(DIST)).removesuffix("index.html")
+        html = p.read_text(encoding="utf-8", errors="replace")
+        for raw in _ANY_ATTR_HREF.findall(html):
+            href = raw.strip().replace("&amp;", "&")
+            if not href or href.startswith(("#", "mailto:", "tel:", "javascript:", "data:")):
+                continue
+            u = urlsplit(urljoin(base_host + page, href))
+            if u.scheme not in ("http", "https") or u.netloc not in ("defycard.com", "www.defycard.com"):
+                continue
+            path = unquote(u.path) or "/"
+            if (_is_asset(path) or path in served or path in redirects
+                    or (DIST / path.lstrip("/")).is_file()):
+                continue
+            dead.setdefault(path, set()).add(page)
+    n = sum(len(v) for v in dead.values())
+    assert not dead, f"{len(dead)} dead target(s), {n} instance(s): " + "; ".join(
+        f"{t} <- {sorted(s)[:3]}" for t, s in sorted(dead.items()))

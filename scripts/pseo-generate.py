@@ -1344,7 +1344,7 @@ def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
                           "button_in_frontmatter_fields": _field_fixed},
                          ensure_ascii=False))
     if _links_dropped:
-        print(json.dumps({"event": "internal_links_dropped", "slug": slug,
+        print(json.dumps({"event": "href_unwrapped", "slug": slug,
                           "links_dropped": _links_dropped}, ensure_ascii=False))
     # Intro paragraph contains a text-link to <<AFFILIATE_URL>> — keep the
     # placeholder for the same reason as above.

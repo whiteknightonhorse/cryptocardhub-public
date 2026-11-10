@@ -12,6 +12,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+# Longest match: Allow wins for /_astro/ (the CSS bundle); the rest of /_ stays blocked.
+Allow: /_astro/
 Disallow: /_*
 
 # Sitemap. Both names serve the same <sitemapindex>: crawlers ask for the

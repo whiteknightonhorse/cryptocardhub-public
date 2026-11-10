@@ -111,6 +111,7 @@ import corpus_edit as ce  # noqa: E402
 import facts_lib as fl  # noqa: E402
 from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch (D3: intel-ingest reads it)
 import telegram_lib  # noqa: E402
+import api_batch as ab  # noqa: E402 -- API-CREDITS-1108/3b batch lane
 
 # LAW #ONE-PLACE-ish: don't reimplement the Intercom article JSON parser or the
 # fetch() helper — availability-check.py already has both, tested against the
@@ -308,15 +309,42 @@ def call_claude_cli(
     return _pg.call_claude_cli(system_prompt, user_message, model, timeout_s)
 
 
+BATCH_MODEL = "claude-sonnet-5-5"   # the batch lane allow-list takes pinned ids; MODEL is the alias
+BATCH_MAX_TOKENS = 4096
+_COLLECTED: dict[str, tuple[str, str]] = {}   # collector tick: custom_id -> (diff sha256, model text)
+
+
 def extract_facts(source: dict, diff_text: str) -> list[dict]:
     """The ONE call site that talks to the model. Tests monkeypatch
-    `call_claude_cli` and count calls against it."""
+    `call_claude_cli` and count calls against it.
+
+    Batch lane (API-CREDITS-1108/3b): a finished result is used only for the diff it was
+    submitted for (sha256); otherwise the diff goes to the lane and the source waits
+    (ab.Deferred). A refusal falls through to the subscription call below."""
     user_msg = f"Source: {source['id']} ({source['url']})\n\nUnified diff:\n{diff_text}\n"
-    text, _usage, _cost = call_claude_cli(EXTRACTION_SYSTEM_PROMPT, user_msg)
+    item, dsha = ab.cid("intel", source["id"]), sha256(diff_text)
+    got = _COLLECTED.get(item)
+    if got and got[0] == dsha:
+        text = got[1]
+    elif ab.enabled("intel") and ab.submit("intel", item, {"diff_sha": dsha, "source_id": source["id"]}, EXTRACTION_SYSTEM_PROMPT,
+                                           user_msg, BATCH_MAX_TOKENS, BATCH_MODEL):
+        raise ab.Deferred
+    else:
+        text, _usage, _cost = call_claude_cli(EXTRACTION_SYSTEM_PROMPT, user_msg)
     data = json.loads(_strip_code_fences(text))
     if not isinstance(data, list):
         raise RuntimeError(f"model returned non-list JSON: {type(data).__name__}")
     return data
+
+
+def collect_batches() -> int:
+    """Collector tick: each ended result re-enters through run(only=its source) -> process_source -> extract_facts."""
+    def handle(results):
+        for i, (ref, t) in results.items():
+            if t:
+                _COLLECTED[i] = (ref["diff_sha"], t)
+                run(only=ref["source_id"])
+    return ab.collect("intel", handle)
 
 
 _LEADING_NUM_RE = re.compile(r"^-?\d+(?:\.\d+)?")
@@ -517,6 +545,8 @@ def process_source(
         diff = unified_diff_text(_load_snapshot(source["id"]), text)
         try:
             extracted = extract_facts(source, diff)
+        except ab.Deferred:   # on the batch lane: state and snapshot stay, so the diff survives to the collector
+            return events, {}
         except Exception as exc:  # noqa: BLE001 -- a model failure is reportable, not
             # fatal to the run (Y55: a zero must carry its cause). State and
             # snapshot are BOTH left untouched so the next run re-diffs the
@@ -896,6 +926,7 @@ def run(dry_run: bool = False, only: Optional[str] = None,
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--collect", action="store_true", help="finish ended batch-lane results (collector cron)")
     ap.add_argument("--accept", metavar="EVENT_ID")
     ap.add_argument("--reject", metavar="EVENT_ID")
     ap.add_argument("--expect", type=int, default=None,
@@ -909,6 +940,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     if not pseo_enabled():
         print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
         return 0
+
+    if args.collect:
+        print(json.dumps({"event": "collected", "batches": collect_batches()}))
+        return 0
+    if args.dry_run:
+        ab.disable()
 
     if args.accept or args.reject:
         result = decide(args.accept or args.reject,
