@@ -45,6 +45,16 @@ meet quickly:
 * rates and country lists compared against the issuer, because an expired promotion was published
   as a current property of the card on 307 of 544 pages.
 
+## API lane
+
+Three offline jobs run on the Anthropic batch lane instead of the subscription CLI: page rewrites
+(`scripts/page-updates.py`), signal classification (`scripts/intel-ingest.py`) and the blind judge
+(`scripts/humanize_gate.py`). They call the wrapper `~/bin/api-credits/api-batch --lane batch` through
+`scripts/api_batch.py`; any refusal (cap, window, key, non-zero exit) logs `batch refused: <reason>`
+and that run uses the subscription path exactly as before. Pending batch ids live in
+`~/api-batch/<job>/state.json`, spend in `~/api-ledger/`. Lanes, caps and cycle dates are stated once in
+[docs/api-credits.md](https://github.com/whiteknightonhorse/APIbase/blob/main/docs/api-credits.md).
+
 ## Running it
 
 ```bash
