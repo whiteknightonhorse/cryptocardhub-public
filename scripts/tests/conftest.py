@@ -21,3 +21,14 @@ def tg_alerts(monkeypatch):
     sent = []
     monkeypatch.setattr(telegram_lib, "alert", lambda text, *a, **k: sent.append(text) or True)
     return sent
+
+
+@pytest.fixture(autouse=True)
+def new_urls_unfrozen(request, monkeypatch):
+    """DEFY-SEO-1110 B8: the freeze is on in production; tests of the producers
+    run with it off. test_new_url_freeze.py turns it on explicitly."""
+    import flags
+
+    if request.module.__name__.endswith("test_new_url_freeze"):
+        return
+    monkeypatch.setattr(flags, "NEW_URLS_FROZEN", False)

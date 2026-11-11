@@ -319,6 +319,9 @@ def _build_entry(row: dict, topic: dict, script: dict | None, summary: dict | No
         "embed_url": f"https://www.youtube-nocookie.com/embed/{video_id}",
         "published_at": row["ts"],
         "target_pseo_slug": _match_pseo_slug(topic, script or {}),
+        # Persisted so the target survives deletion of the render dir (the
+        # only other place an H1 topic's metadata lives).
+        **({"pool": "h1"} if topic.get("pool") == "h1" else {}),
         "hashtags": tags,
     }
 
@@ -420,7 +423,11 @@ def main() -> int:
             if stale.exists():
                 try:
                     d = json.loads(stale.read_text(encoding="utf-8"))
-                    if d.get("target_pseo_slug"):
+                    if d.get("pool") == "h1":
+                        # "Metadata not found" (render dir cleaned up) is not
+                        # "topic removed from the pool" — keep the H1 target.
+                        print(f"[sync-yt-videos] target_kept_h1 {row['external_id']}: {d.get('target_pseo_slug')}")
+                    elif d.get("target_pseo_slug"):
                         d["target_pseo_slug"] = None
                         stale.write_text(json.dumps(d, indent=2, ensure_ascii=False), encoding="utf-8")
                         print(f"[sync-yt-videos] off-pool {row['external_id']}: cleared target_pseo_slug (topic_id={row['topic_id']} not in pool per Y44)")

@@ -40,7 +40,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
+from flags import pseo_enabled, new_urls_frozen, freeze_skip_row  # noqa: E402 -- LAW #ONE-PLACE kill-switch
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "seo-site" / "src" / "content" / "pseo"
@@ -216,6 +216,10 @@ def main() -> int:
     if not pseo_enabled():
         print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
         print("[digest] skip: pseo_disabled (PSEO_ENABLED=false)")
+        return 0
+
+    if new_urls_frozen():  # DEFY-SEO-1110 B8: before any fetch / model call
+        print(json.dumps(freeze_skip_row()))
         return 0
 
     if a.month:

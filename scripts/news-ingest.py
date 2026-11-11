@@ -47,7 +47,7 @@ import yaml
 from bs4 import BeautifulSoup
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
+from flags import pseo_enabled, new_urls_frozen, freeze_skip_row  # noqa: E402 -- LAW #ONE-PLACE kill-switch
 import humanize_gate  # noqa: E402 -- G37: copy-edit AI tells before the markdown emitter
 
 UNSPLASH_KEY = os.environ.get("UNSPLASH_ACCESS_KEY", "").strip()
@@ -592,6 +592,10 @@ def main() -> int:
     if not pseo_enabled():
         print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
         print("[news-ingest] skip: pseo_disabled (PSEO_ENABLED=false)")
+        return 0
+
+    if new_urls_frozen():  # DEFY-SEO-1110 B8: before any fetch / model call
+        print(json.dumps(freeze_skip_row()))
         return 0
 
     # T-0125: fleet pause checked before any fetch/model spend -- see

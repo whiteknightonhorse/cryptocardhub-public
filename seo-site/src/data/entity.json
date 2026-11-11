@@ -1,4 +1,5 @@
 {
-  "sameAs": ["https://www.youtube.com/@defycard", "https://github.com/defycard-com", "https://medium.com/@defycard"],
-  "author": null
+  "sameAs": ["https://www.youtube.com/@defycard", "https://github.com/defycard-com", "https://medium.com/@defycard", "https://huggingface.co/defycard", "https://www.kaggle.com/defycard"],
+  "author": null,
+  "editor": {"name": "Evgenii A.", "role": "Editor", "url": "/editorial-policy/#editor"}
 }

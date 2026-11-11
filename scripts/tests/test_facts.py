@@ -400,3 +400,65 @@ def test_coinbase_facts_are_all_disputed_until_a_page_is_read():
     """Cloudflare 403 on every coinbase.com URL (2026-10-19): nothing may be `current`."""
     cb = fl.load(ROOT / "config" / "facts" / "coinbase.yaml")
     assert cb and all(f["status"] == "disputed" for f in cb)
+
+
+# --- CCH-SEO-28: binance / redotpay / bybit ---------------------------------
+
+_FACTS_DIR = ROOT / "config" / "facts"
+_FIXTURES = SCRIPTS / "tests" / "fixtures"
+
+
+def _flat(text: str) -> str:
+    import html, re
+    text = re.sub(r"<(script|style)[\s\S]*?</\1>", " ", text)
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", text)))
+
+
+def test_redotpay_facts_literals_and_dates():
+    rp = {f["id"]: f for f in fl.load(_FACTS_DIR / "redotpay.yaml")}
+    assert rp["redotpay.card.issuance_virtual"]["value"] == 10
+    assert rp["redotpay.card.issuance_physical"]["value"] == 100
+    assert rp["redotpay.card.merchant_transaction_fee"]["value"] == 1.5
+    for f in rp.values():
+        assert f["status"] == "current" and f["confidence"] == "issuer_help"
+        assert f["source_url"].startswith("https://helpcenter.redotpay.com/")
+        assert str(f["verified_at"]) == "2026-11-10" and str(f["expires"]) == "2027-02-08"
+
+
+def test_redotpay_quotes_are_verbatim_in_the_saved_issuer_pages():
+    """Literal needles per saved issuer page (fixtures, 2026-11-10) — not derived from the yaml."""
+    needles = {
+        "redotpay-issuance-fee": ["Virtual card: 10 USD", "Physical card: 100 USD"],
+        "redotpay-fee-refund": ["the issuance fee you paid can't be refunded"],
+        "redotpay-no-recurring-fees": ["doesn't charge any card management, monthly, or annual fees"],
+        "redotpay-transaction-fee": ["1.5% transaction fee, with a minimum of 0.50 USD per transaction",
+                                     "first 3 eligible transactions per card each calendar month"],
+        "redotpay-card-type": ["stablecoin-based card that lets you spend crypto like a regular card"],
+        "redotpay-how-to-get-card": ["Add crypto to your RedotPay account"],
+        "redotpay-issuance-restrictions": ["ineligible for both virtual and physical cards",
+                                           "Netherlands Antilles", "India", "United States"],
+    }
+    for name, items in needles.items():
+        text = _flat((_FIXTURES / f"{name}-2026-11-10.html").read_text(encoding="utf-8"))
+        for needle in items:
+            assert needle in text, (name, needle)
+    assert "Netherlands Antilles" in text and "Netherlands Estonia" not in text
+
+
+def test_binance_and_bybit_are_disputed_and_render_as_nothing():
+    for name in ("binance", "bybit"):
+        rows = fl.load(_FACTS_DIR / f"{name}.yaml")
+        assert rows and all(f["status"] == "disputed" for f in rows)
+        out = fl.render(rows)
+        assert name + "." not in out and "not verified" not in out
+
+
+def test_expired_and_disputed_rows_never_reach_render():
+    base = {"unit": "USD", "applies_to": {"brand": "redotpay"}, "source_url": "u",
+            "source_quote": "q", "verified_at": "2026-11-10", "expires": "2027-02-08",
+            "class": "fee", "confidence": "issuer_help"}
+    rows = [dict(base, id="x.cur", value=10, status="current"),
+            dict(base, id="x.exp", value=777, status="expired"),
+            dict(base, id="x.dis", value=888, status="disputed")]
+    out = fl.render(rows)
+    assert "x.cur" in out and "777" not in out and "888" not in out

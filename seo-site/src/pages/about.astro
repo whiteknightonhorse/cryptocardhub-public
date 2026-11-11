@@ -4,7 +4,7 @@ import { factIssuerCount } from '../lib/facts.mjs';
 
 const issuerCount = factIssuerCount();
 
-const lastReviewed = '2026-05-05';
+const lastReviewed = '2026-11-11';
 const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
 const breadcrumbs = [
   { name: 'Home', url: `${siteOrigin}/` },
@@ -30,7 +30,7 @@ const breadcrumbs = [
 
     <h2>What we do</h2>
     <p>
-      We have published reviews of 14 crypto cards. For each
+      For each
       card we maintain an internal record covering cashback structure, foreign
       exchange spread, top-up rails, custody model, regulatory status, and the
       country and US-state availability matrix. The country availability matrix
@@ -40,30 +40,10 @@ const breadcrumbs = [
       next to them.
     </p>
 
-    <h2>Editorial methodology</h2>
+    <h2>Methodology</h2>
     <p>
-      Every published article must clear an internal scoring rubric before it
-      goes live. The rubric covers five categories — structural integrity,
-      source quality, neutrality, mechanical correctness, and reader clarity —
-      each scored on a ten-point scale. The minimum publish threshold is
-      eight out of ten in every category; an article that fails any one
-      dimension goes back for revision rather than down a scoring average.
-    </p>
-    <p>
-      We do not publish performance promises. A statically blocked phrase list
-      catches and rejects copy that contains marketing absolutes such as
-      “the only card,” fixed-outcome words such as “will definitely,” and
-      unverifiable adjectives such as “easy.” Numerical claims (cashback
-      percentages, FX percentages, country counts) must cite an issuer help
-      page or an externally archived source by URL; uncited numbers are
-      rejected at the same gate.
-    </p>
-
-    <h2>Refresh cycle</h2>
-    <p>
-      Markets shift faster than evergreen content normally allows, so every
-      issuer fact carries its own verification date and expiry. The “Last updated” date at the bottom of each
-      article is the date of the latest edit of that page.
+      How a figure gets onto a page and what our labels mean:
+      <a href="/methodology/">methodology</a>.
     </p>
 
     <h2>What we are not</h2>
@@ -87,22 +67,10 @@ const breadcrumbs = [
       mechanics, the partners, and the firewall between revenue and editorial.
     </p>
 
-    <h2>Editorial independence</h2>
+    <h2>Editorial policy</h2>
     <p>
-      No issuer has, or has ever had, prior review of a DefyCard article.
-      Issuers may flag a factual correction after publication; we evaluate the
-      submission against the original source and, if substantiated, edit and
-      timestamp the change. Disagreements over interpretation do not result in
-      retractions; they result in either an addendum that surfaces the
-      issuer’s position, or no change.
-    </p>
-
-    <h2>Reader contact</h2>
-    <p>
-      Found an outdated fee, a broken link, or a regulatory update we missed?
-      Email <a href="mailto:support@defycard.com">support@defycard.com</a>
-      or use the <a href="/contact/">contact page</a>. We answer correction
-      requests within 24–48 hours.
+      Who edits the site and how to send a correction:
+      <a href="/editorial-policy/">editorial policy</a>.
     </p>
 
     <p class="page-meta">Last updated: {lastReviewed}</p>

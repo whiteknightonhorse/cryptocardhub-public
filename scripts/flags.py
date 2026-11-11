@@ -27,6 +27,25 @@ def pseo_enabled() -> bool:
     return os.environ.get("PSEO_ENABLED", "true").strip().lower() != "false"
 
 
+# New-URL freeze (DEFY-SEO-1110 B8). Literals on purpose: no env override and
+# no date-based auto-lift -- lifting is a new card that edits this line after an
+# operator decision. Editing existing pages is NOT covered by the freeze.
+NEW_URLS_FROZEN = True
+NEW_URL_FREEZE_SINCE = "2026-11-11"
+NEW_URL_FREEZE_REVIEW = "2027-01-10"
+NEW_URL_FREEZE_BY = "DEFY-SEO-1110 B8, operator 2026-11-11"
+
+
+def new_urls_frozen() -> bool:
+    return NEW_URLS_FROZEN
+
+
+def freeze_skip_row() -> dict:
+    return {"event": "skip", "reason": "new_urls_frozen",
+            "since": NEW_URL_FREEZE_SINCE, "review": NEW_URL_FREEZE_REVIEW,
+            "by": NEW_URL_FREEZE_BY}
+
+
 def _demo() -> None:
     os.environ.pop("PSEO_ENABLED", None)
     assert pseo_enabled() is True, "unset must mean enabled"

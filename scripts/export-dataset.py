@@ -34,6 +34,10 @@ PSEO_DIR = ROOT / "seo-site" / "src" / "content" / "pseo"
 SITE = "https://defycard.com/"
 # Our own affiliate-programme terms are not card data (and are no business of readers).
 EXCLUDED_CLASSES = {"affiliate"}
+# Mirrors (CCH-SEO-35): GitHub stays canonical; HF and Kaggle receive this same tree.
+GITHUB_REPO = "defycard-com/crypto-card-fees-data"
+HF_REPO = "defycard/crypto-card-fees-data"
+KAGGLE_ID = "defycard/crypto-card-fees-data"
 
 CARD_COLUMNS = ["issuer", "card", "fact_id", "class", "applies_to", "value", "unit", "status",
                 "verified_at", "expires", "source_url", "source_quote", "confidence"]
@@ -116,7 +120,17 @@ def _csv(columns: list[str], rows: list[dict]) -> str:
     return buf.getvalue()
 
 
-README = """# Crypto card fees — open dataset
+README = """---
+license: cc-by-4.0
+pretty_name: Crypto card fees — open dataset
+configs:
+- config_name: cards
+  data_files: cards.csv
+- config_name: availability
+  data_files: availability.csv
+---
+
+# Crypto card fees — open dataset
 
 Fees, rates, limits and availability of crypto cards, one row per fact, each with
 the issuer page it came from and the date it was last verified. Only facts that
@@ -148,6 +162,12 @@ verified (date the list was compared with the issuer), source_url.
 
 CC BY 4.0 — see `LICENSE`. Attribution is the only condition.
 
+## Mirrors
+
+Canonical copy: https://github.com/{github}. The same files are mirrored to
+HuggingFace (https://huggingface.co/datasets/{hf}) and Kaggle
+(https://www.kaggle.com/datasets/{kaggle}).
+
 ## How to cite
 
 Data from {site} — reviews:
@@ -176,8 +196,15 @@ def build(today: dt.date) -> dict[str, str]:
         "availability.csv": _csv(AVAIL_COLUMNS, avail),
         "README.md": README.format(site=SITE, n_issuers=len(issuers), issuers=", ".join(issuers),
                                    date=today.isoformat(), n_facts=len(facts),
-                                   n_avail=len(avail), reviews=reviews),
+                                   n_avail=len(avail), reviews=reviews, github=GITHUB_REPO,
+                                   hf=HF_REPO, kaggle=KAGGLE_ID),
         "LICENSE": CC_BY_LICENSE,
+        "dataset-metadata.json": json.dumps({
+            "title": "Crypto card fees — open dataset",
+            "subtitle": "Fees, rates, limits and availability of crypto cards, with sources",
+            "id": KAGGLE_ID,
+            "licenses": [{"name": "CC-BY-4.0"}],
+        }, indent=2, ensure_ascii=False) + "\n",
     }
 
 

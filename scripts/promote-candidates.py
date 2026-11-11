@@ -44,6 +44,9 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import flags  # noqa: E402 -- LAW #ONE-PLACE new-URL freeze
+
 ROOT = Path(__file__).resolve().parent.parent
 CANDIDATES = ROOT / ".claude" / "skills" / "keywords" / "CANDIDATES.md"
 BANK = ROOT / ".claude" / "skills" / "keywords" / "SKILL.md"
@@ -352,6 +355,13 @@ def main() -> int:
     today = date.today()
     week = iso_week(today)
     now = datetime.now(timezone.utc).isoformat()
+
+    if flags.new_urls_frozen():  # DEFY-SEO-1110 B8: promote nothing, keep the zero's cause
+        print(json.dumps(flags.freeze_skip_row()))
+        if not a.dry_run:
+            log([{"event": "nothing_eligible", "week": week, "date": now,
+                  "reason": "new_urls_frozen"}])
+        return 0
 
     data = parse_candidates(CANDIDATES)  # explicit, not the default arg: tests/monkeypatch rely on this
     bank_rows = pg.parse_keyword_bank(BANK)

@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 from slug_lib import slugify, retired_slugs  # noqa: E402 -- LAW #ONE-PLACE canonical slugify
 import availability_lib  # noqa: E402 -- LAW #ONE-PLACE canonical unavailable_for
-from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
+from flags import pseo_enabled, new_urls_frozen, freeze_skip_row  # noqa: E402 -- LAW #ONE-PLACE kill-switch
 import telegram_lib  # noqa: E402
 import no_progress_guard  # noqa: E402
 import money_gate  # noqa: E402 -- G36: a number in money copy must come from a fact
@@ -1277,6 +1277,10 @@ def emit_frontmatter(fm: dict) -> str:
     return "\n".join(["---", *(f"{k}: {scalar(v)}" for k, v in fm.items()), "---"])
 
 
+class NewUrlFrozen(RuntimeError):
+    pass
+
+
 def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
     p = result.payload
     cluster = result.cluster
@@ -1286,6 +1290,8 @@ def write_page(result: GenerationResult, images: list[UnsplashImage]) -> Path:
     # belongs here too — every caller routes through it.
     assert_not_frozen(slug)
     target = CONTENT_DIR / f"{slug}.md"
+    if new_urls_frozen() and not target.exists():
+        raise NewUrlFrozen(f"new URL frozen: {slug}")
     CONTENT_DIR.mkdir(parents=True, exist_ok=True)
 
     # Localize images: download Unsplash CDN -> public/assets/pseo/<slug>-<n>.jpg,
@@ -2120,6 +2126,12 @@ def _main(argv: list[str]) -> int:
         print("[pseo-tick] skip: pseo_disabled (PSEO_ENABLED=false)")
         return 0
 
+    # DEFY-SEO-1110 B8: before the pause check, the gate and the queue -- no
+    # slot claimed, no ledger write, no cohort reopen.
+    if new_urls_frozen() and (args.faq_children or args.only_new):
+        print(json.dumps(freeze_skip_row()))
+        return 0
+
     if args.full_rebuild:
         args.only_new = False
 
@@ -2274,6 +2286,13 @@ def _main(argv: list[str]) -> int:
         # AEO-4-style last line of defence, but BEFORE spending anything.
         # Whoever is about to write checks the exact path it will write, first.
         target_check = would_overwrite(cluster)
+        if target_check is None and new_urls_frozen():
+            # covers --upgrade-thin / --full-rebuild: the file is new, so refuse.
+            print(json.dumps(freeze_skip_row()))
+            if args.probabilistic and _SLOT["claimed"]:
+                _decrement_daily_count()
+                _SLOT["claimed"] = False
+            continue
         if target_check is not None:
             failed += 1
             slug_check = slugify(cluster.primary.keyword)

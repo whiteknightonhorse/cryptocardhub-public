@@ -209,10 +209,12 @@ def test_the_shipped_table_still_changes_exactly_the_declared_15_pages(tmp_path)
             f.write_text(t, encoding="utf-8")
 
     st = corpus_edit.apply_table(sorted(content.glob("*.md")), table,
-                                 write=False, expect=15, tolerance=2)
+                                 write=False, expect=13, tolerance=2)
 
-    assert st["refused"] in (None, "4 table entries matched nothing"), st["refused"]
-    assert st["files"] == 15, st["changed"]
+    # CCH-SEO-33: 2 of the 15 declared pages (e.g. best-crypto-card-for-amazon) were
+    # 301-merged away, so 13 remain and 3 more entries have nothing left to match.
+    assert st["refused"] in (None, "7 table entries matched nothing"), st["refused"]
+    assert st["files"] == 13, st["changed"]
     # CCH-KW-02 removed the body copies of What-to-watch / Bottom-line / FAQ that
     # the template renders from frontmatter; these four entries lived ONLY in
     # such copies, so they have nothing left to match. Literal prefixes (Y49):
@@ -220,6 +222,9 @@ def test_the_shipped_table_still_changes_exactly_the_declared_15_pages(tmp_path)
     gone = ("Referral commissions arrive **rolling**, not batched",
             "[ether.fi's rolling payout model](<<AFFILIATE_URL>>)",
             "A: Sign-up and high-spender bonuses ($10",
-            "A: ether.fi and RedotPay accrue rolling")
-    assert len(st["unused"]) == 4 and all(
+            "A: ether.fi and RedotPay accrue rolling",
+            "Commission payouts ~5th–10th of the month",
+            "Ether.fi Cash offers **up to 3% cashback** on all purchases, paid roll",
+            "**Key metric:** Rolling payouts mean you see")
+    assert len(st["unused"]) == 7 and all(
         any(u.startswith(g) for g in gone) for u in st["unused"]), st["unused"]

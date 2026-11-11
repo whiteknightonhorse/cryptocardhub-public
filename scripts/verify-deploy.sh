@@ -180,6 +180,42 @@ else
 fi
 
 echo ""
+echo "=== 13. URL variants (CCH-SEO-29) ==="
+code() { curl -s -o /dev/null -w "%{http_code}" "$@"; }
+loc() { curl -sI "$1" | tr -d '\r' | awk 'tolower($1)=="location:"{print $2; exit}'; }
+c=$(code "$ORIGIN/index.html"); l=$(loc "$ORIGIN/index.html")
+{ [ "$c" = "301" ] && [ "$l" = "$ORIGIN/" ]; } && ok "/index.html -> 301 $l" || err "/index.html expected 301 -> $ORIGIN/, got $c $l"
+c=$(code "$ORIGIN/reviews/index.html"); l=$(loc "$ORIGIN/reviews/index.html")
+{ [ "$c" = "301" ] && [ "$l" = "$ORIGIN/reviews/" ]; } && ok "/reviews/index.html -> 301 $l" || err "/reviews/index.html expected 301 -> $ORIGIN/reviews/, got $c $l"
+c=$(code --path-as-is "$ORIGIN//reviews/")
+[ "$c" = "301" ] && ok "//reviews/ -> 301" || err "//reviews/ expected 301, got $c"
+c=$(code "$ORIGIN/reviews/"); [ "$c" = "200" ] && ok "/reviews/ still 200" || err "/reviews/ expected 200, got $c"
+c=$(code "$ORIGIN/favicon.ico"); [ "$c" = "301" ] && ok "/favicon.ico -> 301" || err "/favicon.ico expected 301, got $c"
+
+echo ""
+echo "=== 14. Useful 404 (CCH-SEO-29) ==="
+c=$(code "$ORIGIN/nonexistent-page/")
+n=$(curl -s "$ORIGIN/nonexistent-page/" | grep -c 'href="/reviews/"' || true)
+{ [ "$c" = "404" ] && [ "$n" -ge 1 ]; } && ok "404 keeps status and links the bucket indexes" || err "404 page: status=$c reviews-links=$n"
+
+echo ""
+echo "=== 15. Cache-Control on static assets (CCH-SEO-29) ==="
+css=$(echo "$home_html" | grep -oE '/_astro/[^"]+\.css' | head -1)
+if [ -n "$css" ]; then
+  curl -sI "$ORIGIN$css" | grep -qi "^cache-control: public, max-age=31536000, immutable" && ok "$css immutable 1y" || err "$css lacks immutable Cache-Control"
+else
+  err "no /_astro/ css href on homepage"
+fi
+asset=$(find "$DIST/assets" -type f \( -name '*.jpg' -o -name '*.png' -o -name '*.webp' -o -name '*.svg' \) 2>/dev/null | head -1)
+if [ -n "$asset" ]; then
+  a_url="$ORIGIN/assets/${asset#$DIST/assets/}"
+  curl -sI "$a_url" | grep -qi "^cache-control: public, max-age=2592000" && ok "$a_url 30d" || err "$a_url lacks 30d Cache-Control"
+else
+  wrn "no file under dist/assets to check"
+fi
+curl -sI "$ORIGIN/reviews/" | grep -qi "^cache-control:" && wrn "HTML carries a Cache-Control header (card says none)" || ok "HTML has no Cache-Control"
+
+echo ""
 echo "=========================================================="
 echo "  Verification: $PASS pass / $WARN warn / $FAIL fail"
 echo "=========================================================="

@@ -166,3 +166,16 @@ def test_inspect_all_never_exceeds_the_cap():
     urls = [f"https://defycard.com/faq/{i}/" for i in range(1801)]
     table = {u: ("Submitted and indexed", "PASS") for u in urls}
     assert len(gsc.inspect_all(_Fake(table), urls)) == 1800
+
+
+def test_inspect_urls_includes_video_page_absent_from_sitemap(tmp_path):
+    sm = tmp_path / "sitemap-0.xml"
+    sm.write_text("<urlset><url><loc>https://defycard.com/videos/</loc></url></urlset>")
+    for d in ("-2RyHkvhgTI", "2"):
+        (tmp_path / "videos" / d).mkdir(parents=True)
+        (tmp_path / "videos" / d / "index.html").write_text("x")
+    urls = gsc.inspect_urls([sm], dist=tmp_path)
+    assert "https://defycard.com/videos/-2RyHkvhgTI/" in urls
+    assert "https://defycard.com/videos/-2RyHkvhgTI/" not in gsc.sitemap_urls([sm])
+    assert urls.count("https://defycard.com/videos/") == 1
+    assert "https://defycard.com/videos/2/" not in urls

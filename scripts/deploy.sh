@@ -202,6 +202,31 @@ SNIP=/etc/nginx/snippets/defycard-redirects.conf
       *)   printf 'location = %s { return 301 %s; }\n' "$from" "$to" ;;
     esac
   done < "$SEO/redirects.map"
+  # CCH-SEO-29: one URL per page, a useful 404, cache headers on static assets.
+  # $request_uri (not $uri) so nginx's own index.html internal redirect never
+  # matches and loops. add_header in a location drops the server-level ones, so
+  # the 3 security headers are re-emitted there (the 4 server-level Link discovery headers are not: irrelevant for static assets).
+  cat <<'NGX'
+if ($request_uri ~ ^([^?]*)/index\.html(\?.*)?$) { return 301 $1/$2; }
+if ($request_uri ~ ^([^?]*)//+(.*)$) { return 301 $1/$2; }
+location = /favicon.ico { return 301 /favicon.svg; }
+error_page 404 /404.html;
+location = /404.html { internal; }
+location ^~ /_astro/ {
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=15768000; includeSubDomains" always;
+    try_files $uri =404;
+}
+location ^~ /assets/ {
+    add_header Cache-Control "public, max-age=2592000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=15768000; includeSubDomains" always;
+    try_files $uri =404;
+}
+NGX
 } > /tmp/defycard-redirects.conf
 sudo mkdir -p /etc/nginx/snippets
 sudo cp /tmp/defycard-redirects.conf "$SNIP"

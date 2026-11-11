@@ -82,7 +82,9 @@ def test_pseo_generate_unset_env_behaves_as_before():
     )
     assert proc.returncode == 0, proc.stderr
     assert "pseo_disabled" not in proc.stdout
-    assert "[pseo] rate=1" in proc.stdout
+    # CCH-SEO-30: the real (frozen) flag applies to this subprocess, and the
+    # default --only-new run is a new-URL run: the switch passed, the freeze stopped it.
+    assert '"reason": "new_urls_frozen"' in proc.stdout
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,14 @@
+{
+ "query": "limit on crypto.com visa card spend uk",
+ "d": [
+  {
+   "__type": "QueryStats:#Microsoft.Bing.Webmaster.Api",
+   "AvgClickPosition": -1,
+   "AvgImpressionPosition": 5,
+   "Clicks": 0,
+   "Date": "/Date(1793318400000)/",
+   "Impressions": 2009,
+   "Query": "https://defycard.com/faq/how-much-can-i-withdraw-with-crypto-com-card/"
+  }
+ ]
+}

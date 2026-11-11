@@ -98,6 +98,7 @@ const videos = defineCollection({
     embed_url: z.string().url(),
     published_at: z.string(),
     target_pseo_slug: z.string().nullable().optional(),
+    pool: z.string().optional(),       // 'h1' = target survives render-dir cleanup
     hashtags: z.array(z.string()).optional().default([]),
   }),
 });

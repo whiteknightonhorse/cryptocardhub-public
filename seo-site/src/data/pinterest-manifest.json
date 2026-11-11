@@ -1,13 +1,4 @@
 {
-  "binance-card": {
-    "added": "2026-10-23",
-    "bucket": "reviews",
-    "bytes": 149758,
-    "description": "Comprehensive 2026 Binance crypto card review. Learn about features, cashback, fees, and alternatives for your region.",
-    "image": "/assets/pins/binance-card.jpg",
-    "title": "Binance Card Review 2026 — Features, Fees & Availability",
-    "url": "https://defycard.com/reviews/binance-card/"
-  },
   "can-i-change-my-card-tier-after-signing-up": {
     "added": "2026-10-27",
     "bucket": "faq",
@@ -548,6 +539,15 @@
     "title": "How to Get a Crypto Card in the USA",
     "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-usa/"
   },
+  "how-to-get-eeth": {
+    "added": "2026-11-11",
+    "bucket": "how-to",
+    "bytes": 236527,
+    "description": "Learn how to get eETH from Ether.fi, use it as collateral, and connect your wallet to ether.fi Cash. Step-by-step tutorial.",
+    "image": "/assets/pins/how-to-get-eeth.jpg",
+    "title": "How to Get eETH: Guide to Ether.fi Liquid Staking",
+    "url": "https://defycard.com/how-to/how-to-get-eeth/"
+  },
   "how-to-migrate-from-crypto-com-card": {
     "added": "2026-11-02",
     "bucket": "how-to",
@@ -611,6 +611,15 @@
     "title": "How to Set Up a Safe Wallet for Your Crypto Card",
     "url": "https://defycard.com/how-to/how-to-set-up-safe-wallet-for-crypto-card/"
   },
+  "how-to-stake-eth-on-ether-fi": {
+    "added": "2026-11-11",
+    "bucket": "how-to",
+    "bytes": 103370,
+    "description": "Step-by-step guide to staking ETH on ether.fi and earning eETH liquid staking rewards. Learn setup, deposit, unstaking, and next steps.",
+    "image": "/assets/pins/how-to-stake-eth-on-ether-fi.jpg",
+    "title": "How to Stake ETH on ether.fi",
+    "url": "https://defycard.com/how-to/how-to-stake-eth-on-ether-fi/"
+  },
   "how-to-switch-from-gnosis-pay-to-ether-fi": {
     "added": "2026-11-03",
     "bucket": "how-to",
@@ -619,6 +628,15 @@
     "image": "/assets/pins/how-to-switch-from-gnosis-pay-to-ether-fi.jpg",
     "title": "How to Switch from Gnosis Pay to ether.fi Cash Card",
     "url": "https://defycard.com/how-to/how-to-switch-from-gnosis-pay-to-ether-fi/"
+  },
+  "how-to-switch-to-direct-pay-mode-ether-fi": {
+    "added": "2026-11-11",
+    "bucket": "how-to",
+    "bytes": 114045,
+    "description": "Learn how to switch to direct pay mode on ether.fi Cash. Step-by-step guide covering setup, staking integration, and yield optimization.",
+    "image": "/assets/pins/how-to-switch-to-direct-pay-mode-ether-fi.jpg",
+    "title": "How to Switch to Direct Pay Mode on Ether.fi",
+    "url": "https://defycard.com/how-to/how-to-switch-to-direct-pay-mode-ether-fi/"
   },
   "how-to-transfer-balance-between-crypto-cards": {
     "added": "2026-11-04",

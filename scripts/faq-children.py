@@ -53,6 +53,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 from slug_lib import slugify, retired_slugs  # noqa: E402 -- LAW #ONE-PLACE canonical slugify
+import flags  # noqa: E402 -- LAW #ONE-PLACE new-URL freeze
 CONTENT = ROOT / "seo-site" / "src" / "content" / "pseo"
 DIST = ROOT / "seo-site" / "dist"
 AEO = ROOT / "logs" / "aeo"
@@ -350,6 +351,8 @@ def open_next_cohort(size: int = COHORT_DEFAULT, force: bool = False,
     -> {"event": "opened", "cohort": N, "size": M} or
        {"event": "cohort_refused", "reason": "<tap reason>" | "cohort_not_consumed"}
     """
+    if flags.new_urls_frozen():  # DEFY-SEO-1110 B8: even with force=True
+        return {"event": "cohort_refused", "reason": "new_urls_frozen"}
     led = json.loads(LEDGER.read_text(encoding="utf-8")) if LEDGER.exists() else {"cohorts": []}
 
     # The tap. Judging capacity, not printing capacity, is the constraint.

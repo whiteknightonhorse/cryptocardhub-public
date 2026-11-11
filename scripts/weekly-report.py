@@ -253,6 +253,26 @@ def localization_phase(today: date) -> dict[str, Any]:
     return out
 
 
+def freeze_phase(today: date, ticks: int) -> dict[str, Any] | None:
+    """The freeze state is read from flags.py (LAW #ONE-PLACE: flag, dates and
+    ledger text all live there). From the review date on, the freeze heads the
+    report as ACTION REQUIRED (Y57 path); before it, it is a plain line. Flag
+    off -> None: nothing to report, nothing to ask."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import flags
+    if not flags.new_urls_frozen():
+        return None
+    review = date.fromisoformat(flags.NEW_URL_FREEZE_REVIEW)
+    out: dict[str, Any] = {"ticks": ticks, "since": flags.NEW_URL_FREEZE_SINCE,
+                           "review": flags.NEW_URL_FREEZE_REVIEW}
+    if today >= review:
+        out["new_url_freeze"] = Missing(
+            "new_url_freeze",
+            f"review due since {flags.NEW_URL_FREEZE_REVIEW}: lift or extend - "
+            "operator decision (DEFY-SEO-1110 B8)")
+    return out
+
+
 def render_localization(r: dict[str, Any]) -> str:
     loc = r.get("localization")
     if not isinstance(loc, dict):
@@ -632,6 +652,7 @@ def _collect_pseo(since: str, until: str) -> dict[str, Any]:
     idle = 0
     pages = 0
     pause = 0
+    freeze_ticks = 0
     funnel: dict[str, Any] = {}
     try:
         for f in sorted((ROOT / "logs" / "pseo").glob("*.jsonl")):
@@ -650,6 +671,8 @@ def _collect_pseo(since: str, until: str) -> dict[str, Any]:
                         rec = json.loads(line)
                     except Exception:  # noqa: BLE001
                         continue
+                    if rec.get("event") == "skip" and rec.get("reason") == "new_urls_frozen":
+                        freeze_ticks += 1
                     if rec.get("event") == "queue_empty":
                         idle += 1
                         # T-0142-03 (Fable ruling-2 REJECT): the FAQ stream's
@@ -680,7 +703,7 @@ def _collect_pseo(since: str, until: str) -> dict[str, Any]:
         return out
 
     out["pseo"] = {"pages_7d": pages, "idle_ticks": idle, "pause_ticks": pause,
-                   "queue": 0 if idle else None, **funnel}
+                   "freeze_ticks": freeze_ticks, "queue": 0 if idle else None, **funnel}
 
     if pause > 0:
         out["pseo_pause"] = Missing(
@@ -779,6 +802,31 @@ def _collect_gsc() -> dict[str, Any]:
     return {"gsc": data}
 
 
+QUICK_WINS_MAX_AGE_DAYS = 10
+
+
+def _collect_quick_wins() -> dict[str, Any]:
+    """Newest logs/seo/quick-wins-*.json (scripts/quick-wins.py, Monday 06:35
+    UTC). No live API hit here. A failed engine becomes
+    Missing("quick_wins.<engine>") so action_required() heads the report (Y57)."""
+    files = sorted((ROOT / "logs" / "seo").glob("quick-wins-*.json"))
+    if not files:
+        return {"quick_wins": Missing(
+            "quick_wins", "no logs/seo/quick-wins-*.json — scripts/quick-wins.py has not run yet")}
+    try:
+        d = json.loads(files[-1].read_text(encoding="utf-8"))
+        age = (date.today() - date.fromisoformat(d["date"])).days
+    except Exception as e:  # noqa: BLE001
+        return {"quick_wins": Missing("quick_wins", f"{type(e).__name__}: {str(e)[:200]}")}
+    if age > QUICK_WINS_MAX_AGE_DAYS:
+        return {"quick_wins": Missing(
+            "quick_wins", f"{files[-1].name} is {age} d old — scripts/quick-wins.py did not run")}
+    for eng, st in d.get("engines", {}).items():
+        if st.get("status") != "ok":
+            d[eng] = Missing(f"quick_wins.{eng}", st.get("why", "failed"))
+    return {"quick_wins": d}
+
+
 def _collect_a24() -> dict[str, Any]:
     """A2.4 hypothesis check (E-14, read-only, no verdict). Reads the latest
     logs/aeo/a24-check-*.json written by scripts/a24-check.py — same rule as
@@ -823,6 +871,40 @@ def _collect_backup() -> dict[str, Any]:
             "backup", f"{newest.name} exists but failed tar -tzf verification")}
     return {"backup": {"path": newest.name, "age_days": age_days,
                        "size_bytes": newest.stat().st_size, "verified": verified}}
+
+
+MIRROR_TARGETS = ("hf", "kaggle")
+MIRROR_STALE_DAYS = 14
+
+
+def _collect_dataset_mirrors(root: Path = ROOT, today: date | None = None) -> dict[str, Any]:
+    """CCH-SEO-35: last row per target of logs/dataset/mirror.jsonl. A failed
+    last run, no ok run in 14 days, or no row at all is Missing (heads
+    ACTION REQUIRED, Y57) — never a quietly absent line."""
+    today = today or date.today()
+    rows: list[dict[str, Any]] = []
+    try:
+        for ln in (root / "logs" / "dataset" / "mirror.jsonl").read_text(encoding="utf-8").splitlines():
+            try:
+                rows.append(json.loads(ln))
+            except ValueError:
+                pass
+    except OSError:
+        pass
+    out: dict[str, Any] = {}
+    for t in MIRROR_TARGETS:
+        mine = [r for r in rows if r.get("target") == t]
+        if not mine:
+            out[t] = Missing(f"dataset_mirror.{t}", "no mirror run logged — run scripts/mirror-dataset.sh")
+        elif not mine[-1].get("ok"):
+            out[t] = Missing(f"dataset_mirror.{t}", str(mine[-1].get("cause") or "failed"))
+        else:
+            ok_day = str(mine[-1]["ts"])[:10]
+            if (today - date.fromisoformat(ok_day)).days > MIRROR_STALE_DAYS:
+                out[t] = Missing(f"dataset_mirror.{t}", f"no successful mirror in {MIRROR_STALE_DAYS} days (last ok {ok_day})")
+            else:
+                out[t] = {"ok_date": ok_day}
+    return {"dataset_mirror": out}
 
 
 INTEL_UNREAD_DAYS = 7
@@ -1296,6 +1378,7 @@ def collect(since: str, until: str, dry_run: bool = False) -> dict[str, Any]:
             out["cabinet_clicks_since_launch"] = Missing(
                 "cabinet_clicks_since_launch",
                 cab.why if isinstance(cab, Missing) else "cabinet not collected")
+        out.update(_collect_dataset_mirrors())  # local file, independent of GA4
         return out
 
     # --- sessions by source (the honest-metrics base) ---
@@ -1415,9 +1498,13 @@ def collect(since: str, until: str, dry_run: bool = False) -> dict[str, Any]:
     out.update(_collect_h1_mode(client, since, until))
     out.update(_collect_longform(client, since, until))
     out.update(_collect_pseo(since, until))
+    _p = out.get("pseo")
+    out["freeze"] = freeze_phase(date.today(), _p.get("freeze_ticks", 0)
+                                 if isinstance(_p, dict) else 0)
     out.update(_collect_bing())
     out.update(_collect_gsc())
     out.update(_collect_gsc_index())
+    out.update(_collect_quick_wins())
     out.update(_collect_a24())
     out.update(_collect_page_updates())
     try:
@@ -1426,6 +1513,7 @@ def collect(since: str, until: str, dry_run: bool = False) -> dict[str, Any]:
         out["humanize"] = Missing("humanize", type(e).__name__)
     out.update(_collect_pinterest())
     out.update(_collect_backup())
+    out.update(_collect_dataset_mirrors())
     out["intel"] = _collect_intel()
     return out
 
@@ -1691,6 +1779,36 @@ def _streams_lines() -> list[str]:
     return out
 
 
+QUICK_WIN_HEADINGS = (
+    ("striking_distance", "QUICK WIN 1 — striking distance (pos 8-15, imp >= 10)"),
+    ("low_ctr", "QUICK WIN 2 — low CTR (imp >= 50, pos <= 10, CTR < 1%)"),
+    ("falling", "QUICK WIN 3 — falling (prev imp >= 20, now <= 60%)"),
+    ("no_clicks", "QUICK WIN 4 — impressions without clicks (imp >= 20)"),
+)
+
+
+def render_quick_wins(r: dict[str, Any]) -> list[str]:
+    q = r.get("quick_wins")
+    if q is None:
+        return ["  quick wins: n/a (not collected in this run)"]
+    if isinstance(q, Missing):
+        return [f"  quick wins: {q}"]
+    failed = [e for e in q.get("engines", {}) if isinstance(q.get(e), Missing)]
+    L = [f"  bing inbound links: {q.get('bing_inbound_links', 'n/a (missing)')}"]
+    for key, title in QUICK_WIN_HEADINGS:
+        rows = q.get("lists", {}).get(key, [])
+        L.append(f"  {title}")
+        if not rows:
+            L.append("    n/a (engine failed: " + ", ".join(failed) + ")" if failed
+                     else "    none this week")
+        for x in rows[:5]:
+            was = f" (was {x['prev_impressions']})" if "prev_impressions" in x else ""
+            L.append(f"    {x['engine']} | {x['query'][:60]} | {x['page'] or 'n/a'} | "
+                     f"{x['impressions']} imp{was} / {x['clicks']} clk / pos {x['position']} | "
+                     f"{x['index']}")
+    return L
+
+
 def render(r: dict[str, Any]) -> str:
     L = [f"DefyCard weekly — {r['since']} .. {r['until']}", ""]
 
@@ -1792,6 +1910,10 @@ def render(r: dict[str, Any]) -> str:
         if _ps.get("clusters_total") is not None:
             L.append(f"  clusters covered      {_ps.get('covered')}/{_ps.get('clusters_total')}"
                      f"  (frozen {_ps.get('frozen')}, thin {_ps.get('thin')})")
+    _fz = r.get("freeze")
+    if isinstance(_fz, dict):
+        L.append(f"  FREEZE: new URLs frozen since {_fz['since']} (DEFY-SEO-1110 B8), "
+                 f"review {_fz['review']}, {_fz['ticks']} ticks skipped this week")
 
     _bg = r.get("bing")
     if _bg is not None:
@@ -1805,6 +1927,7 @@ def render(r: dict[str, Any]) -> str:
     L.append("  " + render_gsc(r))
     L.append("  " + render_gsc_index(r))
     L.append("  " + render_crawl_supply())
+    L.extend(render_quick_wins(r))
 
     L.append("")
     L.extend(render_a24(r))
@@ -1835,6 +1958,12 @@ def render(r: dict[str, Any]) -> str:
         v = "verified" if _bk["verified"] else "VERIFY FAILED"
         L.append(f"BACKUP: {_bk['path']} ({_bk['age_days']}d old, "
                  f"{_bk['size_bytes']} bytes, {v})")
+    _dm = r.get("dataset_mirror")
+    if isinstance(_dm, dict):
+        L.append("DATASET MIRRORS: " + " · ".join(
+            f"{t} " + (v.why if isinstance(v, Missing) else v["ok_date"]) for t, v in _dm.items()))
+    else:
+        L.append("DATASET MIRRORS: n/a (not collected in this run)")
     _in = r.get("intel")
     if isinstance(_in, dict) and "total" in _in:
         _un = ", ".join(f"{k} {v}" for k, v in _in["unread_ages"].items())

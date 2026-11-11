@@ -291,7 +291,7 @@ def test_every_ether_fi_review_variant_gets_the_schema():
     """Not just the one slug the acceptance literal names -- every review page
     that is actually about ether.fi Cash (ether-fi-cash-review-2026, -uk)."""
     fact = _core_card_price_fact()
-    for slug in ("ether-fi-cash-review", "ether-fi-cash-review-2026", "ether-fi-cash-review-uk"):
+    for slug in ("ether-fi-cash-review", "ether-fi-cash-review-uk"):
         schemas = _product_schemas("reviews", slug)
         assert len(schemas) == 1, f"{slug}: expected 1 Product block, found {len(schemas)}"
         assert schemas[0]["offers"]["price"] == fact["value"], slug
@@ -306,7 +306,7 @@ def test_competitor_review_pages_get_no_product_schema():
     acceptance criterion is explicit: no facts, no schema."""
     checked = 0
     for slug in ("redotpay-review", "crypto-com-card-review", "binance-card-review",
-                 "coinbase-card-review", "nexo-card-review-2026", "bybit-card-review-2026",
+                 "coinbase-card-review", "nexo-card-review", "bybit-card-review",
                  "gnosis-pay-review", "metamask-card-review", "wirex-card-review"):
         path = DIST / "reviews" / slug / "index.html"
         if not path.exists():
@@ -326,17 +326,49 @@ def test_no_product_schema_ever_carries_an_aggregate_rating():
             if isinstance(d, dict) and d.get("@type") == "Product":
                 found += 1
                 assert "aggregateRating" not in d, str(path.relative_to(DIST))
-    assert found >= 3, f"only found {found} Product blocks across the build -- fixture drifted"
+    # CCH-SEO-33: ether-fi-cash-review-2026 (the third) now 301s to ether-fi-cash-review.
+    assert found >= 2, f"only found {found} Product blocks across the build -- fixture drifted"
 
 
 # CCH-PIN-00: og:image must be absolute (Pinterest Save / Rich Pins read it).
+# CCH-SEO-29: a /videos/<id>/ page may carry its OWN YouTube thumbnail (CCH-SEO-24).
+def _og_image_ok(rel, url):
+    if url.startswith("https://defycard.com/assets/"):
+        return True
+    m = re.fullmatch(r"videos/([A-Za-z0-9_-]{11})", rel)
+    return bool(m) and re.fullmatch(
+        "https://i\\.ytimg\\.com/vi/" + re.escape(m.group(1)) + "/[a-z0-9]+\\.jpg", url
+    ) is not None
+
+
 def test_og_image_is_absolute_on_every_page():
-    bad = []
+    bad, yt = [], 0
     for f in _pages():
         m = re.search(r'<meta property="og:image" content="([^"]*)"', f.read_text(errors="ignore"))
-        if m and not m.group(1).startswith("https://defycard.com/assets/"):
-            bad.append((str(f.parent.relative_to(DIST)), m.group(1)[:80]))
+        if not m:
+            continue
+        rel = f.parent.relative_to(DIST).as_posix()
+        if not _og_image_ok(rel, m.group(1)):
+            bad.append((rel, m.group(1)[:80]))
+        elif rel.startswith("videos/") and not m.group(1).startswith("https://defycard.com/"):
+            yt += 1
     assert not bad, bad[:10]
+    assert yt >= 200, f"ytimg branch vacuous: only {yt} video pages"
+
+
+def test_og_image_law_literals():
+    yt = "https://i.ytimg.com/vi/-2RyHkvhgTI/hqdefault.jpg"
+    for rel, url, want in [
+        ("reviews/binance-card-review", "https://defycard.com/assets/pseo/x-0.jpg", True),
+        ("videos/-2RyHkvhgTI", yt, True),
+        ("reviews/binance-card-review", yt, False),
+        ("reviews/-2RyHkvhgTI", yt, False),
+        ("videos/-2RyHkvhgTI", "https://i.ytimg.com/vi/O1VAeRhYW7o/hqdefault.jpg", False),
+        ("videos/-2RyHkvhgTI", "http://i.ytimg.com/vi/-2RyHkvhgTI/hqdefault.jpg", False),
+        ("videos/-2RyHkvhgTI", "https://evil.example/vi/-2RyHkvhgTI/hqdefault.jpg", False),
+        ("videos/-2RyHkvhgTI", "/assets/pseo/x-0.jpg", False),
+    ]:
+        assert _og_image_ok(rel, url) is want, (rel, url)
 
 
 # --- CCH-KW-05: hot keywords on existing pages ------------------------------
@@ -402,6 +434,7 @@ def test_no_page_renders_the_same_h2_twice():
 # invented (entity.author null => no byline anywhere); authorSchema is pure and
 # unit-tested by node because a one-page rebuild with a fake author is too heavy.
 def test_cch_seo_10_organization_sameas_and_no_byline_without_author():
+    # CCH-SEO-34: the visible byline is now the EDITOR line; "By <author>" stays absent while author is null.
     home = DIST / "index.html"
     if not home.is_file():
         pytest.skip("dist/ not built")
@@ -410,7 +443,7 @@ def test_cch_seo_10_organization_sameas_and_no_byline_without_author():
     assert orgs and "https://www.youtube.com/@defycard" in orgs[0]["sameAs"]
     assert "https://github.com/defycard-com" in orgs[0]["sameAs"]
     for path in _pages():
-        assert 'class="byline"' not in path.read_text(encoding="utf-8"), str(path.relative_to(DIST))
+        assert 'class="byline">By' not in path.read_text(encoding="utf-8"), str(path.relative_to(DIST))
 
 
 def test_cch_seo_10_author_schema_two_literal_cases():

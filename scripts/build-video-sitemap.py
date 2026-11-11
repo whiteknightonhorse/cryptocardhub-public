@@ -11,13 +11,17 @@ and writes:
 
 Per https://developers.google.com/search/docs/crawling-indexing/sitemaps/video-sitemaps
 the page in <loc> MUST contain the actual video player. We point each entry
-at /videos/<id>/ which has the iframe. When a video is also embedded on a
-pSEO article (target_pseo_slug set) we emit a SECOND <url> so both pages
-are indexed as carrying the video.
+at the page that carries the player. CCH-SEO-32: /videos/<id>/ pages are out
+of the index (noindex) except hero videos, whose page canonicalises to the
+article that embeds them. So for each BUILT dist/videos/<id>/index.html whose
+canonical is not its own URL we emit ONE <url> whose <loc> is that canonical;
+no /videos/<id>/ <loc> is ever emitted. The hero law lives in
+seo-site/src/lib/videos.mjs; this script only reads its result from the dist.
 """
 from __future__ import annotations
 
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -72,15 +76,20 @@ def _video_url_block(page_url: str, v: dict) -> str:
     return "\n".join(parts)
 
 
+def _canonical(html_path: Path) -> str | None:
+    m = re.search(r'<link rel="canonical" href="([^"]+)"', html_path.read_text(encoding="utf-8"))
+    return m.group(1) if m else None
+
+
 def _build_video_sitemap(videos: list[dict]) -> str:
     blocks: list[str] = []
     for v in videos:
-        # Primary canonical: /videos/<id>/
-        blocks.append(_video_url_block(f"{SITE}/videos/{v['id']}/", v))
-        # If the video is embedded on a pSEO article, register that page too
-        if v.get("target_pseo_slug"):
-            slug = v["target_pseo_slug"].strip("/")
-            blocks.append(_video_url_block(f"{SITE}/{slug}/", v))
+        page = DIST / "videos" / v["id"] / "index.html"
+        if not page.exists():
+            continue
+        canon = _canonical(page)
+        if canon and canon != f"{SITE}/videos/{v['id']}/":
+            blocks.append(_video_url_block(canon, v))
 
     body = "\n".join(blocks)
     return (

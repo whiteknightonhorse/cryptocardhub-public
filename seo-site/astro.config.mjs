@@ -2,7 +2,11 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { remarkAffiliateUrl } from './remark-affiliate-url.mjs';
+import { readdirSync } from 'node:fs';
 import { lastmodFor } from './src/lib/freshness.mjs';
+
+// CCH-SEO-32: ids from the content collection, not a digit regex — /videos/2/ is pagination.
+const VIDEO_IDS = new Set(readdirSync('./src/content/videos').filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)));
 
 export default defineConfig({
   site: 'https://defycard.com',
@@ -32,7 +36,9 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/admin') &&
         !page.includes('/_') &&
-        !/\/search\/?$/.test(page),
+        !/\/search\/?$/.test(page) &&
+        !/\/404\/?$/.test(page) &&
+        !VIDEO_IDS.has((page.match(/\/videos\/([^/]+)\/?$/) || [])[1]),
     }),
   ],
 });

@@ -198,3 +198,39 @@ def test_h1_topic_without_summary_json_stays_off_pool(tmp_path, monkeypatch, cap
 
     out = capsys.readouterr().out
     assert "h1: attached 0/0" in out
+
+
+def _run_sync_without_render_dir(tmp_path, monkeypatch, existing: dict):
+    db_path = tmp_path / "published.db"
+    _seed_db(db_path, ts="2026-09-21T10:00:00Z", topic_id=2626716, video_id="xM8lcMhHOIU")
+    pseo_dir = tmp_path / "pseo"
+    pseo_dir.mkdir()
+    videos_dir = tmp_path / "videos"
+    videos_dir.mkdir()
+    (videos_dir / "xM8lcMhHOIU.json").write_text(json.dumps(existing), encoding="utf-8")
+    _patch_paths(monkeypatch, tmp_path, pseo_dir=pseo_dir)
+    monkeypatch.setattr(syv, "DB", db_path)
+    monkeypatch.setattr(syv, "OUTPUT_DIR", tmp_path / "output")  # does not exist
+    monkeypatch.setattr(syv, "VIDEOS_DIR", videos_dir)
+    assert syv.main() == 0
+    return json.loads((videos_dir / "xM8lcMhHOIU.json").read_text(encoding="utf-8"))
+
+
+def test_h1_target_survives_missing_render_dir(tmp_path, monkeypatch, capsys):
+    data = _run_sync_without_render_dir(tmp_path, monkeypatch, {
+        "id": "xM8lcMhHOIU", "pool": "h1",
+        "target_pseo_slug": "faq/who-can-get-ether-fi-cash"})
+    assert data["target_pseo_slug"] == "faq/who-can-get-ether-fi-cash"
+    assert "target_kept_h1" in capsys.readouterr().out
+
+
+def test_non_h1_off_pool_target_is_still_cleared(tmp_path, monkeypatch):
+    data = _run_sync_without_render_dir(tmp_path, monkeypatch, {
+        "id": "xM8lcMhHOIU", "target_pseo_slug": "faq/who-can-get-ether-fi-cash"})
+    assert data["target_pseo_slug"] is None
+
+
+def test_h1_entry_stores_pool_h1(tmp_path, monkeypatch):
+    topic = {"id": 1, "pool": "h1", "primary": "x", "bucket": "faq"}
+    row = {"topic_id": 1, "ts": "2026-09-21T10:00:00Z", "external_id": "abc", "channel": "youtube"}
+    assert syv._build_entry(row, topic, {}, {"topic": topic}, None)["pool"] == "h1"

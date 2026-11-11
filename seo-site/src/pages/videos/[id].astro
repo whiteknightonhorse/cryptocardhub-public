@@ -4,11 +4,16 @@
  *
  * Renders YouTube iframe (privacy-enhanced youtube-nocookie.com) plus a
  * VideoObject JSON-LD block so Google can index the page as a video result.
- * The page is also surfaced in sitemap-videos.xml (built from the same
- * content collection) — see scripts/build-video-sitemap.py.
+ *
+ * Index law (CCH-SEO-32, heroVideoFor in lib/videos.mjs): the HERO video of an
+ * article (the one the article embeds) canonicalises to that article and is
+ * not itself in sitemap-0.xml; scripts/build-video-sitemap.py lists the
+ * article URL in sitemap-videos.xml for it. Every other video page is
+ * `noindex, follow` with a self-canonical. All stay 200 and listed on /videos/.
  */
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { heroVideoFor } from '../../lib/videos.mjs';
 
 export async function getStaticPaths() {
   const entries = await getCollection('videos');
@@ -30,6 +35,8 @@ const description = (video.description || '').trim()
 const ogImage = video.thumbnail_url || `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
 const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
 const pageUrl = `${siteOrigin}/videos/${video.id}/`;
+const allVideos = (await getCollection('videos')).map((v) => v.data);
+const isHero = !!guide && heroVideoFor(video.target_pseo_slug, allVideos)?.id === video.id;
 const breadcrumbs = [
   { name: 'Home', url: `${siteOrigin}/` },
   { name: 'Videos', url: `${siteOrigin}/videos/` },
@@ -68,6 +75,8 @@ function shortDate(iso: string): string {
   ogImage={ogImage}
   activeNav="cards"
   breadcrumbs={breadcrumbs}
+  canonical={isHero ? `${siteOrigin}/${video.target_pseo_slug}/` : pageUrl}
+  noindex={!isHero}
 >
   <article class="video-page">
     <header class="video-page-header">

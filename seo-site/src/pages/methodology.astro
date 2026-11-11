@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { factIssuerCount } from '../lib/facts.mjs';
+
+const issuerCount = factIssuerCount();
+
+const lastUpdated = '2026-11-11';
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'Methodology', url: `${siteOrigin}/methodology/` },
+];
+---
+<BaseLayout
+  title="Methodology — how DefyCard verifies figures"
+  description={`How DefyCard figures are verified: dated fact records for ${issuerCount} issuers, daily availability checks, and what the Verified badge and Last updated date mean.`}
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="legal-page">
+    <h1>Methodology</h1>
+    <p class="lead">
+      How a figure gets onto a DefyCard page, what the “Verified” badge and the
+      “Last updated” date mean, and what we do not verify.
+    </p>
+
+    <h2>How a figure gets onto a page</h2>
+    <p>
+      Issuer facts are kept as dated records: each has a value, a source link,
+      the date we verified it and an expiry date. We hold such records for
+      {issuerCount} issuers. A record that is disputed or past its expiry is
+      not rendered on any page.
+    </p>
+    <p>
+      Draft text is produced with an AI model, not typed by hand. Before
+      publication it passes automated gates, including one that refuses a money
+      figure (a percentage, a dollar amount, a number of days) that matches none
+      of our fact, rate or availability records. The editor named on the
+      <a href="/editorial-policy/#editor">editorial policy</a> page owns the
+      policy those gates implement.
+    </p>
+
+    <h2>Country availability</h2>
+    <p>
+      The country and US-state availability lists are compared with the
+      issuer’s own list every day. Each list is published with the date it was
+      last confirmed on the
+      <a href="/geo/availability-matrix/">availability matrix</a>.
+    </p>
+
+    <h2>What the labels mean</h2>
+    <p>
+      The “Verified” badge next to a figure prints the verification date and
+      source link of the fact record behind that one figure; it says nothing
+      about other numbers nearby. The “Last updated” date at the bottom of a
+      page is the date of the latest edit of that page, not a re-verification
+      of everything on it.
+    </p>
+
+    <h2>How lists are ordered</h2>
+    <p>
+      The order of cards in lists and comparisons is an editorial choice. No
+      numeric score is assigned to any card.
+    </p>
+
+    <h2>What is not verified</h2>
+    <p>
+      Cards without a fact record carry dated figures only: the date printed
+      next to a figure is the last time it was checked, and nothing promises a
+      later re-check. The one list we re-check against the issuer on a daily
+      schedule is availability by jurisdiction.
+    </p>
+
+    <p class="page-meta">Last updated: {lastUpdated}</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .legal-page h2 {
+    margin-top: 1.8em;
+  }
+  .legal-page p {
+    color: var(--on-surface);
+    margin: 0 0 1em;
+  }
+  .page-meta {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+</style>

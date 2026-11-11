@@ -1,0 +1,31 @@
+---
+/**
+ * 404 — served by nginx `error_page 404 /404.html` (status stays 404).
+ * Not a sitemap URL: astro.config.mjs filters it out.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const buckets: [string, string][] = [
+  ['hub', 'Hubs'], ['compare', 'Comparisons'], ['reviews', 'Reviews'],
+  ['how-to', 'How-to guides'], ['for', 'By use case'], ['geo', 'By country'],
+  ['tools', 'Tools'], ['learn', 'Learn'], ['help', 'Help'],
+  ['news', 'News'], ['faq', 'FAQ'],
+];
+---
+<BaseLayout
+  title="Page not found — DefyCard"
+  description="This page does not exist. Browse the DefyCard crypto card guides, reviews and comparisons instead."
+  noindex={true}
+  activeNav="cards"
+>
+  <section class="search-page">
+    <h1>Page not found</h1>
+    <p class="lead">
+      That address does not exist (or has moved). Pick a section below or
+      <a href="/search/">search every guide</a>.
+    </p>
+    <ul>
+      {buckets.map(([slug, label]) => <li><a href={`/${slug}/`}>{label}</a></li>)}
+    </ul>
+  </section>
+</BaseLayout>

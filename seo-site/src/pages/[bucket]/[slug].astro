@@ -16,6 +16,7 @@
  *   9. More from this section (bento grid)
  *  10. Last updated timestamp
  */
+import { heroVideoFor } from '../../lib/videos.mjs';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
@@ -24,7 +25,7 @@ import BucketSiblings from '../../components/BucketSiblings.astro';
 import VerifiedBadge from '../../components/VerifiedBadge.astro';
 import { primaryPartnerFor, partnerUrl, resolveAffiliate, mdField, PARTNERS, NO_CARD_CTA } from '../../lib/affiliates.mjs';
 import entity from '../../data/entity.json';
-import { authorSchema } from '../../lib/entity.mjs';
+import { authorSchema, editorSchema } from '../../lib/entity.mjs';
 import { dateModifiedFor } from '../../lib/freshness.mjs';
 import { factsForPartner, factById } from '../../lib/facts.mjs';
 
@@ -53,12 +54,10 @@ const { Content } = await render(entry);
 // keyword overlap with primary_keyword. VIRAL videos that don't match a
 // crypto-card article never set target_pseo_slug and live only on /videos/.
 const allVideos = await getCollection('videos');
-const articleVideos = allVideos
-  .map((v) => v.data)
-  .filter((v) => v.target_pseo_slug === `${entry.data.bucket}/${entry.data.slug}`)
-  .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
-  .slice(0, 1); // top 1 most-recent — keep article focused
-const heroVideo = articleVideos[0] || null;
+const heroVideo = heroVideoFor(
+  `${entry.data.bucket}/${entry.data.slug}`,
+  allVideos.map((v) => v.data),
+);
 
 // Y50 P0-1: the CTA partner is a property of the PAGE, not of the site. Geo
 // pages for jurisdictions where ether.fi is unavailable (config/availability.yaml)
@@ -243,6 +242,7 @@ const enrichedArticle = schemaArticle
         '@type': 'WebPage',
         '@id': `${siteOrigin}/${entry.data.bucket}/${entry.data.slug}/`,
       },
+      ...(entity.editor ? { editor: editorSchema(entity, siteOrigin) } : {}),
       ...(entity.author ? { author: authorSchema(entity, (schemaArticle as any).author) } : {}),
       publisher: (schemaArticle as any).publisher || {
         '@type': 'Organization',
@@ -294,8 +294,8 @@ const enrichedArticle = schemaArticle
           )}
         </p>
       )}
-      {entity.author && (
-        <p class="byline">By {entity.author.url ? <a href={entity.author.url}>{entity.author.name}</a> : entity.author.name} · Reviewed {lastReviewed}</p>
+      {entity.editor && (
+        <p class="byline">Editor: <a href={entity.editor.url}>{entity.editor.name}</a> · Updated {lastReviewed}</p>
       )}
       <p class="lead" set:html={mdField(intro)}></p>
       {partOf && (

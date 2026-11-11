@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import entity from '../data/entity.json';
+import { editorSchema } from '../lib/entity.mjs';
+
+const lastUpdated = '2026-11-11';
+const siteOrigin = import.meta.env.PUBLIC_SITE_URL || 'https://defycard.com';
+const breadcrumbs = [
+  { name: 'Home', url: `${siteOrigin}/` },
+  { name: 'Editorial policy', url: `${siteOrigin}/editorial-policy/` },
+];
+const editor = editorSchema(entity, siteOrigin);
+const editorJsonLd = editor ? JSON.stringify({ '@context': 'https://schema.org', ...editor }) : null;
+---
+<BaseLayout
+  title="Editorial policy — DefyCard"
+  description="Who edits DefyCard, how affiliate revenue is kept apart from editorial decisions, and how to send a correction."
+  activeNav="cards"
+  breadcrumbs={breadcrumbs}
+>
+  <article class="legal-page">
+    <h1>Editorial policy</h1>
+    <p class="lead">
+      Who edits DefyCard, how affiliate revenue is kept apart from editorial
+      decisions, and how to send a correction.
+    </p>
+
+    <h2 id="editor">Editor</h2>
+    <p>
+      <strong>{entity.editor.name}</strong>, {entity.editor.role}.
+      Evgenii A. is the editor of DefyCard. He builds payment tools for AI
+      agents and sets the rules this site follows: every fee and limit comes
+      from the issuer’s own published terms, with the date we checked it. Send
+      corrections to the contact below; we fix confirmed errors within 48 hours.
+    </p>
+    <p>
+      How figures are verified is described on the
+      <a href="/methodology/">methodology</a> page.
+    </p>
+
+    <h2>Independence and affiliate revenue</h2>
+    <p>
+      We earn commissions on some links; the mechanics and the partners are on
+      the <a href="/disclosure/">affiliate disclosure</a> page.
+    </p>
+
+    <h2>Corrections</h2>
+    <p>
+      Email <a href="mailto:support@defycard.com">support@defycard.com</a> or
+      use the <a href="/contact/">contact page</a>.
+    </p>
+
+    {editorJsonLd && <script type="application/ld+json" is:inline set:html={editorJsonLd} />}
+    <p class="page-meta">Last updated: {lastUpdated}</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .legal-page h2 {
+    margin-top: 1.8em;
+  }
+  .legal-page p {
+    color: var(--on-surface);
+    margin: 0 0 1em;
+  }
+  .page-meta {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+  }
+</style>

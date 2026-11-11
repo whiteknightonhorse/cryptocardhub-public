@@ -183,6 +183,17 @@ def sitemap_urls(files=None) -> list[str]:
     return list(seen)
 
 
+def inspect_urls(files=None, dist=None) -> list[str]:
+    """Sitemap URLs plus every dist/videos/<id>/ URL (CCH-SEO-32 removed those
+    from the sitemap; index-status.json must keep measuring them)."""
+    seen = dict.fromkeys(sitemap_urls(files))
+    root = (ROOT / "seo-site" / "dist") if dist is None else Path(dist)
+    for p in sorted((root / "videos").glob("*/index.html")):
+        if len(p.parent.name) == 11:  # video ids; /videos/<N>/ pagination is already in the sitemap
+            seen.setdefault(f"{SITE_HOST}/videos/{p.parent.name}/")
+    return list(seen)
+
+
 def inspect_all(client, urls: list[str], sleep=time.sleep) -> dict[str, dict[str, str]]:
     """One inspect() per URL, at most INSPECT_ALL_MAX. A failing URL is
     recorded as instrument_error (Y55), never skipped; HTTP 429 sleeps 60 s
@@ -227,7 +238,7 @@ def summarize(urls: dict[str, dict[str, str]]) -> dict[str, dict[str, int]]:
 
 
 def run_inspect_all() -> dict[str, dict[str, int]]:
-    urls = sitemap_urls()
+    urls = inspect_urls()
     res = inspect_all(_client(), urls)
     INDEX_STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
     INDEX_STATUS_FILE.write_text(json.dumps(

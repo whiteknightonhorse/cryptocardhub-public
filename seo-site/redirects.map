@@ -77,3 +77,34 @@
 /compare/ether-fi-vs-bybit/	410
 /videos/I6Gj1XGhf0U/	410
 /videos/ZGgCMas1v48/	410
+
+# CCH-SEO-09 — near-duplicate consolidation: weaker page 301s to the stronger.
+# DEFY-SEO-1110 B2/B3 - operator decision 2026-11-11, batch config/consolidations-2026-11-11.tsv
+/reviews/crypto-com-card-review-2026/	/reviews/crypto-com-card-review/
+/reviews/crypto-com-card-pros-and-cons/	/reviews/crypto-com-card-review/
+/reviews/is-crypto-com-card-worth-it/	/reviews/crypto-com-card-review/
+/reviews/bybit-card-review-2026/	/reviews/bybit-card-review/
+/reviews/bybit-card-pros-and-cons/	/reviews/bybit-card-review/
+/reviews/is-bybit-card-worth-it/	/reviews/bybit-card-review/
+/reviews/bybit-card-review-europe/	/reviews/bybit-card-review/
+/reviews/redotpay-review-2026/	/reviews/redotpay-review/
+/reviews/redotpay-review-uae/	/reviews/redotpay-review/
+/reviews/nexo-card-review-2026/	/reviews/nexo-card-review/
+/reviews/nexo-card-pros-and-cons/	/reviews/nexo-card-review/
+/reviews/nexo-card-review-uk/	/reviews/nexo-card-review/
+/reviews/ether-fi-cash-review-2026/	/reviews/ether-fi-cash-review/
+/reviews/gnosis-pay-card-review/	/reviews/gnosis-pay-review/
+/reviews/gnosis-pay-review-uk/	/reviews/gnosis-pay-review/
+/reviews/coinbase-card-review-2026/	/reviews/coinbase-card-review/
+/reviews/coinbase-card-review-canada/	/reviews/coinbase-card-review/
+/reviews/binance-card/	/reviews/binance-card-review/
+/compare/best-crypto-card-for-amazon/	/for/crypto-card-for-amazon/
+/for/crypto-card-for-beginners/	/compare/best-crypto-card-for-beginners/
+/for/crypto-card-for-digital-nomads/	/compare/best-crypto-card-for-digital-nomads/
+/compare/best-crypto-card-for-europe/	/geo/best-crypto-card-europe/
+/for/crypto-card-for-online-shopping/	/compare/best-crypto-card-for-online-shopping/
+/compare/best-crypto-card-for-self-custody/	/hub/non-custodial-crypto-card/
+/for/crypto-card-for-self-custody/	/hub/non-custodial-crypto-card/
+/for/crypto-card-for-travel/	/compare/best-crypto-card-for-travel/
+/for/crypto-card-with-no-foreign-transaction-fee/	/compare/best-crypto-card-no-foreign-transaction-fee/
+/faq/what-is-the-best-crypto-card-with-no-annual-fee/	/compare/best-crypto-card-with-no-annual-fee/

@@ -254,6 +254,5 @@ def test_belgium_and_ireland_appear_only_where_they_are_refused():
             if "Belgium" in f.read_text(encoding="utf-8")
             or "Ireland" in f.read_text(encoding="utf-8")}
     assert hits == {"best-crypto-card-uk",
-                    "crypto-com-card-pros-and-cons",
                     "does-crypto-com-card-work-in-europe",
                     "mica-compliant-vs-non-compliant-crypto-card"}

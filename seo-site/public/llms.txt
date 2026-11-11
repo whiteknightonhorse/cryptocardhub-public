@@ -1,6 +1,6 @@
 # DefyCard
 
-> Independent, editorial comparison hub for crypto debit and credit cards. We have published reviews of 14 crypto cards, covering fee changes, cashback rates, country availability, and security/custody analysis.
+> Independent, editorial comparison hub for crypto debit and credit cards. Coverage includes fee changes, cashback rates, country availability, and security/custody analysis.
 
 ## What this site is
 
@@ -8,7 +8,7 @@ DefyCard publishes long-form, decision-grade affiliate articles about crypto deb
 
 Primary affiliate: ether.fi Cash (`https://www.ether.fi/@defycard`). Secondary partners: Crypto.com, Coinbase, Binance, Bybit, Gnosis Pay, RedotPay, Bleap, Nexo, Wirex, MetaMask Card.
 
-Editorial independence policy: we earn affiliate commissions on some links — never on the editorial scoring. Fee numbers and country gates are sourced from issuer help centres. The one list we re-check against the issuer on a schedule is card availability by jurisdiction — it is published, dated, and machine-readable at <https://defycard.com/geo/availability-matrix/>, which states when each card's list was last confirmed. Nothing else on this site carries a refresh guarantee.
+Editorial independence policy: we earn affiliate commissions on some links (see <https://defycard.com/disclosure/>). Fee numbers and country gates are sourced from issuer help centres. The one list we re-check against the issuer on a schedule is card availability by jurisdiction — it is published, dated, and machine-readable at <https://defycard.com/geo/availability-matrix/>, which states when each card's list was last confirmed. Nothing else on this site carries a refresh guarantee.
 
 ## Audience
 
@@ -90,7 +90,7 @@ What we do NOT cover:
 
 ## Contact
 
-Editorial / corrections: maintained by the DefyCard editorial team via the GitHub issue queue (private).
+Editorial / corrections: edited by Evgenii A. (Editor); policy and corrections at <https://defycard.com/editorial-policy/>, verification method at <https://defycard.com/methodology/>.
 
 ## Inventory
 

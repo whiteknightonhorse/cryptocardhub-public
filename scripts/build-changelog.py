@@ -42,7 +42,7 @@ from pathlib import Path
 from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from flags import pseo_enabled  # noqa: E402 -- LAW #ONE-PLACE kill-switch
+from flags import pseo_enabled, new_urls_frozen, freeze_skip_row  # noqa: E402 -- LAW #ONE-PLACE kill-switch
 import facts_lib as fl  # noqa: E402 -- CLASS_TITLE, reused rather than re-typed
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -186,6 +186,12 @@ def main() -> int:
     if not pseo_enabled():
         print(json.dumps({"event": "skip", "reason": "pseo_disabled"}))
         print("[changelog] skip: pseo_disabled (PSEO_ENABLED=false)")
+        return 0
+
+    # DEFY-SEO-1110 B8: sixth new-file producer. Refreshing the existing page is
+    # an edit and stays allowed; creating it is a new URL.
+    if new_urls_frozen() and not (CONTENT / f"{SLUG}.md").exists():
+        print(json.dumps(freeze_skip_row()))
         return 0
 
     rows = read_rows()
