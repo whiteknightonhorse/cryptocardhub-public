@@ -37,6 +37,7 @@ import telegram_lib  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "logs" / "humanize" / "backfill-report.json"
+# ledger label of already-processed pages, not a model selector: do not bump or every page re-queues
 SONNET_STAMP = "claude-sonnet-5"
 LEDGER = ROOT / "logs" / "humanize" / "backfill.jsonl"
 DAILY_CAP = 10

@@ -1,4 +1,13 @@
 {
+  "anonymous-crypto-card": {
+    "added": "2026-11-14",
+    "bucket": "for",
+    "bytes": 122069,
+    "description": "Use ether.fi Cash to spend crypto anonymously without surrendering custody. Up to 3% cashback, non-custodial, Visa in 76 countries.",
+    "image": "/assets/pins/anonymous-crypto-card.jpg",
+    "title": "Anonymous Crypto Card for High Net Worth — Self-Custody Spending",
+    "url": "https://defycard.com/for/anonymous-crypto-card/"
+  },
   "can-i-change-my-card-tier-after-signing-up": {
     "added": "2026-10-27",
     "bucket": "faq",
@@ -179,6 +188,15 @@
     "title": "Crypto Card for Emergency Funds — When & How to Use It",
     "url": "https://defycard.com/for/crypto-card-for-emergency-fund/"
   },
+  "crypto-card-for-high-net-worth": {
+    "added": "2026-11-14",
+    "bucket": "for",
+    "bytes": 140422,
+    "description": "How HNW crypto holders use non-custodial crypto cards to earn cashback while keeping assets self-hosted. Tax strategies, tier benefits, and 2026 card comparison.",
+    "image": "/assets/pins/crypto-card-for-high-net-worth.jpg",
+    "title": "Crypto Card for High-Net-Worth: Tax-Efficient Spending & Yield",
+    "url": "https://defycard.com/for/crypto-card-for-high-net-worth/"
+  },
   "crypto-card-for-inflation-hedge": {
     "added": "2026-11-06",
     "bucket": "for",
@@ -224,6 +242,15 @@
     "title": "Crypto Card for Stablecoin Spending: Earn Bitcoin Cashback",
     "url": "https://defycard.com/for/crypto-card-for-stablecoin-spending/"
   },
+  "crypto-card-for-tax-efficiency-us": {
+    "added": "2026-11-12",
+    "bucket": "for",
+    "bytes": 240236,
+    "description": "Use a crypto card for tax-efficiency to spend staked ETH without selling. Earn up to 3% cashback while maintaining staking rewards. US guide.",
+    "image": "/assets/pins/crypto-card-for-tax-efficiency-us.jpg",
+    "title": "Crypto Card for Tax Efficiency: Keep ETH Staked, Earn Cashback",
+    "url": "https://defycard.com/for/crypto-card-for-tax-efficiency-us/"
+  },
   "crypto-card-for-usdc-spending": {
     "added": "2026-11-07",
     "bucket": "for",
@@ -232,6 +259,15 @@
     "image": "/assets/pins/crypto-card-for-usdc-spending.jpg",
     "title": "Crypto Card for USDC Spending: Earn While You Spend",
     "url": "https://defycard.com/for/crypto-card-for-usdc-spending/"
+  },
+  "crypto-card-for-whales": {
+    "added": "2026-11-13",
+    "bucket": "for",
+    "bytes": 122689,
+    "description": "Best crypto card for high net worth individuals. ether.fi Pinnacle tier supports $50k/month with 3% cashback, self-custody, and tax-efficient records.",
+    "image": "/assets/pins/crypto-card-for-whales.jpg",
+    "title": "Crypto card for whales: high-limit cards for $50k+ monthly spending",
+    "url": "https://defycard.com/for/crypto-card-for-whales/"
   },
   "crypto-card-to-accumulate-bitcoin": {
     "added": "2026-11-08",
@@ -250,6 +286,24 @@
     "image": "/assets/pins/crypto-card-to-avoid-banks.jpg",
     "title": "Crypto Card to Avoid Banks: Self-Custody Spending",
     "url": "https://defycard.com/for/crypto-card-to-avoid-banks/"
+  },
+  "crypto-card-to-keep-eth-staked": {
+    "added": "2026-11-14",
+    "bucket": "for",
+    "bytes": 242252,
+    "description": "Keep your ETH staking yield. Use a crypto card to spend USDC while earning 3% cashback—ether.fi Cash splits staking and spending.",
+    "image": "/assets/pins/crypto-card-to-keep-eth-staked.jpg",
+    "title": "Crypto Card to Keep ETH Staked While Spending Stablecoins",
+    "url": "https://defycard.com/for/crypto-card-to-keep-eth-staked/"
+  },
+  "crypto-card-to-maximize-eth-yield": {
+    "added": "2026-11-15",
+    "bucket": "for",
+    "bytes": 244122,
+    "description": "Earn ETH staking rewards while spending via ether.fi Cash. Keep your ETH staked, get up to 3% cashback, control your coins. Global coverage, self-custody.",
+    "image": "/assets/pins/crypto-card-to-maximize-eth-yield.jpg",
+    "title": "Crypto Card to Maximize ETH Yield: Keep Staking, Spend USDC",
+    "url": "https://defycard.com/for/crypto-card-to-maximize-eth-yield/"
   },
   "crypto-card-to-spend-without-selling-crypto": {
     "added": "2026-11-08",
@@ -449,6 +503,33 @@
     "title": "How to Earn a Referral Bonus on Your Crypto.com Card",
     "url": "https://defycard.com/how-to/how-to-earn-referral-bonus-crypto-com-card/"
   },
+  "how-to-earn-yield-while-spending-crypto": {
+    "added": "2026-11-16",
+    "bucket": "how-to",
+    "bytes": 150453,
+    "description": "Step-by-step guide to earning 3% cashback and yield with the ether.fi Cash card while you spend. Compare to Crypto.com.",
+    "image": "/assets/pins/how-to-earn-yield-while-spending-crypto.jpg",
+    "title": "How to Earn Yield While Spending Crypto",
+    "url": "https://defycard.com/how-to/how-to-earn-yield-while-spending-crypto/"
+  },
+  "how-to-export-crypto-card-transactions": {
+    "added": "2026-11-13",
+    "bucket": "how-to",
+    "bytes": 139046,
+    "description": "Export crypto card transactions step-by-step. Learn how to track spending for taxes, reconcile cashback rewards, and file your crypto card earnings correctly.",
+    "image": "/assets/pins/how-to-export-crypto-card-transactions.jpg",
+    "title": "How to Export Crypto Card Transactions & Track Taxes",
+    "url": "https://defycard.com/how-to/how-to-export-crypto-card-transactions/"
+  },
+  "how-to-file-taxes-on-crypto-cashback": {
+    "added": "2026-11-15",
+    "bucket": "how-to",
+    "bytes": 159872,
+    "description": "Learn how to file taxes on crypto cashback from ether.fi Cash. Step-by-step Koinly import, fiat-value tracking, and tax-form generation for US, UK, EU filers.",
+    "image": "/assets/pins/how-to-file-taxes-on-crypto-cashback.jpg",
+    "title": "How to File Taxes on Crypto Cashback: Koinly Guide",
+    "url": "https://defycard.com/how-to/how-to-file-taxes-on-crypto-cashback/"
+  },
   "how-to-get-a-crypto-card-in-australia": {
     "added": "2026-11-09",
     "bucket": "how-to",
@@ -548,6 +629,15 @@
     "title": "How to Get eETH: Guide to Ether.fi Liquid Staking",
     "url": "https://defycard.com/how-to/how-to-get-eeth/"
   },
+  "how-to-import-ether-fi-transactions-koinly": {
+    "added": "2026-11-13",
+    "bucket": "how-to",
+    "bytes": 165721,
+    "description": "Learn how to import ether.fi transactions to Koinly for accurate crypto tax reporting. Step-by-step guide covering borrow mode and direct pay.",
+    "image": "/assets/pins/how-to-import-ether-fi-transactions-koinly.jpg",
+    "title": "How to Import Ether.fi Transactions to Koinly: Complete Tax Tracking Guide",
+    "url": "https://defycard.com/how-to/how-to-import-ether-fi-transactions-koinly/"
+  },
   "how-to-migrate-from-crypto-com-card": {
     "added": "2026-11-02",
     "bucket": "how-to",
@@ -638,6 +728,15 @@
     "title": "How to Switch to Direct Pay Mode on Ether.fi",
     "url": "https://defycard.com/how-to/how-to-switch-to-direct-pay-mode-ether-fi/"
   },
+  "how-to-track-crypto-card-spending-for-taxes": {
+    "added": "2026-11-15",
+    "bucket": "how-to",
+    "bytes": 206048,
+    "description": "Learn how to track crypto card spending for taxes, file cashback earnings, and use tools like Koinly. Step-by-step tax compliance guide for crypto card holders.",
+    "image": "/assets/pins/how-to-track-crypto-card-spending-for-taxes.jpg",
+    "title": "How to Track Crypto Card Spending for Taxes",
+    "url": "https://defycard.com/how-to/how-to-track-crypto-card-spending-for-taxes/"
+  },
   "how-to-transfer-balance-between-crypto-cards": {
     "added": "2026-11-04",
     "bucket": "how-to",
@@ -647,6 +746,24 @@
     "title": "How to Transfer Balance Between Crypto Cards",
     "url": "https://defycard.com/how-to/how-to-transfer-balance-between-crypto-cards/"
   },
+  "how-to-unstake-from-ether-fi": {
+    "added": "2026-11-12",
+    "bucket": "how-to",
+    "bytes": 239541,
+    "description": "Learn how to unstake from ether.fi, manage eETH tokens, and use liquid staking as collateral. Step-by-step guide for crypto holders.",
+    "image": "/assets/pins/how-to-unstake-from-ether-fi.jpg",
+    "title": "How to Unstake From Ether.fi: Complete Guide to eETH",
+    "url": "https://defycard.com/how-to/how-to-unstake-from-ether-fi/"
+  },
+  "how-to-use-borrow-mode-ether-fi": {
+    "added": "2026-11-16",
+    "bucket": "how-to",
+    "bytes": 160080,
+    "description": "Learn how to use ether.fi for ETH staking and the ether.fi Cash card. Step-by-step guide to setting up staking, switching payment modes, and earning yield.",
+    "image": "/assets/pins/how-to-use-borrow-mode-ether-fi.jpg",
+    "title": "How to Use ether.fi: Getting Started with Staking and Payments",
+    "url": "https://defycard.com/how-to/how-to-use-borrow-mode-ether-fi/"
+  },
   "how-to-use-crypto-card-for-subscriptions": {
     "added": "2026-11-04",
     "bucket": "how-to",
@@ -655,6 +772,24 @@
     "image": "/assets/pins/how-to-use-crypto-card-for-subscriptions.jpg",
     "title": "How to Use a Crypto Card for Subscriptions in 2026",
     "url": "https://defycard.com/how-to/how-to-use-crypto-card-for-subscriptions/"
+  },
+  "how-to-use-eeth-as-collateral": {
+    "added": "2026-11-12",
+    "bucket": "how-to",
+    "bytes": 241428,
+    "description": "Step-by-step guide: connect your wallet to ether.fi, claim ePoints, and use the ether.fi Cash card to spend crypto. Start earning 3% cashback today.",
+    "image": "/assets/pins/how-to-use-eeth-as-collateral.jpg",
+    "title": "How to Use eETH as Collateral: ether.fi Cash Setup Guide",
+    "url": "https://defycard.com/how-to/how-to-use-eeth-as-collateral/"
+  },
+  "how-to-use-koinly-with-crypto-card": {
+    "added": "2026-11-16",
+    "bucket": "how-to",
+    "bytes": 163066,
+    "description": "Learn how to import ether.fi transactions into Koinly for accurate tax reporting. Step-by-step guide to track cashback, FX conversions, and calculate capital gains.",
+    "image": "/assets/pins/how-to-use-koinly-with-crypto-card.jpg",
+    "title": "How to Use Koinly With Your Crypto Card",
+    "url": "https://defycard.com/how-to/how-to-use-koinly-with-crypto-card/"
   },
   "is-a-regulated-crypto-card-the-same-as-a-custodial-card": {
     "added": "2026-10-21",

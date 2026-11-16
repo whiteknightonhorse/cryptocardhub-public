@@ -27,6 +27,17 @@ def violations(html):
         out.append('uncovered-mention-outside-block')
     return out
 
+def md_violations(md):
+    out = []
+    for ln in md.splitlines():
+        if NAME.search(ln) and not CLOSED.search(ln):
+            out.append('recommendation-context(md): ' + ln.strip()[:120])
+        for h in re.findall(r'\]\(([^)\s]*)\)|href="([^"]*)"', ln):
+            h = h[0] or h[1]
+            if 'cypher' in h.lower() and h.rstrip('/') != 'https://www.cypherhq.io':
+                out.append('affiliate/link(md): ' + h)
+    return out
+
 def main(dist):
     files = mentioning = bad = 0
     for p in pathlib.Path(dist).rglob('*.html'):
@@ -39,7 +50,18 @@ def main(dist):
         if v:
             bad += len(v)
             print(f'FAIL {p}: ' + ' | '.join(v[:3]))
-    print(f'html files scanned: {files}; files still mentioning Cypher (closed-note only): {mentioning}; Cypher recommendations: {bad}')
+    mds = mdment = 0
+    for p in pathlib.Path(dist).rglob('*.md'):
+        t = p.read_text(encoding='utf8', errors='replace')
+        mds += 1
+        if not NAME.search(t):
+            continue
+        mdment += 1
+        v = md_violations(t)
+        if v:
+            bad += len(v)
+            print(f'FAIL {p}: ' + ' | '.join(v[:3]))
+    print(f'html files scanned: {files}; files still mentioning Cypher (closed-note only): {mentioning}; md files scanned: {mds}; md files still mentioning Cypher: {mdment}; Cypher recommendations: {bad}')
     return 1 if bad else 0
 
 if __name__ == '__main__':

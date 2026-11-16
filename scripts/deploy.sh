@@ -163,6 +163,12 @@ if ! LIVE_ROOT="$WEB" "$PYBIN" -m pytest "$SEO/tests/test_url_retirement.py" -q;
   exit 7
 fi
 
+echo "==> [2f/5] dead-issuer gate — a closed issuer is never recommended (html + md sidecars)"
+if ! "$PYBIN" "$ROOT/scripts/check-dead-issuer.py" "$SEO/dist"; then
+  echo "ERROR: dead-issuer gate failed - refusing to deploy" >&2
+  exit 1
+fi
+
 echo ""
 # EVERY gate above this line runs BEFORE the renames below. They used to sit
 # after them: the deploy was already live by the time a red gate "blocked" it,

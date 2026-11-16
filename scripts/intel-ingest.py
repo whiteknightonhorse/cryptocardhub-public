@@ -146,7 +146,7 @@ CAPTURES_DIR = ROOT / "logs" / "intel" / "captures"
 CONTENT_DIR = ROOT / "seo-site" / "src" / "content" / "pseo"
 AEO_DIR = ROOT / "logs" / "aeo"
 
-MODEL = "claude-sonnet-5"
+MODEL = "claude-sonnet-5-5"
 # Compliance gate, mirror of pseo-generate.py's Haiku gate in the opposite
 # direction: extraction of unreviewed money copy (6.2/6.3) must never
 # silently downgrade to a cheaper, weaker model.

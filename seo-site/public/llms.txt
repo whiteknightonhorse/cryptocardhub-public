@@ -6,7 +6,7 @@
 
 DefyCard publishes long-form, decision-grade affiliate articles about crypto debit and credit cards. Every article carries an FTC affiliate disclosure above the fold, a 6-key "At-a-Glance" snapshot, callout boxes for Signal/Risk/Watch, an FAQ accordion with FAQPage JSON-LD, and 8+ internal links to related guides.
 
-Primary affiliate: ether.fi Cash (`https://www.ether.fi/@defycard`). Secondary partners: Crypto.com, Coinbase, Binance, Bybit, Gnosis Pay, RedotPay, Bleap, Nexo, Wirex, MetaMask Card.
+Primary affiliate: ether.fi Cash (`https://www.ether.fi/@defycard`). Second referral partner: Plasma One. Crypto.com card pages link to the issuer's public page and earn no commission. Every other issuer on this site is covered editorially, with no referral relationship. Full disclosure: https://defycard.com/disclosure/
 
 Editorial independence policy: we earn affiliate commissions on some links (see <https://defycard.com/disclosure/>). Fee numbers and country gates are sourced from issuer help centres. The one list we re-check against the issuer on a schedule is card availability by jurisdiction — it is published, dated, and machine-readable at <https://defycard.com/geo/availability-matrix/>, which states when each card's list was last confirmed. Nothing else on this site carries a refresh guarantee.
 

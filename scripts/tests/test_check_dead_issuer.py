@@ -10,3 +10,15 @@ def test_closed_note_passes():
 
 def test_cypher_link_fails():
     assert cdi.violations('<p>closed <a href="https://cypher.example/ref">x</a></p>')
+
+def test_md_recommendation_fails():
+    assert cdi.md_violations('Cypher is a good fallback')
+
+def test_md_closed_note_passes():
+    assert not cdi.md_violations('Cypher: closed - cards ended 2026-08-08; acquired by Nium ([source](https://www.cypherhq.io/)).')
+
+def test_md_cypherpunk_passes():
+    assert not cdi.md_violations('A cypherpunk ethos and Cypherpunk wallets')
+
+def test_md_cypher_link_fails():
+    assert cdi.md_violations('closed [x](https://cypher.example/ref)')
