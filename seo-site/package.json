@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "node scripts/check-image-exposure.mjs",
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
     "typecheck": "astro check",

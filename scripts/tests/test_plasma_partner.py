@@ -124,3 +124,13 @@ def test_mutation_expires_stripped_from_one_record_is_red():
     facts[0]["expires"] = None  # first record is `current` (plasma.card.network)
     assert facts[0]["status"] == "current"
     assert not no_current_fact_has_null_expires(facts)
+
+
+def test_plasma_rates_reverified_2026_11_18_literals():
+    by_id = {f["id"]: f for f in _plasma_facts()}
+    assert by_id["plasma.rate.cashback_lite_first500"]["value"] == 1
+    assert by_id["plasma.rate.cashback_lite_first500"]["history"][0]["value"] == 2
+    assert by_id["plasma.rate.cashback_lite_over500"]["value"] == 0.1
+    assert by_id["plasma.rate.cashback_platinum"]["value"] == 3
+    assert by_id["plasma.rate.cashback_platinum"]["history"][0]["value"] == 4
+    assert by_id["plasma.fee.card_lite"]["value"] == 10
