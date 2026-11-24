@@ -25,6 +25,12 @@ three new shapes (flat list, prose refusal sentence, prose comma list), so
 this file's fixture and low-level parser tests moved to the 2026-09-17
 capture. `verdict_pairs`/`compare_pairs`/`intercom_pairs` are gone — no code
 outside this file's own history ever called them (grepped clean).
+
+CCH-AVAIL-01 (2026-11-24): the article was restructured again (virtual-and-
+physical / virtual-only / united-states sections), so the fixture moved to
+the 2026-11-24 capture. After any `availability-check.py --accept`, or any
+parser change, this fixture is recaptured with ac.fetch and the literals
+retyped.
 """
 from __future__ import annotations
 
@@ -37,7 +43,7 @@ import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-FIXTURE = Path(__file__).resolve().parent / "fixtures" / "etherfi-758780-2026-09-17.html"
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "etherfi-758780-2026-11-24.html"
 _SPEC = importlib.util.spec_from_file_location(
     "availability_check", ROOT / "scripts" / "availability-check.py")
 ac = importlib.util.module_from_spec(_SPEC)
@@ -47,18 +53,20 @@ _SPEC.loader.exec_module(ac)
 sys.path.insert(0, str(ROOT / "scripts"))
 import availability_lib as al  # noqa: E402
 
-# --- LAW: what article 758780 said when it was captured, 2026-09-17 ---------
-# 88 countries (flat list, Nigeria included), 2 explicit refusals in prose
-# (Belgium, Ireland), 31 US jurisdictions (30 states + District of Columbia)
-# in one prose comma list, 0 US refusals (the page states none today).
-N_COUNTRIES = 88
-N_COUNTRIES_NO = 2
+# --- LAW: what article 758780 said when it was captured, 2026-11-24 --------
+# 79 countries with a physical card (flat list), 12 "virtual card only"
+# countries (Mexico with a parenthetical reason), US: 31 jurisdictions where a
+# personal account can be opened (Mississippi, Missouri, Tennessee get a
+# physical card only where an account exists - they have none, so not listed).
+N_COUNTRIES = 79
+N_COUNTRIES_NO = 12
 N_US_STATES = 31
 
-COUNTRY_HEADING = "countries where a physical cash card is currently available"
-COUNTRY_NO_HEADING = "eligible cash regions where a physical card is not currently available"
+COUNTRY_HEADING = "virtual and physical card available"
+COUNTRY_NO_HEADING = "virtual card only"
 US_HEADING = "united states"
-US_ANCHOR = "Physical card availability:"
+US_ANCHOR = "You can open a personal account if you live in:"
+US_SPEC = {"anchor": US_ANCHOR}
 
 
 @pytest.fixture(scope="module")
@@ -74,41 +82,54 @@ def cfg():
 
 # --- 1. the parser reads each section in its DECLARED form -----------------
 
-def test_the_country_section_reads_as_a_flat_list_of_88(html):
+def test_the_country_section_reads_as_a_flat_list_of_79(html):
     stream = ac.parse_intercom_stream(html)
     cells = ac._stream_section(stream, COUNTRY_HEADING)
     found = ac.parse_flat_list(cells)
     assert len(found) == N_COUNTRIES, len(found)
-    assert "Nigeria" in found
-    assert "Belgium" not in found, "Belgium is a refusal, not an available country"
+    assert "Grenada" in found
+    assert "\u200b" not in "".join(found), "the trailing zero-width cell is not a country"
+    assert "Belgium" not in found and "Mexico" not in found
 
 
-def test_the_explicit_no_section_reads_belgium_and_ireland_from_prose(html):
+def test_the_virtual_only_section_reads_12_names_and_drops_the_mexico_note(html):
     stream = ac.parse_intercom_stream(html)
     cells = ac._stream_section(stream, COUNTRY_NO_HEADING)
-    found = ac.parse_prose_no(cells)
-    assert found == ["Belgium", "Ireland"], found
+    found = ac.parse_list_notes(cells)
+    assert len(found) == N_COUNTRIES_NO, found
+    assert "Mexico" in found and "Belgium" in found and "Ireland" in found
+    assert not any("customs" in x or "can open" in x for x in found)
 
 
-def test_the_us_states_section_reads_31_names_from_one_prose_cell(html):
+def test_the_us_section_reads_31_account_states_from_one_prose_cell(html):
     stream = ac.parse_intercom_stream(html)
     cells = ac._stream_section(stream, US_HEADING)
-    found = ac.parse_prose_list(cells, US_ANCHOR)
+    found = ac.parse_prose_list_and(cells, US_SPEC)
     assert len(found) == N_US_STATES, found
     assert "District of Columbia" in found
-    assert "Mississippi" not in found
-    assert not any("Note" in x or "jurisdiction is not listed" in x for x in found)
+    assert "West Virginia" in found and "Wyoming" in found
+    assert "Alabama" in found and "Vermont" not in found
+    for plus in ("Mississippi", "Missouri", "Tennessee"):
+        assert plus not in found, plus
 
 
-def test_a_prose_no_section_whose_wording_changed_is_unparseable(html):
-    """The refusal sentence is matched by its exact wording, not by keyword —
-    a rewrite must read as 'could not check', never as 'nobody is refused'
-    (T-0134 law #4: this list is money, see Y50)."""
+def test_a_us_section_whose_anchor_is_reworded_is_unparseable(html):
     stream = ac.parse_intercom_stream(html)
-    cells = ac._stream_section(stream, COUNTRY_NO_HEADING)
-    doctored = [c.replace("are eligible regions", "used to be eligible regions") for c in cells]
+    cells = ac._stream_section(stream, US_HEADING)
+    doctored = [c.replace("You can open", "You may open") for c in cells]
     assert doctored != cells
-    assert ac.parse_prose_no(doctored) is None
+    assert ac.parse_prose_list_and(doctored, US_SPEC) is None
+
+
+def test_the_2026_09_17_countries_heading_reads_as_unparseable_not_as_empty(html, cfg):
+    card = dict(al.card(cfg))
+    card["source"] = dict(card["source"])
+    card["source"]["sections"] = {"countries": {
+        "heading": "countries where a physical cash card is currently available",
+        "form": "list"}}
+    res = ac.compare(card, html)
+    assert res["status"] == "unparseable"
+    assert "countries where a physical cash card" in res["summary"]
 
 
 # --- 2. the config agrees with the captured page ---------------------------
@@ -116,6 +137,21 @@ def test_a_prose_no_section_whose_wording_changed_is_unparseable(html):
 def test_the_checked_in_lists_match_the_captured_issuer_page(html, cfg):
     res = ac.compare(al.card(cfg), html)
     assert res["status"] == "match", res["summary"]
+
+
+def test_the_pending_2026_11_24_difference_is_pinned_as_differs_not_unparseable(html, cfg):
+    """Green while the lists await the operator's --accept: pins the exact
+    difference so a renamed/broken YAML heading (differs -> unparseable)
+    cannot hide behind the already-red match test. After --accept this goes
+    red with it; retype the literals from the recapture."""
+    res = ac.compare(al.card(cfg), html)
+    assert res["status"] == "differs"
+    assert res["summary"] == (
+        "countries: issuer adds ['Grenada'], issuer no longer lists ['Bahrain', "
+        "'Isle of Man', 'Liechtenstein', 'Maldives', 'Mexico', 'Oman', 'Seychelles', "
+        "'Vanuatu']; countries_virtual_only: issuer adds ['Bahrain', 'Bermuda', "
+        "'Isle of Man', 'Liechtenstein', 'Maldives', 'Mauritius', 'Mexico', 'Oman', "
+        "'Seychelles', 'Vanuatu'], issuer no longer lists -")
 
 
 def test_a_removed_country_is_a_difference_not_a_match(html, cfg):
@@ -154,7 +190,7 @@ def test_a_list_section_whose_anchor_is_renamed_is_unparseable(html, cfg):
     """The US prose anchor is a literal stated in the YAML. If the issuer
     rewords it, the section must read as unparseable, not as an empty list."""
     card = dict(al.card(cfg))
-    doctored = html.replace("Physical card availability:", "Physical card availabilityXX:")
+    doctored = html.replace("You can open a personal account if you live in:", "You can open an account if you live in:")
     assert doctored != html
     res = ac.compare(card, doctored)
     assert res["status"] == "unparseable"
@@ -167,7 +203,7 @@ def test_the_countries_heading_renamed_on_the_live_page_is_unparseable_not_a_mat
     bug this whole file exists to prevent."""
     card = dict(al.card(cfg))
     doctored = html.replace(
-        "Countries where a physical Cash card is currently available",
+        "Virtual and physical card available",
         "Countries relocated heading xyz")
     assert doctored != html
     res = ac.compare(card, doctored)
@@ -181,8 +217,10 @@ def test_hungary_is_available():
     assert al.unavailable_for("Hungary") is False
 
 
-def test_belgium_is_unavailable_by_the_issuers_own_cross():
-    assert al.unavailable_for("Belgium") is True
+def test_belgium_is_available_as_virtual_card_only():
+    assert al.unavailable_for("Belgium") is False
+    assert al.unavailable_for("Mississippi") is True    # no personal account
+    assert al.unavailable_for("Netherlands") is True    # absent
 
 
 def test_mississippi_is_unavailable_by_absence():
@@ -475,3 +513,24 @@ def test_a_document_blocked_country_missing_from_the_fixture_is_a_difference(pla
     res = ac.compare(al.card(cfg, "plasma"), doctored)
     assert res["status"] == "differs"
     assert "countries_document_blocked" in res["summary"] and "India" in res["summary"]
+
+
+def test_accept_of_the_pinned_diff_fills_virtual_only_and_keeps_comments(html, tmp_path, monkeypatch):
+    """Scratch copy of the real YAML, never the real file."""
+    res = ac.compare(al.card(al.load()), html)
+    ypath = tmp_path / "availability.yaml"
+    ypath.write_text(al.YAML_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+    apath = tmp_path / "alerts.json"
+    apath.write_text(json.dumps([{"id": "cccccccccccc", "card": "etherfi",
+                                  "status": "differs", "summary": res["summary"],
+                                  "source": "x", "apply": res["apply"]}]), encoding="utf-8")
+    monkeypatch.setattr(ac, "ALERTS", apath)
+    monkeypatch.setattr(ac, "YAML_PATH", ypath)
+    monkeypatch.setattr(ac, "JOURNAL", tmp_path / "fact-journal.jsonl")
+    assert ac.accept("cccccccccccc") == 0
+    out = ypath.read_text(encoding="utf-8")
+    c = yaml.safe_load(out)["cards"]["etherfi"]
+    assert len(c["countries_virtual_only"]) == 12
+    assert len(c["countries"]) == 79 and len(c["us_states"]) == 31
+    assert "AVAILABLE for every question this site asks" in out
+    assert c["countries_explicit_no"] is None

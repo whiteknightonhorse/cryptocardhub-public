@@ -99,10 +99,23 @@ def test_hungary_reads_as_available(html):
     assert "Available" in row and "Not available" not in row, row
 
 
-def test_belgium_reads_as_not_available_by_the_issuers_own_cross(html):
+def test_belgium_reads_as_available_virtual_card_only(html):
     row = _row(html, "Belgium")
-    assert row is not None, "Belgium carries an explicit ❌ and must be a row"
-    assert NOT_AVAILABLE in row, row
+    assert row is not None, "Belgium is a virtual-card-only row"
+    assert "Available (virtual card only)" in row and NOT_AVAILABLE not in row, row
+
+
+def test_cellLabel_for_a_virtual_only_name():
+    src = (f"import {{ cellFor, cellLabel }} from '{SEO}/src/lib/availability.mjs';"
+           "const c = {mode:'allowlist', countries:['Spain'], countries_virtual_only:['Belgium']};"
+           "process.stdout.write(JSON.stringify([cellFor(c,'Belgium','country'),"
+           "cellLabel(c,'Belgium','country'),cellLabel(c,'Spain','country'),"
+           "cellLabel(c,'Peru','country')]));")
+    p = subprocess.run(["node", "--input-type=module", "-e", src],
+                       capture_output=True, text=True, cwd=SEO)
+    assert p.returncode == 0, p.stderr
+    assert json.loads(p.stdout) == [True, "Available (virtual card only)",
+                                    "Available", "Not available"]
 
 
 def test_nevada_is_marked_not_available_for_etherfi(html):
@@ -230,7 +243,7 @@ def test_the_rows_are_exactly_what_the_yaml_names(html, cards):
     cfg = yaml.safe_load(YAML_PATH.read_text(encoding="utf-8")) or {}
     allowed = set()
     for c in cards.values():
-        for key in ("countries", "countries_explicit_no", "countries_document_blocked",
+        for key in ("countries", "countries_virtual_only", "countries_explicit_no", "countries_document_blocked",
                     "us_states", "us_states_explicit_no", "us_states_blocked"):
             allowed.update(c.get(key) or [])
     allowed.update(j["name"] for j in (cfg.get("slug_jurisdictions") or {}).values())
@@ -344,6 +357,12 @@ def _md_cell(md_text, jurisdiction, card_name):
     idx = cols.index(card_name)
     row = next(l for l in md_text.splitlines() if l.startswith(f"| {jurisdiction} |"))
     return [c.strip() for c in row.strip("|").split("|")][idx]
+
+
+def test_the_sidecar_reads_belgium_as_virtual_card_only():
+    md = MATRIX_MD.read_text(encoding="utf-8")
+    assert _md_cell(md, "Belgium", "ether.fi Cash") == "Available (virtual card only)"
+    assert _md_cell(md, "Nevada", "ether.fi Cash") == "Not available"
 
 
 def test_the_sidecar_agrees_with_the_html_on_plasma_not_stated_vs_not_available():

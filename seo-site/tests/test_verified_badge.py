@@ -41,8 +41,8 @@ DIST = Path(__file__).resolve().parent.parent / "dist"
 # LAW — config/facts/etherfi.yaml, id etherfi.fee.physical_card.core,
 # status: current. A deliberate change to that record's verified_at/
 # source_url/status/value must update these literals in the same commit.
-BADGE_VERIFIED_AT = "2026-08-13"
-BADGE_SOURCE_URL = "https://help.ether.fi/en/articles/376356-physical-cards-faq"
+BADGE_VERIFIED_AT = "2026-11-24"
+BADGE_SOURCE_URL = "https://help.ether.fi/en/articles/304368-what-are-the-benefits-of-a-personal-cash-credit-card"
 BADGE_CLAIM_VALUE = "$50"
 BADGE_MARKER = 'class="verified-badge"'
 

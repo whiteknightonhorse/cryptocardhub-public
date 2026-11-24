@@ -908,6 +908,32 @@ def _collect_dataset_mirrors(root: Path = ROOT, today: date | None = None) -> di
 
 
 INTEL_UNREAD_DAYS = 7
+INTEL_ARTICLE_RE = re.compile(r"help\.ether\.fi/en/articles/(\d+)")
+
+
+def _orphan_fact_sources(srcs: list[dict[str, Any]], removed_on: dict[str, str]) -> dict[str, Any]:
+    """CCH-FACTS-07: a current/beta fact is only as alive as its source. Join
+    each fact's help-article id to the collection listing; one Missing per
+    article that left it (the removal event alone sat `pending` for 61 days)."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import facts_lib
+    coll = next((s for s in srcs if s.get("kind") == "intercom_collection"), None)
+    listed = {str(i) for i in ((coll or {}).get("last_article_ids") or [])}
+    if not listed:
+        return {"fact_source": Missing(
+            "intel.fact_source", "intercom_collection source absent or last_article_ids "
+            "empty — cannot check whether fact sources are still listed")}
+    orphans: dict[str, list[str]] = {}
+    for f in facts_lib.load_all(ROOT / "config" / "facts"):
+        m = INTEL_ARTICLE_RE.search(str(f.get("source_url") or ""))
+        if f["status"] in ("current", "beta") and m and m.group(1) not in listed:
+            orphans.setdefault(m.group(1), []).append(f["id"])
+    return {f"fact_source.{aid}": Missing(
+        f"intel.fact_source.{aid}",
+        f"source article {aid} is no longer listed in the issuer's help collection "
+        f"(removed {removed_on.get(aid) or 'date unknown'}): {len(ids)} published facts "
+        f"({', '.join(ids)}); action: find the successor article and re-verify, "
+        f"or mark the facts disputed") for aid, ids in orphans.items()}
 
 
 def _collect_intel(today: date | None = None) -> dict[str, Any]:
@@ -931,7 +957,18 @@ def _collect_intel(today: date | None = None) -> dict[str, Any]:
                 continue
             if e.get("kind") in ("fetch_failed", "extract_failed"):
                 last_cause[e["source_id"]] = e.get("diff_summary", "")
+    removed_on: dict[str, str] = {}
+    if ev.is_file():
+        for line in ev.read_text(encoding="utf-8").splitlines():
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            m = INTEL_ARTICLE_RE.search(e.get("url") or "")
+            if e.get("kind") == "removed" and m:
+                removed_on[m.group(1)] = str(e.get("ts", ""))[:10]
     out: dict[str, Any] = {"total": len(srcs), "fresh": 0, "unread_ages": {}}
+    out.update(_orphan_fact_sources(srcs, removed_on))
     for s in srcs:
         last_ok = s.get("last_ok")
         age = (today - date.fromisoformat(str(last_ok))).days if last_ok else None

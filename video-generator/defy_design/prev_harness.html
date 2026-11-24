@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>html,body{margin:0;padding:0;background:#000;overflow:hidden}#stage{width:1080px;height:1920px;position:relative;overflow:hidden}</style>
+</head><body><div id="stage"></div>
+<script src="engine/defycard-previews.js"></script>
+<script>
+window.__renderPreview=function(o){
+  document.getElementById('stage').innerHTML = window.renderPreviewHTML({index:o.index, hook:o.hook, stat:o.stat||''}, {guides:false});
+  window.__ready=true;
+};
+</script></body></html>

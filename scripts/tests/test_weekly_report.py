@@ -8,8 +8,10 @@ mutation it exists to catch. The numbers below are worked out by hand.
 """
 from __future__ import annotations
 
+import datetime
 import importlib.util
 import json
+import os
 import zipfile
 from pathlib import Path
 
@@ -1155,7 +1157,12 @@ def test_collect_cabinet_clicks_queries_the_same_window_as_the_cabinet_export(tm
     """
     monkeypatch.setattr(wr, "ROOT", tmp_path)
     monkeypatch.setattr(wr, "_ga4_client", lambda: object())
-    _install_cabinet_fixture(tmp_path, mtime_days_old=0)  # export_date == today
+    # Pin the export to a literal date (not "today") and lift the staleness gate,
+    # which would otherwise turn the pinned old export into Missing.
+    monkeypatch.setattr(wr, "CABINET_STALE_DAYS", 10**6)
+    dest = _install_cabinet_fixture(tmp_path)
+    pinned = datetime.datetime(2026, 9, 24, 12, 0).timestamp()
+    os.utime(dest, (pinned, pinned))
     calls = []
 
     def fake_run_report(client, dims, mets, since, until, dim_filter=None, limit=200):
@@ -1357,7 +1364,8 @@ def test_collect_intel_flags_unread_sources_with_age_cause_and_action(tmp_path, 
     monkeypatch.setattr(wr, "ROOT", tmp_path)
     _intel_cfg(tmp_path)
     out = wr._collect_intel(today=date(2026, 10, 5))
-    missing = [k for k, v in out.items() if isinstance(v, wr.Missing)]
+    missing = [k for k, v in out.items()
+               if isinstance(v, wr.Missing) and not k.startswith("fact_source")]
     assert sorted(missing) == ["etherfi-affiliates-page", "etherfi-blog-feed"]
     assert "unread since 2026-09-14 (21 d)" in str(out["etherfi-affiliates-page"])
     assert "429" in str(out["etherfi-affiliates-page"])
@@ -1512,3 +1520,78 @@ def test_pinterest_line_is_in_the_transmitted_text(tmp_path, monkeypatch):
     wr.send(report, wr.render(report))
     body = "".join(urllib.parse.unquote_plus(d.decode()) for d in sent)
     assert "pinterest: manifest 3 (+0 new, +3 backfill, 7d) image_failed 0" in body
+
+
+# --- CCH-FACTS-07: a fact whose source article left the issuer's collection ---
+import urllib.parse as _up  # noqa: E402
+from datetime import date as _d  # noqa: E402
+
+_FACT = """facts:
+  - id: t.fact.{n}
+    value: 1
+    unit: USD
+    applies_to: {{}}
+    source_url: "https://help.ether.fi/en/articles/{art}-slug"
+    source_quote: q
+    verified_at: 2026-08-13
+    expires: null
+    status: {status}
+    class: fee
+    confidence: issuer_help
+"""
+
+
+def _intel_root(tmp_path, monkeypatch, status="current", art="111", listed='["222"]'):
+    (tmp_path / "config" / "facts").mkdir(parents=True)
+    (tmp_path / "config" / "facts" / "t.yaml").write_text(
+        _FACT.format(n=1, art=art, status=status))
+    (tmp_path / "config" / "intel_sources.yaml").write_text(
+        "sources:\n  - id: coll\n    kind: intercom_collection\n"
+        f"    last_ok: '2026-11-24'\n    last_article_ids: {listed}\n")
+    monkeypatch.setattr(wr, "ROOT", tmp_path)
+
+
+def _sent_text(monkeypatch, report) -> str:
+    sent = {}
+
+    class R:
+        def read(self):
+            return b""
+
+    monkeypatch.setattr(wr.urllib.request, "urlopen",
+                        lambda url, data=None, timeout=None: sent.update(data=data) or R())
+    monkeypatch.setenv("TG_BOT_TOKEN", "t")
+    monkeypatch.setenv("TG_CHAT_ID", "c")
+    wr.send(report, "BODY")
+    return _up.unquote_plus(sent["data"].decode())
+
+
+def test_orphan_fact_source_reaches_the_sent_text(tmp_path, monkeypatch):
+    _intel_root(tmp_path, monkeypatch)
+    body = _sent_text(monkeypatch, {"intel": wr._collect_intel(_d(2026, 11, 24))})
+    assert "ACTION REQUIRED" in body
+    assert "intel.fact_source.111" in body and "date unknown" in body
+
+
+def test_listed_fact_source_is_silent(tmp_path, monkeypatch):
+    _intel_root(tmp_path, monkeypatch, listed='["111"]')
+    body = _sent_text(monkeypatch, {"intel": wr._collect_intel(_d(2026, 11, 24))})
+    assert "fact_source" not in body
+
+
+def test_disputed_fact_with_absent_source_is_not_reported(tmp_path, monkeypatch):
+    _intel_root(tmp_path, monkeypatch, status="disputed")
+    body = _sent_text(monkeypatch, {"intel": wr._collect_intel(_d(2026, 11, 24))})
+    assert "fact_source" not in body
+
+
+def test_empty_listing_names_its_cause_instead_of_an_empty_result(tmp_path, monkeypatch):
+    _intel_root(tmp_path, monkeypatch, listed="[]")
+    body = _sent_text(monkeypatch, {"intel": wr._collect_intel(_d(2026, 11, 24))})
+    assert "intel.fact_source:" in body and "last_article_ids" in body
+
+
+def test_real_config_has_no_orphan_fact_source():
+    # Red again when a fact's article leaves the issuer's collection.
+    out = wr._collect_intel(_d(2026, 11, 24))
+    assert [k for k in out if k.startswith("fact_source")] == []

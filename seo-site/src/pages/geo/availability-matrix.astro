@@ -18,7 +18,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   publishedCards, jurisdictions, cellFor, geoSlugFor,
-  availabilityNote, defaultDeny, STALE_AFTER_DAYS,
+  availabilityNote, defaultDeny, cellLabel, STALE_AFTER_DAYS,
 } from '../../lib/availability.mjs';
 import { primaryPartnerFor, partnerUrl, PARTNERS } from '../../lib/affiliates.mjs';
 
@@ -43,11 +43,6 @@ const description =
   'Which crypto cards can actually be issued in your country or US state, '
   + 'card by card, with the date each list was last checked against the issuer.';
 
-function verdict(card, name, kind) {
-  const v = cellFor(card, name, kind);
-  if (v === null) return 'Not stated';
-  return v ? 'Available' : 'Not available';
-}
 
 // A fact about the ISSUER'S publishing format, so it comes from the YAML like
 // every other fact on this page. ether.fi switched from "here is what is
@@ -121,7 +116,7 @@ const absentMeans = denyByDefault
                 <th scope="row">{name}</th>
                 {cards.map((c) => (
                   <td data-card={c.key} data-jurisdiction={name}>
-                    {verdict(c, name, 'country')}
+                    {cellLabel(c, name, 'country')}
                     {cellFor(c, name, 'country') === false && geoSlugFor(name) && (
                       <>{' — '}<a href={`/geo/${geoSlugFor(name)}/`}>alternatives for {name}</a></>
                     )}
@@ -148,7 +143,7 @@ const absentMeans = denyByDefault
                   <tr>
                     <th scope="row">{name}</th>
                     {cards.map((c) => (
-                      <td data-card={c.key} data-jurisdiction={name}>{verdict(c, name, 'state')}</td>
+                      <td data-card={c.key} data-jurisdiction={name}>{cellLabel(c, name, 'state')}</td>
                     ))}
                   </tr>
                 ))}
@@ -163,6 +158,7 @@ const absentMeans = denyByDefault
       <h2>How to read this table</h2>
       <ul>
         <li><strong>Available</strong> — the issuer states your jurisdiction is supported. Approval still depends on KYC.</li>
+        <li><strong>Available (virtual card only)</strong> — the issuer opens accounts and issues a virtual card there; it does not deliver a physical card.</li>
         <li><strong>Not available</strong> — the issuer does not list your jurisdiction as supported. Applying will not work.</li>
         <li>{absentMeans}</li>
         <li><strong>Not stated</strong> — the issuer publishes no list we could check. We do not guess.</li>

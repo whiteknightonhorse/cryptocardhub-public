@@ -90,3 +90,16 @@ def test_date_is_datePublished_never_generated_at(env):
 def test_old_pages_with_new_generated_at_are_not_new(env):
     _page(env / "content", "old0", date="2026-05-01", gen="2026-10-25T00:00:00+00:00")
     assert pf.run()["candidates_new"] == 1  # only new1
+
+
+def test_description_drift_updates_description_keeps_added_no_render(env):
+    pf.run()
+    m = json.loads((env / "m.json").read_text())
+    m["new1"]["description"] = "old text, 76 countries"
+    m["new1"]["added"] = "2026-01-01"
+    (env / "m.json").write_text(json.dumps(m))
+    st = pf.run()
+    m = json.loads((env / "m.json").read_text())
+    assert m["new1"]["description"] == "d"
+    assert m["new1"]["added"] == "2026-01-01"
+    assert st["redescribed"] == 1 and st["rerendered"] == 0

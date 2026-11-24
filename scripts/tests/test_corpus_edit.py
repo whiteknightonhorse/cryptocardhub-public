@@ -120,3 +120,64 @@ def test_mutation_expect_mismatch_refuses_before_writing(corpus):
         corpus, [(PAGE_A, LINE)], write=True, expect=11, tolerance=0)
     assert st["refused"] is not None
     assert LINE not in _watch_list(corpus / f"{PAGE_A}.md")
+
+
+# --- keep_verified / `#` rows ------------------------------------------------
+
+_DATED = '---\nsnapshot_bullets: ["a"]\n---\n**Last verified:** 2026-09-14\nfoo bar\n'
+_UNDATED = '---\nsnapshot_bullets: ["a"]\n---\nfoo bar\n'
+
+
+def _page(tmp_path, text=_DATED):
+    d = tmp_path / "c"
+    d.mkdir(exist_ok=True)
+    (d / "p.md").write_text(text, encoding="utf-8")
+    return d
+
+
+def test_keep_verified_replaces_phrase_and_keeps_date(tmp_path):
+    d = _page(tmp_path)
+    st = ce.apply_table([d / "p.md"], [("foo bar", "baz")], write=True,
+                        keep_verified=True)
+    out = (d / "p.md").read_text(encoding="utf-8")
+    assert "baz" in out and "2026-09-14" in out
+    assert st["dated"] == 0
+
+
+def test_keep_verified_adds_no_bullet(tmp_path):
+    d = _page(tmp_path, _UNDATED)
+    st = ce.apply_table([d / "p.md"], [("foo bar", "baz")], write=True,
+                        keep_verified=True)
+    assert "Last verified" not in (d / "p.md").read_text(encoding="utf-8")
+    assert st["dated"] == 0
+
+
+def test_default_still_bumps_the_date(tmp_path):
+    d = _page(tmp_path)
+    ce.apply_table([d / "p.md"], [("foo bar", "baz")], write=True)
+    assert "2026-09-14" not in (d / "p.md").read_text(encoding="utf-8")
+
+
+def test_main_passes_keep_verified(tmp_path, monkeypatch):
+    d = _page(tmp_path)
+    t = tmp_path / "T.tsv"
+    t.write_text("foo bar\tbaz\n", encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", [
+        "corpus_edit", "--table", str(t), "--expect", "1", "--content", str(d),
+        "--write", "--keep-verified"])
+    assert ce.main() == 0
+    assert "2026-09-14" in (d / "p.md").read_text(encoding="utf-8")
+
+
+def test_hash_row_is_refused_unless_escaped(tmp_path):
+    t = tmp_path / "T.tsv"
+    t.write_text("## H\t## G\n", encoding="utf-8")
+    with pytest.raises(ValueError):
+        ce.load_table(t)
+    t.write_text("\\## H\t\\## G\n# comment, no tab\n", encoding="utf-8")
+    assert ce.load_table(t) == [("## H", "## G")]
+
+
+def test_market_figures_table_has_251_rows():
+    assert len(ce.load_table(
+        ROOT / "scripts" / "tables" / "market-figures-2026-11.tsv")) == 251

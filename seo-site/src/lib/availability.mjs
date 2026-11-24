@@ -73,6 +73,12 @@ export function availabilityNote(card, today = new Date()) {
   return `Last verified: ${card.verified} (${age} days ago)`;
 }
 
+/** Countries a card can be issued in: full + virtual-only (both AVAILABLE). */
+export function availableCountryCount(cardKey) {
+  const c = (AVAILABILITY.cards || {})[cardKey] || {};
+  return (c.countries || []).length + (c.countries_virtual_only || []).length;
+}
+
 /** slug -> {name, kind}: the join table between our URLs and the issuer's
  *  jurisdiction names. Not derivable — `best-crypto-card-georgia` is the US
  *  state, `best-crypto-card-uk` is "United Kingdom". */
@@ -97,6 +103,7 @@ export function jurisdictions(cards) {
   const states = new Set();
   for (const c of cards) {
     for (const x of c.countries || []) countries.add(x);
+    for (const x of c.countries_virtual_only || []) countries.add(x);
     for (const x of c.countries_explicit_no || []) countries.add(x);
     for (const x of c.countries_document_blocked || []) countries.add(x);
     for (const x of c.us_states || []) states.add(x);
@@ -146,12 +153,22 @@ export function cellFor(card, name, kind = 'country') {
   const blocked = [card.countries_explicit_no, card.countries_document_blocked]
     .some((l) => Array.isArray(l) && l.includes(name));
   if (blocked) return false;
+  if ((card.countries_virtual_only || []).includes(name)) return true;
   if (card.mode === 'blocklist') return !(card.countries || []).includes(name);
   if (allow) {
     if (card.countries === null || card.countries === undefined) return null;
     return card.countries.includes(name);
   }
   return null;
+}
+
+/** The one label a cell reads, HTML and markdown sidecar alike. */
+export function cellLabel(card, name, kind = 'country') {
+  const v = cellFor(card, name, kind);
+  if (v === null) return 'Not stated';
+  if (!v) return 'Not available';
+  return kind !== 'state' && (card.countries_virtual_only || []).includes(name)
+    ? 'Available (virtual card only)' : 'Available';
 }
 
 /** slug of the honest "not available here" page for a jurisdiction, when we

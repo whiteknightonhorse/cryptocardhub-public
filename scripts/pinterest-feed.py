@@ -97,7 +97,7 @@ def run() -> dict:
     manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
     today = date.today().isoformat()
     st = dict(date=today, candidates_new=0, candidates_backfill=0, rendered=0, rerendered=0,
-              removed=0, image_failed=0, skipped_no_hero=0, skipped_no_date=0, skipped_news=0)
+              removed=0, redescribed=0, image_failed=0, skipped_no_hero=0, skipped_no_date=0, skipped_news=0)
     pages = {md.stem: _frontmatter(md) for md in sorted(CONTENT.glob("*.md"))}
 
     for slug in [s for s in manifest if s not in pages]:
@@ -136,6 +136,9 @@ def run() -> dict:
             if size:
                 e.update(title=fm["title"], bytes=size)
                 st["rerendered"] += 1
+        if e and e.get("description", "") != fm.get("description", ""):
+            e["description"] = fm.get("description", "")
+            st["redescribed"] += 1
 
     fresh = [c for c in cands if c[1] not in manifest]
     new = [c for c in fresh if c[0] >= FEED_SINCE]

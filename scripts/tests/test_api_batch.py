@@ -118,3 +118,21 @@ def test_page_updates_routes_and_collector_applies(tmp_path, monkeypatch):
     monkeypatch.setattr(pu, "apply_updates", lambda dry_run, writer: seen.update(t=writer("q", "body")))
     monkeypatch.setenv("FAKE_TEXT", "### New\ntext")
     assert pu.collect_batches() == 1 and seen["t"] == "### New\ntext"
+
+
+def test_pytest_without_api_batch_dir_never_reaches_live_lane(tmp_path, monkeypatch):
+    """CCH-PYTEST-02: no API_BATCH_DIR under pytest -> nothing read, wrapper never executed."""
+    marker = tmp_path / "ran"
+    b = tmp_path / "wrapper"
+    b.write_text(f"#!/bin/sh\ntouch {marker}\n")
+    b.chmod(b.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setattr(ab, "BIN", str(b))
+    monkeypatch.setattr(ab, "_refused", False)
+    monkeypatch.delenv("API_BATCH_DIR", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))   # a jobs file at the default place must not matter
+    (tmp_path / "api-batch").mkdir()
+    (tmp_path / "api-batch" / "jobs").write_text("intel")
+    assert ab.enabled("intel") is False
+    assert ab.submit("intel", "x", {}, "s", "u", 10, "claude-haiku-5-5") is False
+    assert ab.collect("intel", lambda r: None) == 0
+    assert not marker.exists()

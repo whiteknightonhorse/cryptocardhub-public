@@ -222,12 +222,12 @@ def test_the_saved_fixture_diffs_on_exactly_the_nine_bands_plus_business():
     assert v["apply"] == {"lock_days": 7, "min_claim_usd": 5}
 
 
-def test_the_live_rates_config_now_matches_the_09_14_capture():
-    """T-0134 accepted exactly this diff into config/rates.yaml — the live
-    file must now read as a match against the same captured article."""
+def test_the_live_rates_config_matches_the_11_24_capture():
+    """CCH-RATES-01: the issuer relabelled the second currency "EUR / CHF"
+    (numbers unchanged); the live file must match the 2026-11-24 capture."""
     cfg = yaml.safe_load((ROOT / "config" / "rates.yaml").read_text(encoding="utf-8"))
     html = (ROOT / "scripts" / "tests" / "fixtures" /
-            "etherfi-262374-2026-09-14.html").read_text(encoding="utf-8")
+            "etherfi-262374-2026-11-24.html").read_text(encoding="utf-8")
     v = ac.compare_rates(cfg, html)
     assert v["status"] == "match", v["summary"]
 

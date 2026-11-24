@@ -461,3 +461,41 @@ def test_cch_seo_10_author_schema_two_literal_cases():
         {"@type": "Person", "name": "Jane Roe", "url": "https://example.com/jane",
          "sameAs": ["https://x.com/jane"]},
     ]
+
+
+_FAQ_SECTION = re.compile(r'<section class="article-faq">(.*?)</section>', re.S)
+_FAQ_SUMMARY = re.compile(r"<summary>\s*<span>(.*?)</span>", re.S)
+
+
+def _plain(fragment):
+    import html as _html
+    return _html.unescape(re.sub(r"<[^>]*>", "", fragment)).strip()
+
+
+def test_faq_jsonld_is_the_visible_faq():
+    """One page = one law: FAQPage JSON-LD lists exactly the visible questions."""
+    bad = []
+    for f in _pages():
+        html = f.read_text(encoding="utf-8")
+        m = _FAQ_SECTION.search(html)
+        visible = [_plain(q) for q in _FAQ_SUMMARY.findall(m.group(1))] if m else []
+        ld = [d for d in _ld_json_blocks(f) if isinstance(d, dict) and d.get("@type") == "FAQPage"]
+        names = [e["name"] for d in ld for e in d.get("mainEntity", [])]
+        texts = [e["name"] + " " + e["acceptedAnswer"]["text"] for d in ld for e in d.get("mainEntity", [])]
+        page = str(f.parent.relative_to(DIST))
+        if names != visible or len(ld) != (1 if visible else 0):
+            bad.append((page, len(visible), len(names)))
+        elif any("**" in t or "](" in t or "<<" in t or "{{" in t for t in texts):
+            bad.append((page, "markup in JSON-LD"))
+    assert not bad, f"{len(bad)} pages: {bad[:5]}"
+
+
+def test_faq_jsonld_escapes_lt():
+    """A decoded `<` in FAQ text must reach the JSON-LD as \\u003c, never close the script tag."""
+    bad = []
+    for f in _pages():
+        html = f.read_text(encoding="utf-8")
+        for body in re.findall(r'<script type="application/ld\+json"[^>]*>(.*?)</script>', html, re.S):
+            if "<" in body:
+                bad.append(str(f.parent.relative_to(DIST)))
+    assert not bad, f"{len(bad)} pages: {bad[:5]}"

@@ -39,18 +39,20 @@ def available_jurisdictions(cfg: dict[str, Any] | None = None,
                             key: str = CARD) -> set[str]:
     """Everything the issuer's allow-list names, countries and US states in one
     set. They are one namespace for this question: a reader asks "can I get it
-    where I live", not "is my jurisdiction a country"."""
+    where I live", not "is my jurisdiction a country". `countries_virtual_only`
+    counts: those residents can apply and are issued a virtual card."""
     c = card(cfg, key)
-    return set(c.get("countries") or []) | set(c.get("us_states") or [])
+    return (set(c.get("countries") or []) | set(c.get("countries_virtual_only") or [])
+            | set(c.get("us_states") or []))
 
 
 def unavailable_for(jurisdiction: str, cfg: dict[str, Any] | None = None,
                     key: str = CARD) -> bool:
     """DEFAULT-DENY. Not on the allow-list means cannot apply.
 
-    Belgium and Ireland are on the issuer's page with an explicit ❌; Vietnam
-    and Mississippi are simply absent. Both answers are True here and that is
-    the point — the explicit list is editorially useful, never load-bearing.
+    Vietnam and Mississippi (no personal account there) are simply absent and
+    answer True. Belgium and Ireland are "virtual card only": eligible, so
+    False. The explicit-refusal list is editorially useful, never load-bearing.
     A blocklist card keeps its old meaning so a second issuer can be added
     without rewriting this.
     """

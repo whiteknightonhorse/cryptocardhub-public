@@ -13,8 +13,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LatestPosts from '../components/LatestPosts.astro';
 import heroVariants from '../data/hero-variants.json';
+import { availableCountryCount } from '../lib/availability.mjs';
+import { factsForPartner, factById } from '../lib/facts.mjs';
 
 const now = new Date();
+const countryCount = availableCountryCount('etherfi');
+const fxEur = factById(factsForPartner('etherfi'), 'etherfi.rate.fx_eur_zero');
+const hasFxEur = !!fxEur;
 const monthYear = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
 const affiliateUrl = import.meta.env.PUBLIC_ETHERFI_REF_URL || 'https://www.ether.fi/@defycard';
 
@@ -126,7 +131,7 @@ const buckets = [
           </li>
           <li>
             <span class="material-symbols-outlined" aria-hidden="true">public</span>
-            <span><strong>76 countries</strong> · 0% FX on EUR (beta)</span>
+            <span><strong>{countryCount} countries</strong>{hasFxEur && ` · 0% FX on EUR${fxEur.status === 'beta' ? ' (beta)' : ''}`}</span>
           </li>
         </ul>
         <a class="featured-cta featured-cta-large" href={affiliateUrl} rel="sponsored noopener" target="_blank">

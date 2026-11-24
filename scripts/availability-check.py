@@ -199,7 +199,9 @@ def parse_flat_list(cells: list[str]) -> list[str]:
     without this, that sentence itself counted as a 'country' and the real
     list of 7/12/31 always came back exactly one instance shy of matching.
     """
-    cleaned = [c for c in (_clean_cell(x) for x in cells) if c]
+    # 2026-11: each list section ends with a lone zero-width-space cell, which
+    # `\s` in _clean_cell does not treat as blank.
+    cleaned = [c for c in (_clean_cell(x.replace("\u200b", "")) for x in cells) if c]
     while cleaned and cleaned[0].endswith((".", ":")):
         cleaned.pop(0)
     return cleaned
@@ -238,8 +240,31 @@ def parse_prose_no(cells: list[str]) -> list[str] | None:
     return None
 
 
+def parse_list_notes(cells: list[str]) -> list[str] | None:
+    """A flat list whose names may carry one trailing parenthetical NOTE
+    ("Mexico (customs rules currently stop physical cards from arriving)",
+    2026-11). The note is the issuer's reason, not part of the name. Declared
+    by form name in the YAML — `list` keeps "(BVI)" / "(UAE)" as written."""
+    names = [re.sub(r"\s*\([^)]*\)$", "", n) for n in parse_flat_list(cells)]
+    return names or None
+
+
+def parse_prose_list_and(cells: list[str], spec: dict[str, Any]) -> list[str] | None:
+    """One prose cell "<anchor> A, B and C." — split on "," and the word
+    "and". The anchor is a literal from the YAML; None if no cell starts with
+    it or the tail is empty (unparseable, never an empty list)."""
+    for raw in cells:
+        cell = _clean_cell(raw)
+        if cell.startswith(spec["anchor"]):
+            tail = cell[len(spec["anchor"]):].strip().rstrip(".")
+            return [n.strip() for n in re.split(r",|\band\b", tail) if n.strip()] or None
+    return None
+
+
 _SECTION_FORMS = {
     "list": lambda cells, spec: parse_flat_list(cells) or None,
+    "list_notes": lambda cells, spec: parse_list_notes(cells),
+    "prose_list_and": parse_prose_list_and,
     "prose_no": lambda cells, spec: parse_prose_no(cells),
     "prose_list": lambda cells, spec: parse_prose_list(cells, spec["anchor"]),
 }

@@ -61,7 +61,7 @@ def _write_facts(tmp_path: Path, facts: list[dict]) -> Path:
 
 def test_the_real_facts_file_loads_and_validates():
     facts = fl.load()
-    assert len(facts) == 40
+    assert len(facts) == 49
     ids = [f["id"] for f in facts]
     assert len(ids) == len(set(ids)), "duplicate ids"
 
@@ -201,7 +201,7 @@ def test_check_cli_fails_when_the_live_prose_reverts_to_a_banned_claim(tmp_path,
     # Must land inside SKILL.md[:7000]; the §1.2 row moved past that byte when the
     # affiliate facts grew the render (2026-09-29).
     reverted = real_text.replace(
-        "Never call the physical-card fee refundable.", "10%-25% Never call the physical-card fee refundable.", 1
+        "Never call the physical-card fee refundable", "10%-25% Never call the physical-card fee refundable", 1
     )
     assert reverted != real_text, "fixture assumes the corrected phrase is still present"
     fake_skill = tmp_path / "SKILL.md"
@@ -462,3 +462,20 @@ def test_expired_and_disputed_rows_never_reach_render():
             dict(base, id="x.dis", value=888, status="disputed")]
     out = fl.render(rows)
     assert "x.cur" in out and "777" not in out and "888" not in out
+
+
+# ---------------------------------------------------------------------------
+# CCH-FACTS-08 — fee/FX facts follow the issuer's pages of 2026-11-24.
+# Literals typed on purpose: the law is not read back through the code.
+# ---------------------------------------------------------------------------
+
+def test_fee_and_fx_facts_follow_the_2026_11_24_issuer_pages():
+    facts = {f["id"]: f for f in fl.load()}
+    for tier, fee in (("core", 50), ("luxe", 100), ("pinnacle", 100)):
+        f = facts[f"etherfi.fee.physical_card.{tier}"]
+        assert f["value"] == fee and "304368" in f["source_url"]
+    assert "etherfi.fee.physical_card.vip" not in facts
+    assert facts["etherfi.rate.fx_eur_zero"]["status"] == "current"
+    assert facts["etherfi.rate.fx_added_fee.core"]["value"] == 0.5
+    for f in facts.values():
+        assert "376356" not in f["source_url"], f["id"]

@@ -69,7 +69,8 @@ def test_availability_allowlist_only():
     assert rows and all(r["available"] == "true" and r["kind"] in ("country", "us_state") for r in rows)
     assert {"card": "ether.fi Cash", "jurisdiction": "Germany"}.items() <= next(
         r for r in rows if r["jurisdiction"] == "Germany" and r["card"] == "ether.fi Cash").items()
-    assert not [r for r in rows if r["jurisdiction"] in ("Belgium", "Ireland", "India")]
+    assert not [r for r in rows if r["jurisdiction"] == "India"]
+    assert [r for r in rows if r["jurisdiction"] == "Belgium" and r["available"] == "true"]
     assert not [r for r in rows if r["card"] == "Crypto.com Visa"]  # no `verified` => absent
 
 

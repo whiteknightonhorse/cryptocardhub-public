@@ -4,12 +4,17 @@ telegram_lib.alert() sends whenever TG_* credentials sit in the environment, so
 one unstubbed failure path sent real messages (2026-09-29). Every caller resolves
 telegram_lib through sys.modules, so one patch here covers all of them.
 """
+import os
 import sys
 from pathlib import Path
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# weekly-report.py reads this at import; the real id sits in the git-ignored secrets file and is
+# absent in a clean run. Collection must not depend on it - every GA4 call in these tests is stubbed.
+os.environ.setdefault("GA4_PROPERTY_ID", "0")
 
 
 @pytest.fixture(autouse=True)

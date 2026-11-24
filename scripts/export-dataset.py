@@ -89,7 +89,8 @@ def availability_rows(avail_path: Path = AVAIL_PATH) -> list[dict]:
         if not c or not c.get("verified"):
             continue
         src = (c.get("source") or {}).get("url", "")
-        for kind, key in (("country", "countries"), ("us_state", "us_states")):
+        for kind, key in (("country", "countries"), ("country", "countries_virtual_only"),
+                          ("us_state", "us_states")):
             for j in sorted(c.get(key) or []):
                 rows.append({"card": c["name"], "jurisdiction": j, "kind": kind,
                              "available": "true", "verified": _s(c["verified"]), "source_url": src})
@@ -143,7 +144,7 @@ Exported {date}: {n_facts} facts, {n_avail} availability rows.
 ## Files
 
 - `cards.csv` / `cards.json` — one row per fact.
-- `availability.csv` — one row per (card, jurisdiction) the issuer lists as available.
+- `availability.csv` — one row per (card, jurisdiction) the issuer lists as available (including jurisdictions where only a virtual card is issued).
 
 ## Columns
 

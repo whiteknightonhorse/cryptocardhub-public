@@ -1,0 +1,33 @@
+# scripts/tables/cryptocom-2026-09.tsv — T-0142-16 (ruling-6 Q1)
+# netherlands only (arizona moved to full-rewrite bucket: its current text
+# calls the US card a "Visa debit card", the same wrong-product premise
+# defect as georgia/nevada/washington -- corpus_edit --expect 1, not 2).
+# Every reformulated number is preceded by a comment naming the
+# config/facts/cryptocom.yaml fact id it comes from. A number with no fact
+# is deleted outright (ruling-6 Q1), never hedged with a guess.
+
+# cryptocom.rate.nl.ruby_steel_cashback
+- **Ruby Steel:** €50 CRO staked → **1 % cashback**	- **Ruby Steel:** EUR3.99/month, EUR39.90/year, or EUR450 12-month CRO staking → **2 % cashback**
+# cryptocom.rate.nl.ruby_steel_cashback
+Crypto.com's Ruby Steel tier (€50 CRO staking, no ongoing fees, instant 1 % cashback) is your safest bet.	Crypto.com's Ruby Steel tier (EUR3.99/month, EUR39.90/year, or EUR450 12-month CRO staking, 2 % cashback) is your safest bet.
+# cryptocom.rate.nl.ruby_steel_cashback
+Start with Crypto.com's Ruby Steel (€50 CRO, no ongoing fees, instant 1 % cashback). Works today; integrates with Dutch banking.	Start with Crypto.com's Ruby Steel (EUR3.99/month, EUR39.90/year, or EUR450 12-month CRO staking, 2 % cashback). Works today; integrates with Dutch banking.
+# cryptocom.rate.nl.ruby_steel_cashback
+- **Simplest entry point:** Crypto.com Ruby Steel (€50 CRO, 1 % cashback, no ongoing fees). Works today in the Netherlands.	- **Simplest entry point:** Crypto.com Ruby Steel (EUR3.99/month, EUR39.90/year, or EUR450 12-month CRO staking, 2 % cashback). Works today in the Netherlands.
+# cryptocom.rate.nl.jade_indigo_cashback
+- **Jade Green / Royal Indigo:** €350 CRO → **2 % cashback**	- **Jade Green / Royal Indigo:** EUR24.99/month, EUR249.90/year, or EUR4,500 12-month CRO staking → **3 % cashback**
+# cryptocom.rate.nl.icy_rose_cashback
+- **Icy White / Rose Gold:** €3,500 CRO → **3 % cashback**	- **Icy White / Rose Gold:** EUR45,000 12-month CRO staking → **4 % cashback**
+# cryptocom.rate.nl.obsidian_cashback
+- **Obsidian Black:** €35,000 CRO → **5 % cashback**	- **Obsidian Black:** EUR450,000 12-month CRO staking → **5 % cashback**
+Issuance fee ranges from free (Ruby Steel) to €40 (higher tiers). EUR transactions have **0 % FX fee**; non-EUR currencies incur **1 %** conversion.	
+**Alternative option:** RedotPay (up to 40% tiered commission)	**Alternative option:** RedotPay (self-custodial, available in the Netherlands)
+- **Cashback / commission:** Up to **40 %** tiered (on-chain only; excludes CEX-custodial cards)	- **Cashback / commission:** Tiered rewards (RedotPay does not publish a fixed percentage on its own site)
+RedotPay's your match. Up to 40 % commission; you hold your keys. Requires technical skill.	RedotPay's your match. Tiered rewards (no fixed percentage published); you hold your keys. Requires technical skill.
+- **Maximum yield + self-custody:** RedotPay (up to 40 % commission, you hold your keys). Best for advanced users.	- **Maximum yield + self-custody:** RedotPay (tiered rewards, no fixed percentage published; you hold your keys). Best for advanced users.
+RedotPay enables you to spend directly from your Ethereum wallet with up to 40 % tiered rewards. You hold your keys, avoiding intermediary risk.	RedotPay enables you to spend directly from your Ethereum wallet with tiered rewards (no fixed percentage published). You hold your keys, avoiding intermediary risk.
+(with **0 % EUR FX**)	
+Remember that ether.fi Cash becomes available in Spain and Portugal with 0 % EUR FX. If you may move in 2026, test it after relocating.	Remember that ether.fi Cash becomes available in Spain and Portugal. If you may move in 2026, test it after relocating.
+**FX fee:** 0% EUR on Crypto.com; varies on RedotPay	**FX fee:** not itemized by either issuer — check current rates before signup
+# cryptocom.rate.nl.ruby_steel_cashback
+Monitor for changes to the €50 minimum if CRO price spikes.	Monitor for changes to the EUR450 12-month CRO-staking threshold if CRO price spikes.

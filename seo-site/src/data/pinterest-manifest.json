@@ -1151,6 +1151,33 @@
     "title": "What Is a Smart Account Crypto Card? Account Abstraction Explained",
     "url": "https://defycard.com/learn/what-is-a-smart-account-crypto-card/"
   },
+  "what-is-cashback-in-crypto": {
+    "added": "2026-11-24",
+    "bucket": "learn",
+    "bytes": 147077,
+    "description": "Learn what cashback in crypto is, how it works on crypto cards like ether.fi Cash, and how you earn rewards on every transaction.",
+    "image": "/assets/pins/what-is-cashback-in-crypto.jpg",
+    "title": "What Is Cashback in Crypto? A Complete Guide",
+    "url": "https://defycard.com/learn/what-is-cashback-in-crypto/"
+  },
+  "what-is-chargeback-on-crypto-card": {
+    "added": "2026-11-24",
+    "bucket": "learn",
+    "bytes": 116022,
+    "description": "Understand what chargebacks are on crypto cards. Learn how Visa protection works with ether.fi Cash and why dispute resolution matters for self-custody card users.",
+    "image": "/assets/pins/what-is-chargeback-on-crypto-card.jpg",
+    "title": "What Is a Chargeback on Crypto Cards? Visa Protection Explained",
+    "url": "https://defycard.com/learn/what-is-chargeback-on-crypto-card/"
+  },
+  "what-is-direct-pay-vs-borrow": {
+    "added": "2026-11-24",
+    "bucket": "learn",
+    "bytes": 231982,
+    "description": "Learn the difference between direct pay and borrow on crypto cards. How smart accounts and on-ramps work on cards like ether.fi Cash.",
+    "image": "/assets/pins/what-is-direct-pay-vs-borrow.jpg",
+    "title": "Direct Pay vs. Borrow on Crypto Cards",
+    "url": "https://defycard.com/learn/what-is-direct-pay-vs-borrow/"
+  },
   "what-is-on-ramp-on-a-crypto-card": {
     "added": "2026-11-17",
     "bucket": "learn",

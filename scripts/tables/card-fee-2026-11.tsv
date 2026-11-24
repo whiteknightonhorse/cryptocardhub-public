@@ -1,0 +1,880 @@
+# CCH-MONEY-04a - ether.fi physical-card fee: replacement table (dry-run only; applied by CCH-MONEY-04b).
+# Source of every number: config/facts/etherfi.yaml (etherfi.fee.physical_card.*, etherfi.fee.virtual_card.core_regional), issuer articles 304368 and 833743, checked 2026-11-24.
+# Covers the first 140 files (sorted) that carry an F/A/T/V row; the rest is listed in taskloop/knowledge/CCH-MONEY-04a.md. Longest entries first.
+# Class: F fee shape, A arithmetic/conclusion removed, T tier statement rewritten to the fact file, V regional virtual-card price. Raw bytes from the files.
+# A best-crypto-card-no-kyc.md
+{"@type": "Question", "name": "Is the $40 card deposit refundable?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, fully. It's a fraud safeguard, not a fee. You get it back when you close the account or redeem it as a credit. Some competitors offer zero-deposit cards but compensate with 1\\u20132 % higher FX or ATM fees."}}, 	
+# A crypto-card-for-high-net-worth.md
+{"@type": "Question", "name": "Is the $40 physical card deposit refundable?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, it's a refundable deposit, not a fee. Close your account, return the card, and you'll get $40 back. Refund processing may take 30+ days. Note: card replacement for loss/damage is non-refundable."}}, 	
+# A best-crypto-card-canada.md
+{"@type": "Question", "name": "How does the $40 deposit work?", "acceptedAnswer": {"@type": "Answer", "text": "It's fully refundable. When you order a physical card, you pay $40, which is credited back to your ether.fi account once the card arrives. Virtual cards require zero deposit and issue instantly."}}, 	
+# A best-crypto-card-no-kyc.md
+{"q": "Is the $40 card deposit refundable?", "a": "Yes, fully. It's a fraud safeguard, not a fee. You get it back when you close the account or redeem it as a credit. Some competitors offer zero-deposit cards but compensate with 1\\u20132 % higher FX or ATM fees. ether.fi's approach is competitive."}, 	
+# A best-crypto-card-argentina.md
+{"@type": "Question", "name": "Is the $40 deposit refundable if I close my card?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The $40 is a refundable security deposit (Core tier). If you close your account, the deposit returns to your registered wallet within 5\\u20137 business days."}}, 	
+# A best-crypto-card-wyoming.md
+{"q": "What is the $40 deposit for, and when do I get it back?", "a": "The $40 Core tier deposit is refundable and held as security. Once you upgrade to Luxe or Pinnacle tier, or close your account in good standing, the deposit is returned to your account within 5\\u201310 business days."}, 	
+# A crypto-card-for-high-net-worth.md
+{"q": "Is the $40 physical card deposit refundable?", "a": "Yes, it's a refundable deposit, not a fee. Close your account, return the card, and you'll get $40 back. Refund processing may take 30+ days. Note: card replacement for loss/damage is non-refundable."}, 	
+# A crypto-card-for-dining.md
+A frequent traveler spending $3,000 yearly abroad saves $30\\u2013$90 annually vs. cards charging 1\\u20133 % FX fees. Physical card issuance is free on the first card; refundable $40 deposits on additional cards mean zero net cost to test multiple cards.	A frequent traveler spending $3,000 yearly abroad saves $30\\u2013$90 annually vs. cards charging 1\\u20133 % FX fees.
+# A best-crypto-card-canada.md
+{"q": "How does the $40 deposit work?", "a": "It's fully refundable. When you order a physical card, you pay $40, which is credited back to your ether.fi account once the card arrives. Virtual cards require zero deposit and issue instantly."}, 	
+# A crypto-card-cashback-calculator.md
+The calculator also accounts for tier requirements (does your card reach higher cashback only at $5,000+ monthly spend?), physical-card costs ($40 deposit breakeven), and geographic restrictions (is the card available in your country?).	The calculator also accounts for tier requirements (does your card reach higher cashback only at $5,000+ monthly spend?), physical-card costs, and geographic restrictions (is the card available in your country?).
+# A best-crypto-card-argentina.md
+{"q": "Is the $40 deposit refundable if I close my card?", "a": "Yes. The $40 is a refundable security deposit (Core tier). If you close your account, the deposit returns to your registered wallet within 5\\u20137 business days."}, 	
+# F crypto-card-for-europe-travel.md
+**Step 4: Choose card tier.** Core tier (up to €2,000/month spend) is free except the $40 refundable deposit for the physical card. Luxe ($10k/month) and Pinnacle ($50k/month) unlock higher limits and expedited shipping.	**Step 4: Choose card tier.** Core tier (up to €2,000/month spend) is free except the $50 fee for the physical card. Luxe ($10k/month) and Pinnacle ($50k/month) unlock higher limits and expedited shipping.
+# F best-crypto-card-pennsylvania.md
+**In short:** the best crypto card for Pennsylvania is [ether.fi Cash](<<AFFILIATE_URL>>), offering non-custodial spending with up to 3% cashback, 0% FX on EUR (beta), and a $40 refundable physical card deposit.	**In short:** the best crypto card for Pennsylvania is [ether.fi Cash](<<AFFILIATE_URL>>), offering non-custodial spending with up to 3% cashback, 0% FX on EUR (beta), and a $50 physical card fee.
+# T how-long-does-it-take-to-get-a-physical-card.md
+Readers who ask 'How long does it take to get a physical card?' should read the issuer's current wording before they order. Physical card fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	Readers who ask 'How long does it take to get a physical card?' should read the issuer's current wording before they order. Physical card fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# F crypto-card-for-utility-bills.md
+**ether.fi Cash delivers on the promise:** up to 3% cashback, 0% FX on EUR (beta), non-custodial (you own your keys), and free physical card. Core ($2k/month) covers most bills + groceries.	**ether.fi Cash delivers on the promise:** up to 3% cashback, 0% FX on EUR (beta), and non-custodial (you own your keys). Core ($2k/month) covers most bills + groceries.
+# F best-crypto-card-with-no-annual-fee.md
+You only pay for what you use: the Visa network (free), the card itself (optional, $40 refundable deposit for physical; virtual costs nothing), and transaction fees (zero on USD/EUR).	You only pay for what you use: the Visa network (free), the card itself (optional, $50 fee for physical; virtual costs nothing), and transaction fees (zero on USD/EUR).
+# T best-crypto-card-london.md
+The first physical card is free for Core-tier users (standard). No deposit. Higher tiers (Luxe, Pinnacle) may charge fees or require a deposit—check ether.fi's current pricing page.	The physical card costs $50 on Core. Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# F best-crypto-card-south-africa.md
+**Key metric**: Physical card deposit is $40 refundable (Core tier). Luxe tier ($10k/month limit) waives the deposit; Pinnacle ($50k/month) offers expedited 1–3 day shipping.	**Key metric**: Physical card fee is $50 (Core tier). Luxe tier ($10k/month limit) includes one free physical card, then $100; Pinnacle ($50k/month) offers expedited 1–3 day shipping.
+# F best-crypto-card-brazil.md
+For Brazilian users with moderate spending patterns ($1,000\\u2013$3,000/month), the Core tier ($2,000/month limit) with $40 refundable deposit provides an ideal entry point.	For Brazilian users with moderate spending patterns ($1,000\\u2013$3,000/month), the Core tier ($2,000/month limit) with $50 fee provides an ideal entry point.
+# A crypto-card-cashback-calculator.md
+**If you spend $1,000+/month, the physical card deposit pays for itself in 1\\u20132 months**: [calculate your specific earnings and open an account](<<AFFILIATE_URL>>).	[calculate your specific earnings and open an account](<<AFFILIATE_URL>>).
+# F best-crypto-card-brazil.md
+If you're undecided between custodial and non-custodial models, ether.fi's frictionless onboarding lets you test-drive before committing the $40 physical-card deposit.	If you're undecided between custodial and non-custodial models, ether.fi's frictionless onboarding lets you test-drive before committing the $50 physical-card fee.
+# F best-crypto-card-canada.md
+The $40 refundable deposit is a one-time cost; after that, Core-tier users enjoy $2,000/month limits with zero monthly fees and earn up to 3% cashback on all spending.	The $50 fee is a one-time cost; after that, Core-tier users enjoy $2,000/month limits with zero monthly fees and earn up to 3% cashback on all spending.
+# F crypto-card-for-b2b-payments.md
+**Pinnacle tier ($50,000/month):** Crypto-native companies, trading operations, teams with 5+ members paying salaries entirely in crypto. $40 physical card deposit.	**Pinnacle tier ($50,000/month):** Crypto-native companies, trading operations, teams with 5+ members paying salaries entirely in crypto. Two physical cards free, then $100.
+# F crypto-card-for-advanced-defi-users.md
+ether.fi Cash pairs this model with a **$40 refundable deposit** for the physical card (free virtual), up to **3 %** cashback, and **0 % FX fees** on USD and EUR.	ether.fi Cash pairs this model with a **$50 fee** for the physical card (free virtual), up to **3 %** cashback, and **0 % FX fees** on USD and EUR.
+# F best-crypto-card-brazil.md
+Physical cards ship to Brazil in **15+ business days** (standard) and require a **$40 refundable deposit** for the Core tier (up to $2,000/month spending limit).	Physical cards ship to Brazil in **15+ business days** (standard) and require a **$50 fee** for the Core tier (up to $2,000/month spending limit).
+# F what-is-the-best-crypto-card-for-beginners.md
+Virtual cards work online only, are free, and appear instantly. Physical cards work in stores and ATMs, cost $40 (refundable), and take 2\\u20133 weeks to arrive.	Virtual cards work online only, are free, and appear instantly. Physical cards work in stores and ATMs, cost $50, and take 2\\u20133 weeks to arrive.
+# T coinbase-card-review.md
+Coinbase's physical card fee is $10 one-time, with the virtual card free. ether.fi's physical card fee is $50 on Core, $100 on Luxe and Pinnacle, and $0 on VIP.	Coinbase's physical card fee is $10 one-time, with the virtual card free. ether.fi's physical card fee is $50 on Core, $100 on Luxe and Pinnacle, and VIP includes two physical cards.
+# A crypto-card-for-steam.md
+Most gamers earn back their issuance costs within a single year and break even on the $40 refundable deposit in the first 1\\u20132 months of regular spending. 	
+# A crypto-card-for-multi-currency.md
+**Signal:** For a Southeast Asia traveler, the 0% FX on EUR (beta) + 3% cashback means you recoup your card deposit in approximately $1,300–$1,500 of spend. 	
+# F crypto-card-for-usd-spending.md
+The Core tier caps at $2,000/month, but you can upgrade to Luxe ($10,000/month limit) or Pinnacle ($50,000/month) for a $40 refundable deposit (Luxe only).	The Core tier caps at $2,000/month, but you can upgrade to Luxe ($10,000/month limit) or Pinnacle ($50,000/month).
+# F ether-fi-cash-review-uk.md
+Virtual cards are instant. Physical cards ship in 15+ business days for Core tier ($40 refundable deposit), or 1\\u20133 days for Pinnacle tier (expedited).	Virtual cards are instant. Physical cards ship in 15+ business days for Core tier ($50 fee), or 1\\u20133 days for Pinnacle tier (expedited).
+# A crypto-card-for-usdc-spending.md
+**Alternative:** If you spend <$500/month, the $40 Core tier fee isn't worth it; pivot to RedotPay (non-custodial, lower minimum) or hold USDC directly.\n	
+# F best-crypto-card-florida.md
+Luxe ($10,000/month) and Pinnacle ($50,000/month) available for power users. First physical card is free; additional cards cost a $40 refundable deposit.	Luxe ($10,000/month) and Pinnacle ($50,000/month) available for power users. Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# F crypto-card-for-defi-users.md
+Tier unlocks: Core ($2k/mo) \\u2192 Luxe ($10k/mo) is achievable in 2\\u20133 months for active traders; unlocking free physical card (saves $40 deposit).	Tier unlocks: Core ($2k/mo) \\u2192 Luxe ($10k/mo) is achievable in 2\\u20133 months for active traders; unlocking a free first physical card.
+# A best-crypto-card-no-kyc.md
+Lowest ongoing costs for beginners:** $0 card issuance, 0 % FX on USD/EUR, $40 refundable deposit that you get back, up to 3 % cashback on all spend.	Lowest ongoing costs for beginners:** $0 card issuance, 0 % FX on USD/EUR, $50 physical card fee, up to 3 % cashback on all spend.
+# F bleap-vs-ether-fi-cash.md
+Spending tiers scale cleanly: Core ($2k/mo) starts free and refundable, Luxe ($10k/mo) adds perks, Pinnacle ($50k/mo) unlocks same-day card delivery.	Spending tiers scale cleanly: Core ($2k/mo) starts free, Luxe ($10k/mo) adds perks, Pinnacle ($50k/mo) unlocks same-day card delivery.
+# A best-crypto-card-new-york-city.md
+**Risk:** The refundable deposit is refunded to your ether.fi account, not as fiat, so you'll need to convert or sell that balance if you want USD. 	
+# F coinbase-vs-gemini-card.md
+The result: **0 %** FX on USD and EUR, **1 %** on all other currencies, and a **$40** refundable deposit for the physical card (free for virtual).	The result: **0 %** FX on USD and EUR, **1 %** on all other currencies, and a **$50** fee for the physical card (free for virtual).
+# F best-crypto-card-for-low-fees.md
+**Why:** No staking lock-in (unlike Crypto.com), simple $40 deposit, works immediately with virtual card, 0% FX on EUR (beta) (no hidden math).	**Why:** No staking lock-in (unlike Crypto.com), simple $50 fee, works immediately with virtual card, 0% FX on EUR (beta) (no hidden math).
+# F best-crypto-card-wyoming.md
+**Card tier upgrade:** Track monthly spending—if you exceed $2,000, upgrade from Core to Luxe to unlock higher rewards and free card deposit.	**Card tier upgrade:** Track monthly spending—if you exceed $2,000, upgrade from Core to Luxe to unlock higher rewards and a free first physical card.
+# F best-crypto-card-germany.md
+If you spend more than \\u20ac1,800/month, pay the $40 refundable deposit to unlock the physical card and upgrade to Luxe (\\u20ac9,000 limit).	If you spend more than \\u20ac1,800/month, pay the $50 fee on Core to unlock the physical card and upgrade to Luxe (\\u20ac9,000 limit).
+# A binance-card-europe-alternative.md
+The only cost is a $40 refundable deposit for the physical card (Core tier). Return the card and get $40 back\\u2014it's a deposit, not a fee.	The only cost is a $50 fee for the physical card (Core tier).
+# A crypto-card-for-b2b-payments.md
+\n\nOn **$50,000/month**, even a seasonal peak of 2 months justifies Pinnacle: $3,000 earned cashback over 2 months vs $200 deposit = 15× ROI.	
+# F crypto-card-for-small-business.md
+Cost: Core/Luxe/Pinnacle tiers get a free card on first issue; replacement cards cost $40 (refundable deposit if returned within 12 months).	Cost: Core physical card $50; Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# T how-long-does-kyc-approval-take.md
+Physical card fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP, as listed in help article 376356 (checked 2026-08-13).	Physical card fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards, as listed in help article 376356 (checked 2026-08-13).
+# F best-crypto-card-new-york-city.md
+Physical card: **$40 refundable deposit** (Core tier), shipped in 15+ business days (standard) or 1–3 days if you upgrade to Pinnacle tier	Physical card: **$50 fee** (Core tier), shipped in 15+ business days (standard) or 1–3 days if you upgrade to Pinnacle tier
+# T is-ether-fi-cash-available-in-my-country.md
+The physical card fee is $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP, based on the issuer's fee page checked 2026-08-13.	The physical card fee is $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards, based on the issuer's fee page checked 2026-08-13.
+# F crypto-card-for-asia-travel.md
+Only per-transaction costs: 2% ATM withdrawal, 1% FX (non-USD/EUR currencies), $40 one-time refundable physical card deposit (Core tier).	Only per-transaction costs: 2% ATM withdrawal, 1% FX (non-USD/EUR currencies), $50 physical card fee (Core tier).
+# T which-card-has-the-lowest-fees-overall.md
+For the ether.fi Cash card, physical card fees run from $0 on VIP to $100 on Luxe and Pinnacle, with cashback up to 3% at the top step.	For the ether.fi Cash card, physical card fees run from $50 on Core to $100 on Luxe and Pinnacle, with cashback up to 3% at the top step.
+# T is-self-custody-safer-than-custodial-cards.md
+The issuer lists physical card fees of $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP (issuer FAQ, checked 2026-08-13).	The issuer lists physical card fees of $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards (issuer FAQ, checked 2026-08-13).
+# A best-crypto-card-for-stablecoins.md
+**Best for simplicity:** **$0 annual fee**, **$0 issuance fee** (unless Core tier physical = $40 refundable), and instant cashback.	**Best for simplicity:** **$0 annual fee**, **$0 issuance fee** (unless Core tier physical = $50), and instant cashback.
+# T best-crypto-debit-card.md
+Physical card fees are the second filter. Core costs $50, Luxe and Pinnacle cost $100 each, and VIP costs $0 (checked 2026-08-13).	Physical card fees are the second filter. Core costs $50, Luxe and Pinnacle cost $100 each, and VIP includes two physical cards (checked 2026-08-13).
+# F crypto-card-for-daily-spending.md
+**ether.fi Cash is built for hodlers.** Up to 3% cashback, 0% FX on EUR (beta), self-custody, and a $40 refundable physical card.	**ether.fi Cash is built for hodlers.** Up to 3% cashback, 0% FX on EUR (beta), self-custody, and a $50 physical card.
+# F best-crypto-card-italy.md
+There's a **$40 refundable deposit** for the physical card on Core tier, which you recover when the card is returned or upgraded.	There's a **$50 fee** for the physical card on Core tier.
+# F ether-fi-cash-review-uk.md
+Downsides include the $40 refundable deposit for physical cards, no guarantee on staking APY, and promo periods that may expire.	Downsides include the $50 fee for physical cards, no guarantee on staking APY, and promo periods that may expire.
+# F how-to-use-eeth-as-collateral.md
+Once KYC is complete, request your physical card ($40 refundable deposit for Core tier) or activate your virtual card instantly.	Once KYC is complete, request your physical card ($50 fee for Core tier) or activate your virtual card instantly.
+# F best-crypto-card-for-usdt.md
+**Physical card fees:** Watch whether issuers introduce or raise card-deposit fees. $40 today could become $100 by end of 2026.	**Physical card fees:** Watch whether issuers introduce or raise card fees.
+# T which-card-has-the-lowest-fees-overall.md
+For the ether.fi Cash card, the published physical card fees are $50 on Core, $100 on Luxe, $100 on Pinnacle, and $0 on VIP.	For the ether.fi Cash card, the published physical card fees are $50 on Core, $100 on Luxe, $100 on Pinnacle, and VIP includes two physical cards.
+# T which-card-has-the-lowest-fees-overall.md
+The physical card fee is $0 on VIP and $100 on Luxe and Pinnacle, so the tier you can hold matters as much as the fee table.	The physical card fee is $50 on Core and $100 on Luxe and Pinnacle, so the tier you can hold matters as much as the fee table.
+# T can-i-upgrade-or-downgrade-my-tier-later.md
+The physical card fees we verified are Core $50, Luxe $100, Pinnacle $100 and VIP $0, each with its check date on this page.	The physical card fees we verified are Core $50, Luxe $100, Pinnacle $100 and VIP two physical cards included, each with its check date on this page.
+# F best-crypto-card-california.md
+**Physical cards ship free.** Core-tier cardholders get their first card free; subsequent cards are $40 refundable deposit.	**Physical cards ship free.** Core-tier cardholders pay a $50 fee for a physical card.
+# T best-crypto-debit-card.md
+Fees apply to physical cards only. Core costs $50, Luxe and Pinnacle cost $100 each, and VIP costs $0 (checked 2026-08-13).	Fees apply to physical cards only. Core costs $50, Luxe and Pinnacle cost $100 each, and VIP includes two physical cards (checked 2026-08-13).
+# A crypto-card-for-shopify-merchants.md
+If you're consistently above $3,000/month, the mental overhead of staying under Core limits is not worth the $40 savings. 	
+# F crypto-card-for-defi-users.md
+Pay only: $40 refundable deposit for Core tier (returned on closure), 2% ATM fee, and 1% FX fee on non-USD/EUR currencies.	Pay only: $50 fee for Core tier, 2% ATM fee, and 1% FX fee on non-USD/EUR currencies.
+# F best-crypto-card-for-low-fees.md
+**Lowest total cost for most users:** ether.fi Cash (0% FX on EUR (beta), no staking, $40 one-time deposit, 3% cashback).	**Lowest total cost for most users:** ether.fi Cash (0% FX on EUR (beta), no staking, $50 physical card fee, 3% cashback).
+# F best-crypto-card-new-york-city.md
+**Order physical card (optional):** If you want a plastic card, add the $40 refundable deposit and choose shipping speed.	**Order physical card (optional):** If you want a plastic card, add the $50 fee and choose shipping speed.
+# A best-crypto-card-with-no-fees.md
+, "Physical card promo windows: deposit refund or waiver is occasionally offered; timing signup around promos saves $40."	
+# F best-crypto-card-toronto.md
+The $40 refundable deposit (Core tier) is low-friction compared to Crypto.com, and 15+ day shipping is industry-standard.	The Core tier physical card fee is $50, and 15+ day shipping is industry-standard.
+# F best-crypto-card-for-beginners.md
+Fee changes: the $40 deposit and 1 % FX fee are current as of May 2026; verify on ether.fi's help center before opening.	Fee changes: the $50 fee and 1 % FX fee are current as of May 2026; verify on ether.fi's help center before opening.
+# F crypto-card-for-gas-station.md
+**Cons:** Requires card setup; $40 deposit (refundable); 15+ day shipping; spending caps by tier ($2k Core, $10k Luxe).	**Cons:** Requires card setup; $50 fee; 15+ day shipping; spending caps by tier ($2k Core, $10k Luxe).
+# F crypto-card-for-b2b-payments.md
+**Luxe tier ($10,000/month):** Small teams (2–5 people), freelance agencies, small startups. $20 physical card deposit.	**Luxe tier ($10,000/month):** Small teams (2–5 people), freelance agencies, small startups. First physical card free, then $100.
+# T how-does-0-fx-fee-work-on-ether-fi.md
+Physical card fees are a separate cost. The issuer lists $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	Physical card fees are a separate cost. The issuer lists $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# T what-s-the-fastest-way-to-get-a-crypto-card-that-actually.md
+Physical cards carry a one-time fee. ether.fi Cash lists $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	Physical cards carry a one-time fee. ether.fi Cash lists $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# F best-crypto-card-australia.md
+The only cost is the $40 AUD deposit (fully refundable when you close the card) and a 2 % ATM fee if you withdraw cash.	The only cost is the $50 fee and a 2 % ATM fee if you withdraw cash.
+# F best-crypto-card-no-kyc.md
+**Minimal KYC + non-custody + low FX** is ether.fi's trinity. 0 % FX on USD/EUR, 3 % cashback, $40 refundable deposit.	**Minimal KYC + non-custody + low FX** is ether.fi's trinity. 0 % FX on USD/EUR, 3 % cashback, $50 fee.
+# A best-crypto-card-for-travel.md
+**Best crypto card with no fees:** The $40 refundable physical-card deposit returns to your account; it's not a fee. 	
+# T is-ether-fi-cash-available-in-my-country.md
+On the issuer's fee page, checked 2026-08-13, Core costs $50, Luxe costs $100, Pinnacle costs $100, and VIP costs $0.	On the issuer's fee page, checked 2026-08-13, Core costs $50, Luxe costs $100, Pinnacle costs $100, and VIP includes two physical cards.
+# F best-crypto-card-wyoming.md
+The physical card ships in 15+ days (Core) or 1\\u20133 days (Pinnacle), with a refundable $40 deposit for Core users.	The physical card ships in 15+ days (Core) or 1\\u20133 days (Pinnacle), with a $50 fee for Core users.
+# F crypto-card-for-usdc-spending.md
+**Core tier:** $2,000/month limit, $40 one-time (refundable) card fee, **3 % cashback**, 15+ business-day shipping.	**Core tier:** $2,000/month limit, $50 card fee, **3 % cashback**, 15+ business-day shipping.
+# F crypto-card-for-usd-spending.md
+If you exceed, upgrade to Luxe (**$10,000/month** with **$40** refundable deposit) or Pinnacle (**$50,000/month**).	If you exceed, upgrade to Luxe (**$10,000/month** with first physical card free, then **$100**) or Pinnacle (**$50,000/month**).
+# F crypto-card-for-shopify-merchants.md
+Most Shopify merchants and creators start on Core tier ($2,000/month spend limit, $40 one-time refundable deposit).	Most Shopify merchants and creators start on Core tier ($2,000/month spend limit, $50 fee).
+# F best-crypto-card-new-york.md
+A physical card requires a $40 refundable deposit, refunded when the account closes or you maintain good standing.	A physical card requires a $50 fee.
+# T is-self-custody-safer-than-custodial-cards.md
+For physical cards, the Core fee is $50, Luxe and Pinnacle are $100 each, and VIP is $0, as checked on 2026-08-13.	For physical cards, the Core fee is $50, Luxe and Pinnacle are $100 each, and VIP includes two physical cards, as checked on 2026-08-13.
+# T best-crypto-debit-card.md
+**Physical card:** Core costs $50 and Luxe costs $100. Pinnacle costs $100 and VIP costs $0 (checked 2026-08-13).	**Physical card:** Core costs $50 and Luxe costs $100. Pinnacle costs $100 and VIP includes two physical cards (checked 2026-08-13).
+# T what-s-the-cheapest-crypto-card-for-travel.md
+Core costs $50, Luxe costs $100, Pinnacle costs $100 and VIP costs $0, per the help center checked on 2026-08-13.	Core costs $50, Luxe costs $100, Pinnacle costs $100 and VIP includes two physical cards, per the help center checked on 2026-08-13.
+# T can-i-upgrade-or-downgrade-my-tier-later.md
+Physical card fee table: re-check Core $50, Luxe $100, Pinnacle $100 and VIP $0 against the ether.fi help center.	Physical card fee table: re-check Core $50, Luxe $100, Pinnacle $100 and VIP two physical cards included against the ether.fi help center.
+# T is-there-a-fee-to-open-an-account.md
+The only fees we can cite apply to the physical card: $50 on Core, $100 on Luxe, $100 on Pinnacle, and $0 on VIP.	The only fees we can cite apply to the physical card: $50 on Core, $100 on Luxe, $100 on Pinnacle, and VIP includes two physical cards.
+# F crypto-card-for-passive-income-while-spending.md
+**Physical card (Core tier):** Free for the first card; **$40 refundable deposit** for additional physical cards	**Physical card (Core tier):** **$50 fee**
+# A best-crypto-card-calculator.md
+**Watch:** At this spending level, the **$40 physical-card deposit is negligible** (amortizes to $3.33/month). 	
+# F crypto-card-hawaii.md
+**Issuance fee:** Free virtual card, $40 refundable deposit for physical (Pinnacle expedited at no extra cost)	**Issuance fee:** Free virtual card, $50 fee on Core for physical (Pinnacle expedited at no extra cost)
+# F crypto-card-for-subscriptions.md
+**Physical card issuance:** $40 refundable deposit (Core tier only; issued once if you request physical card).	**Physical card issuance:** $50 fee (Core tier only; issued once if you request physical card).
+# T is-there-a-fee-to-open-an-account.md
+The issuer's physical cards FAQ fee figures: Core $50, Luxe $100, Pinnacle $100, VIP $0 (verified 2026-08-13).	The issuer's physical cards FAQ fee figures: Core $50, Luxe $100, Pinnacle $100, VIP two physical cards included (verified 2026-08-13).
+# F what-is-the-best-crypto-card-for-beginners.md
+**Physical card:** Arrives in 15–30 business days; works in stores, ATMs, and online; $40 refundable deposit.	**Physical card:** Arrives in 15–30 business days; works in stores, ATMs, and online; $50 fee on Core.
+# T best-crypto-debit-card.md
+If "no fee" is your rule, VIP is the only physical card with a $0 fee. Core is the lowest paid option at $50.	If "no fee" is your rule, VIP includes two physical cards. Core is the lowest paid option at $50.
+# F best-crypto-card-australia.md
+Virtual card is free. Physical card requires a $40 AUD refundable deposit (returned when you close the card).	Virtual card is free. Physical card requires a $50 fee.
+# F crypto-card-for-remote-contractors.md
+**Core tier:** $40 refundable deposit for the physical card. Refunded when you close the account or upgrade.	**Core tier:** $50 fee for the physical card.
+# T what-s-the-fastest-way-to-get-a-crypto-card-that-actually.md
+**Key metric:** a Core card costs $50 up front, a Luxe or Pinnacle card costs $100, and a VIP card costs $0.	**Key metric:** a Core card costs $50 up front, a Luxe or Pinnacle card costs $100, and VIP includes two physical cards.
+# F best-crypto-card-mexico.md
+**Physical card cost:** First card free for Core tier; subsequent replacements are $40 (refundable deposit).	**Physical card cost:** $50 on Core tier.
+# T best-stablecoin-card.md
+**Physical card fee:** ether.fi Cash charges $50 on the Core tier, $100 on Luxe and Pinnacle, and $0 on VIP.	**Physical card fee:** ether.fi Cash charges $50 on the Core tier, $100 on Luxe and Pinnacle, and VIP includes two physical cards.
+# F best-crypto-card-illinois.md
+If you want a physical card, request it for free (Core tier) or expedited ($40 deposit for faster shipping).	If you want a physical card, request it ($50 fee on Core tier) or choose expedited shipping.
+# F crypto-card-for-sending-money-home.md
+Over a year of monthly $1,500 sends, that 1% costs you $180\\u2014nearly the cost of a physical card deposit.	Over a year of monthly $1,500 sends, that 1% costs you $180.
+# T is-there-a-fee-to-open-an-account.md
+The fees we can cite apply to the physical card: $50 on Core, $100 on Luxe, $100 on Pinnacle, and $0 on VIP.	The fees we can cite apply to the physical card: $50 on Core, $100 on Luxe, $100 on Pinnacle, and VIP includes two physical cards.
+# F crypto-card-for-stablecoin-spending.md
+The physical card costs $40 (refundable) and ships in 15+ business days; virtual card activation is instant.	The physical card costs $50 on Core and ships in 15+ business days; virtual card activation is instant.
+# F crypto-card-for-multi-currency.md
+**$40 refundable deposit** for physical card (Core tier); Pinnacle tier gets expedited shipping (1–3 days).	**$50 fee** for physical card (Core tier); Pinnacle tier gets expedited shipping (1–3 days).
+# T will-opening-a-second-crypto-card-hurt-my-credit-score.md
+**Fees:** the ether.fi Cash physical card costs $50 on Core, $100 on Luxe, $100 on Pinnacle, and $0 on VIP.	**Fees:** the ether.fi Cash physical card costs $50 on Core, $100 on Luxe, $100 on Pinnacle, and VIP includes two physical cards.
+# T how-long-does-kyc-approval-take.md
+**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP (help article 376356, checked 2026-08-13)	**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included (help article 376356, checked 2026-08-13)
+# T can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply.md
+The VIP tier carries no issuance fee in the figures we verified, while the other tiers cost money up front.	The VIP tier includes two physical cards in the figures we verified, while Core costs money up front.
+# F best-crypto-card-europe.md
+The first physical card is free; replacement cards are \\u20ac0 or $40 refundable deposit depending on tier.	A physical card costs $50 on Core; on Luxe the first is free, then $100.
+# F crypto-card-for-international-students.md
+**Card issuance:** free virtual card instantly, first physical card free, Core tier deposit $40 refundable	**Card issuance:** free virtual card instantly, Core tier physical card $50
+# F best-crypto-card-london.md
+**Cost breakdown.** The first physical card is **free** for Core-tier users—no deposit, no activation fee.	**Cost breakdown.** The physical card costs **$50** for Core-tier users.
+# A crypto-card-for-charitable-giving.md
+Luxe and Pinnacle are also free. You get the deposit back if you close the account or deactivate the card.	Luxe: first physical card free, then $100; Pinnacle two free, then $100.
+# A best-crypto-card-for-low-fees.md
+ The $40 refundable deposit breaks even after ~1,300 USD in spending (at a typical 3% margin on savings).	
+# A crypto-card-for-b2b-payments.md
+ On $10,000/month at 3%, you earn $300/month cashback—that alone offsets the higher deposit requirement.	
+# F crypto-card-for-sending-money-home.md
+Over a year of monthly $1,500 sends, that 1% costs you $180, nearly the cost of a physical card deposit.	Over a year of monthly $1,500 sends, that 1% costs you $180.
+# F best-crypto-card-singapore.md
+Physical-card holders get a $40 refundable deposit (Core tier), or free shipping on Luxe/Pinnacle tiers.	Physical-card holders pay a $50 fee (Core tier) or get free shipping on Luxe/Pinnacle tiers.
+# F crypto-card-for-gas-station.md
+The $40 card deposit (refundable) and 2\\u20135 day KYC process add friction, but are one-time obstacles.	The $50 fee and 2\\u20135 day KYC process add friction, but are one-time obstacles.
+# F can-crypto-card-be-used-internationally.md
+**Key metric:** **$40 refundable deposit** is the only cost to enable the physical card; no annual fee.	**Key metric:** **$50 fee** is the only cost to enable the physical card; no annual fee.
+# F best-crypto-card-toronto.md
+**Request your card:** Select Core, Luxe, or Pinnacle tier → $40 refundable deposit → ships in 15+ days	**Request your card:** Select Core, Luxe, or Pinnacle tier → physical card fee (Core $50; Luxe first physical card free, then $100; Pinnacle two free, then $100) → ships in 15+ days
+# T what-s-the-cheapest-crypto-card-for-travel.md
+**Why it matters:** The physical card fee is $50 on Core, $100 on Luxe, $100 on Pinnacle and $0 on VIP.	**Why it matters:** The physical card fee is $50 on Core, $100 on Luxe, $100 on Pinnacle and VIP includes two physical cards.
+# F crypto-card-for-latin-america.md
+First physical card is free. Core tier requires a $40 refundable deposit (refunded on account closure).	Core tier requires a $50 fee for a physical card.
+# F crypto-card-for-spotify.md
+You may pay $40 for a refundable Core-tier physical card deposit (refunded when you close the account).	You may pay $50 for a Core-tier physical card.
+# F crypto-card-for-usd-spending.md
+Tier upgrade friction: Moving from Core ($2,000/month) to Luxe ($10,000/month) requires a $40 deposit.	Tier upgrade: Moving from Core ($2,000/month) to Luxe ($10,000/month) includes one free physical card, then $100.
+# F crypto-card-for-entrepreneurs.md
+**Card types:** Virtual (instant) + Physical (15+ business days, $40 refundable deposit on Core tier)	**Card types:** Virtual (instant) + Physical (15+ business days, $50 fee on Core tier)
+# F best-crypto-card-france.md
+First physical card is free (just the initial €40 Core-tier refundable deposit if you want physical).	Core-tier physical card costs $50.
+# T is-ether-fi-cash-legal-in-europe.md
+Physical cards carry a tier-based fee: $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	Physical cards carry a tier-based fee: $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# F best-crypto-card-australia.md
+The physical card arrives in Australia within 3 weeks and requires only a $40 AUD refundable deposit.	The physical card arrives in Australia within 3 weeks and requires only a $50 fee.
+# F best-crypto-card-canada.md
+Choose virtual card (instant) or physical card ($40 refundable deposit, 15+ business days to Canada)	Choose virtual card (instant) or physical card ($50 fee on Core, 15+ business days to Canada)
+# F crypto-card-no-kyc.md
+Virtual card activates instantly; physical card ships in 2\\u20133 weeks with $40 refundable deposit.	Virtual card activates instantly; physical card ships in 2\\u20133 weeks with $50 fee.
+# F crypto-card-for-sending-money-home.md
+**Core:** Up to $2,000/month spend, $40 refundable deposit for physical card, standard 3% cashback.	**Core:** Up to $2,000/month spend, $50 fee for physical card, standard 3% cashback.
+# F crypto-card-for-dining.md
+First physical card is free for Core-tier members; additional cards incur a $40 refundable deposit.	Core-tier members pay a $50 fee for a physical card.
+# T can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply.md
+The physical cards FAQ for any change to the $50, $100 or $0 issuance fees before you order a card.	The physical cards FAQ for any change to the $50 or $100 issuance fees before you order a card.
+# A binance-card-europe-alternative.md
+The only cost is a $40 refundable deposit for the physical card. Return the card and get $40 back.	The only cost is a $50 fee for the physical card.
+# F crypto-card-for-freelance-income.md
+Virtual card instant; physical ships in 15 days ($40 refundable deposit for Luxe+, free for Core).	Virtual card instant; physical ships in 15 days ($50 fee on Core; Luxe first physical card free, then $100).
+# F crypto-card-vs-traditional-debit-card.md
+ether.fi Cash charges 0% FX on EUR (beta), a $40 refundable deposit, and offers up to 3% cashback.	ether.fi Cash charges 0% FX on EUR (beta), a $50 fee, and offers up to 3% cashback.
+# F crypto-card-for-freelance-income.md
+*Mitigation:* upgrade to Luxe ($10k/month) or Pinnacle ($50k/month)—costs $40 refundable deposit.	*Mitigation:* upgrade to Luxe ($10k/month) or Pinnacle ($50k/month); Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# A crypto-card-cashback-calculator.md
+- **Breakeven:** At 3% cashback on $1,000/month = $30/month → $40 ÷ $30 = ~1.3 months to recoup.\n	
+# T how-does-0-fx-fee-work-on-ether-fi.md
+**Issuance fee:** physical card $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP (checked 2026-08-13).	**Issuance fee:** physical card $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included (checked 2026-08-13).
+# F best-crypto-credit-card.md
+**Physical card:** Free for Core tier ($2k monthly limit); $40 refundable for Luxe ($10k limit).	**Physical card:** $50 for Core tier ($2k monthly limit); first physical card free, then $100, for Luxe ($10k limit).
+# T can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply.md
+Physical cards carry an issuance fee: $50 on Core, $100 on Luxe, $100 on Pinnacle and $0 on VIP.	Physical cards carry an issuance fee: $50 on Core, $100 on Luxe, $100 on Pinnacle and VIP includes two physical cards.
+# T which-card-has-the-lowest-fees-overall.md
+The published physical card fees are $50 on Core, $100 on Luxe, $100 on Pinnacle, and $0 on VIP.	The published physical card fees are $50 on Core, $100 on Luxe, $100 on Pinnacle, and VIP includes two physical cards.
+# F crypto-card-for-amazon.md
+**Core tier:** $2,000/month limit, free (virtual card) or **$40 refundable deposit** (physical)	**Core tier:** $2,000/month limit, free (virtual card) or **$50 fee** (physical)
+# A binance-card-europe-alternative.md
+The first physical card carries a **$40 refundable deposit**, so it is a deposit you get back. 	
+# A crypto-card-cost-vs-reward-calculator.md
+ Example: $2k/month \\u00d7 12 \\u00d7 (3% \\u2212 0%) \\u2212 $40 = $680/year with ether.fi Cash.	
+# A best-crypto-card-california.md
+**Core Tier:** $2,000/month limit, up to 3% cashback, free first card + $40 deposit for extras	**Core Tier:** $2,000/month limit, up to 3% cashback, physical card $50
+# F best-crypto-card-germany.md
+**Issuance fee:** Free virtual card, $40 refundable deposit for physical (Luxe/Pinnacle tiers)	**Issuance fee:** Free virtual card, physical card: Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F best-crypto-card-dubai.md
+**Refundable deposit:** $40 for the physical card (held by issuer, refundable on card closure)	**Physical card fee:** $50 for the physical card on Core
+# T can-i-use-the-card-before-ordering-a-physical-card.md
+The listed fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP, all in USD.	The listed fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards, all in USD.
+# A crypto-card-for-b2b-payments.md
+ If you need instant access for international payroll, Pinnacle justifies its higher deposit.	
+# V crypto-card-for-argentina-inflation.md
+**Issuance fee:** Free virtual card; **$40** refundable deposit for physical card (Core tier)	**Issuance fee:** Core members in Argentina pay a $10 fee per virtual card (regional pricing); **$50** fee for physical card (Core tier)
+# T can-i-upgrade-or-downgrade-my-tier-later.md
+**Physical card fees:** Core $50, Luxe $100, Pinnacle $100, VIP $0 (last verified 2026-08-13)	**Physical card fees:** Core $50, Luxe $100, Pinnacle $100, VIP two physical cards included (last verified 2026-08-13)
+# T best-crypto-debit-card.md
+**Physical card:** Fees run from $0 on VIP to $100 on Luxe and Pinnacle (checked 2026-08-13).	**Physical card:** Fees run from $50 on Core to $100 on Luxe and Pinnacle (checked 2026-08-13).
+# F best-crypto-card-for-usdc.md
+**ether.fi Cash:** $0/month, $40 physical deposit (refundable), 2% ATM, 0% FX USD/EUR then 1%	**ether.fi Cash:** $0/month, $50 fee, 2% ATM, 0% FX USD/EUR then 1%
+# A best-crypto-card-pennsylvania.md
+Pennsylvania residents recover the **$40 physical deposit** in ~3 months of normal spending.\n	
+# F crypto-card-for-argentina-inflation.md
+Physical card costs **$40 refundable deposit** (returned after 12 months of account activity)	Physical card costs **$50 fee** on Core
+# A how-to-sign-up-for-gnosis-pay-alternative.md
+Your $40 refundable deposit for a physical card is locked until you deactivate your account. 	
+# F crypto-card-for-crypto-traders.md
+The $40 refundable deposit applies to physical Core-tier cards only; virtual cards are free.	The $50 fee applies to physical Core-tier cards only; virtual cards are free.
+# F crypto-card-fca-uk.md
+A \\u00a340 refundable deposit is required; it's credited when you return or close the card.	A \\u00a340 fee is required.
+# F crypto-card-for-usd-spending.md
+**Card Deposit (Luxe+):** Upgrading to Luxe or Pinnacle requires a $40 refundable deposit.	**Physical card fee (Luxe+):** Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# F crypto-card-for-usdc-spending.md
+**No monthly fees.** $40 one-time Core tier card cost is refundable; no recurring charges.	**No monthly fees.** The Core tier physical card costs $50; no recurring charges.
+# F coinbase-vs-gemini-card.md
+**Physical card (Coinbase):** free; Gemini: [verify]; ether.fi: **$40** refundable deposit	**Physical card (Coinbase):** free; Gemini: [verify]; ether.fi: **$50** fee
+# F best-crypto-card-calculator.md
+**Physical card deposit:** ether.fi Core tier = **$40 refundable**; Pinnacle = no deposit.	**Physical card fee:** ether.fi Core tier = **$50**; Pinnacle two free, then $100.
+# F can-crypto-card-be-used-internationally.md
+**Physical card:** $40 refundable deposit; ships 15+ days (Core), 1\\u20133 days (Pinnacle)	**Physical card:** $50 fee; ships 15+ days (Core), 1\\u20133 days (Pinnacle)
+# F crypto-card-for-thailand-travel.md
+**ether.fi Cash:** 3% cashback, 0% FX on EUR (beta), self-custody, $40 refundable deposit.	**ether.fi Cash:** 3% cashback, 0% FX on EUR (beta), self-custody, $50 fee.
+# F best-crypto-card-spain.md
+Cost: $40 refundable deposit (deducted from your first load, or refundable if you cancel).	Cost: $50 fee.
+# A crypto-card-cost-vs-reward-calculator.md
+True ROI subtracts fees: (3% \\u2212 1% FX) \\u00d7 spend \\u2212 $40 issuance = net profit. 	
+# F crypto-card-for-freelance-income.md
+Virtual card instant; physical ships in 15 days ($40 refundable deposit for higher tiers).	Virtual card instant; physical ships in 15 days (Luxe first physical card free, then $100; Pinnacle two free, then $100).
+# F best-crypto-card-new-york-city.md
+**Issuance fee:** Free virtual card; $40 refundable deposit for physical card (Core tier)	**Issuance fee:** Free virtual card; $50 fee for physical card (Core tier)
+# F best-crypto-card-wyoming.md
+**Physical card deposit:** $40 refundable (Core tier); waived for Luxe and Pinnacle tiers	**Physical card fee:** $50 (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F best-crypto-card-for-online-shopping.md
+Core requires a **$40 refundable deposit** for physical card; Luxe and Pinnacle waive it.	Core requires a **$50 fee** for physical card; Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# T can-i-use-the-card-before-ordering-a-physical-card.md
+The physical card fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	The physical card fees are $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# F crypto-card-for-retirees.md
+**Issuance fee:** None for virtual card; $40 refundable deposit for physical (Core tier)	**Issuance fee:** None for virtual card; $50 fee for physical (Core tier)
+# F best-crypto-card-brazil.md
+**Order physical card** (optional): $40 refundable deposit, 15+ business days to Brazil.	**Order physical card** (optional): $50 fee, 15+ business days to Brazil.
+# F crypto-card-for-dining.md
+**Issuance fee:** $40 refundable deposit on additional physical cards (first card free)	**Issuance fee:** $50 for a Core physical card
+# A crypto-card-cashback-calculator.md
+**Physical card fee:** $0\\u2013$50 (refundable or one-time), calculated in net earnings	**Physical card fee:** $50 for a physical card on Core, calculated in net earnings
+# F best-crypto-card-for-usdt.md
+**Physical card:** Free for Luxe and Pinnacle tiers; $40 refundable deposit (Core tier)	**Physical card:** $50 fee (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# T coinbase-card-review.md
+Checked fee facts (2026-08-13): ether.fi Core is $50, Luxe $100, Pinnacle $100, VIP $0.	Checked fee facts (2026-08-13): ether.fi Core is $50, Luxe $100, Pinnacle $100, VIP two physical cards included.
+# T how-long-does-it-take-to-get-a-physical-card.md
+The physical card fee is $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	The physical card fee is $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# V how-to-get-a-crypto-card-in-philippines.md
+**Core (free):** $2,000/month | Free virtual card, $40 refundable deposit for physical	**Core (free):** $2,000/month | Core members in the Philippines pay a $10 fee per virtual card (regional pricing), $50 fee on Core for physical
+# F crypto-card-for-high-net-worth.md
+**Core tier** ($2,000/month limit): Entry point. Physical card costs $40 (refundable).	**Core tier** ($2,000/month limit): Entry point. Physical card costs $50.
+# F crypto-card-cost-vs-reward-calculator.md
+**Issuance fees.** ether.fi: **$40 refundable** (returned when you close the account).	**Issuance fees.** ether.fi: **$50**.
+# T what-s-the-cheapest-crypto-card-for-travel.md
+**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP (checked 2026-08-13)	**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included (checked 2026-08-13)
+# F crypto-card-for-crypto-traders.md
+No card issuance fee for virtual cards; $40 refundable deposit for physical Core tier.	No card issuance fee for virtual cards; $50 fee for physical Core tier.
+# F crypto-com-card-frozen.md
+**Activate the card**: Choose Core ($40 deposit) or higher tier, order physical card.	**Activate the card**: Choose Core ($50 fee) or higher tier, order physical card.
+# T which-card-is-best-for-international-travel.md
+The issuance fee depends on the tier: Core $50, Luxe $100, Pinnacle $100, and VIP $0.	The issuance fee depends on the tier: Core $50, Luxe $100, Pinnacle $100, and VIP two physical cards included.
+# F crypto-card-for-remote-workers.md
+**Issuance:** Virtual card instant; physical card $40 refundable deposit (Core tier)	**Issuance:** Virtual card instant; physical card $50 fee (Core tier)
+# F best-crypto-debit-card.md
+Ether.fi Cash: 15+ business days (Core tier free, Luxe tier $40 refundable deposit).	Ether.fi Cash: 15+ business days (Core tier $50; Luxe tier first physical card free, then $100).
+# F crypto-card-for-remote-contractors.md
+Tier limits range from $2k/month (Core, $40 deposit) to $50k/month (Pinnacle, free).	Tier limits range from $2k/month (Core, $50 physical card fee) to $50k/month (Pinnacle, two physical cards free).
+# F best-crypto-card-for-ethereum.md
+Virtual has no fee; physical is free in Core tier, $40 refundable deposit elsewhere.	Virtual has no fee; physical costs $50 on Core.
+# F best-crypto-card-for-digital-nomads.md
+**$40 refundable physical-card deposit** if you want plastic; virtual card is free.	**$50 physical-card fee** if you want plastic; virtual card is free.
+# F best-crypto-card-wyoming.md
+**Pinnacle tier:** up to $50,000/month | no deposit, 1–3 day physical card shipping	**Pinnacle tier:** up to $50,000/month | two physical cards free (then $100), 1–3 day physical card shipping
+# F crypto-card-for-gas-station.md
+**Issuance fee:** $40 refundable deposit (Core tier); free for Luxe/Pinnacle tiers	**Issuance fee:** $50 (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# T what-s-the-fastest-way-to-get-a-crypto-card-that-actually.md
+ether.fi Cash lists $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	ether.fi Cash lists $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# T crypto-card-hawaii.md
+**Core tier:** $2,000 monthly limit, free physical card, standard 15-day shipping	**Core tier:** $2,000 monthly limit, physical card $50, standard 15-day shipping
+# F best-crypto-card-for-usdt.md
+**Core tier:** $2,000/month spending limit. Physical card costs $40 (refundable).	**Core tier:** $2,000/month spending limit. Physical card costs $50 on Core.
+# F best-crypto-card-for-low-fees.md
+**Physical card cost:** ether.fi $40 refundable, RedotPay varies, Crypto.com free	**Physical card cost:** ether.fi $50, RedotPay varies, Crypto.com free
+# F best-crypto-card-for-online-shopping.md
+**Watch:** Core tier requires a **$40 refundable deposit** for the physical card.	**Watch:** Core tier requires a **$50 fee** for the physical card.
+# F best-crypto-card-for-low-fees.md
+**ether.fi Cash:** 0% FX on EUR (beta), up to 3% cashback, $40 refundable deposit	**ether.fi Cash:** 0% FX on EUR (beta), up to 3% cashback, $50 fee
+# F best-crypto-card-for-digital-nomads.md
+If it works and the UX feels natural, request the physical card ($40 refundable).	If it works and the UX feels natural, request the physical card ($50).
+# F best-crypto-card-toronto.md
+The Core tier starts at $2,000 monthly spend limit with a $40 refundable deposit.	The Core tier starts at $2,000 monthly spend limit with a $50 fee.
+# F bleap-vs-ether-fi-cash.md
+**Core:** $2,000/month (free to join, $40 refundable deposit for physical card).	**Core:** $2,000/month (free to join, $50 fee for physical card).
+# F crypto-card-for-crypto-traders.md
+**Issuance fee:** $40 refundable deposit (Core tier physical card), free virtual	**Issuance fee:** $50 fee (Core tier physical card), free virtual
+# F best-crypto-card-hong-kong.md
+**Issuance fee:** Free virtual card, $40 refundable physical deposit (Core tier)	**Issuance fee:** Free virtual card, $50 physical card fee (Core tier)
+# F crypto-card-for-euro-spending.md
+**Physical card:** Free issuance for Core+ tiers; $40 refundable deposit on Core	**Physical card:** $50 fee on Core; Luxe first physical card free, then $100; Pinnacle two free, then $100
+# T is-there-a-fee-to-open-an-account.md
+The issuer lists $50 for Core, $100 for Luxe, $100 for Pinnacle, and $0 for VIP.	The issuer lists $50 for Core, $100 for Luxe, $100 for Pinnacle, and VIP includes two physical cards.
+# F best-crypto-card-thailand.md
+**Physical card:** Free for Core tier; $40 refundable deposit for Luxe/Pinnacle	**Physical card:** $50 for Core tier; Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F crypto-card-for-defi-users.md
+**Physical card:** Free for Luxe/Pinnacle; $40 refundable deposit for Core tier	**Physical card:** Luxe first physical card free, then $100; Pinnacle two free, then $100; $50 fee for Core tier
+# F best-crypto-card-usa.md
+**ether.fi Cash**: 0 % FX (USD/EUR), 3 % cashback, non-custodial, $40 issuance.	**ether.fi Cash**: 0 % FX (USD/EUR), 3 % cashback, non-custodial, $50 physical card fee.
+# T how-does-0-fx-fee-work-on-ether-fi.md
+The issuer lists $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	The issuer lists $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# F does-ether-fi-cash-work-in-usa.md
+**Physical card:** $40 refundable deposit (Core tier) or free (Pinnacle tier).	**Physical card:** $50 fee (Core tier); Pinnacle two free, then $100.
+# A crypto-card-cashback-calculator.md
+ether.fi charges a $40 *refundable* deposit for the physical card (not a fee).	ether.fi charges a $50 fee for the physical card.
+# F best-crypto-card-for-stablecoins.md
+**Annual fee:** None (physical card: **$40** refundable deposit at Core tier)	**Annual fee:** None (physical card: **$50** fee at Core tier)
+# T crypto-card-for-flights.md
+**Core Tier** (free to join): Monthly limit $2,000, first physical card free.	**Core Tier** (free to join): Monthly limit $2,000, physical card $50.
+# F best-crypto-card-for-cashback.md
+**Issuance fee:** Free virtual card, $40 refundable deposit for Core physical	**Issuance fee:** Free virtual card, $50 fee for Core physical
+# F best-crypto-card-new-york-city.md
+**Issuance fee:** Free virtual card; $40 refundable deposit for physical card	**Issuance fee:** Free virtual card; $50 fee for physical card
+# F best-crypto-card-europe.md
+**Issuance:** Free first physical card (Core tier), $40 refundable thereafter	**Issuance:** Core tier physical card $50
+# F crypto-card-mica-eu.md
+**Order physical card** (optional): Ships in 15+ days; $40 refundable deposit	**Order physical card** (optional): Ships in 15+ days; $50 fee
+# F best-crypto-card-for-low-fees.md
+**Physical card:** $40 refundable deposit (Core tier), free for Luxe/Pinnacle	**Physical card:** $50 per physical card (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F crypto-card-for-southeast-asia.md
+**Physical card:** $40 refundable deposit (Core tier); free for Luxe/Pinnacle	**Physical card:** $50 per physical card (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F best-crypto-card-for-usdt.md
+**Physical card:** Free to $40 refundable deposit, depending on card and tier	**Physical card:** $50 on Core, $100 on Luxe and Pinnacle after the free cards, depending on tier
+# A crypto-card-cost-vs-reward-calculator.md
+- True profit: $1,440 − $40 − $144 = **$1,256 over 2 years** ≈ **$628/year**\n	
+# F best-crypto-card-with-no-annual-fee.md
+Card-issuance fees: The $40 refundable deposit for physical cards may change.	Card-issuance fees: The $50 fee for physical cards may change.
+# F best-crypto-card-for-usdc.md
+Ether.fi Cash: $0/month, $0 FX on USD/EUR, $40 physical deposit (refundable).	Ether.fi Cash: $0/month, $0 FX on USD/EUR, $50 fee.
+# T how-to-get-a-crypto-card-in-uk.md
+**Core tier:** $2,000/month, free physical card, 15+ business days shipping.	**Core tier:** $2,000/month, physical card $50, 15+ business days shipping.
+# F crypto-card-capital-gains.md
+**Issuance Fee:** Free virtual, $40 refundable deposit (physical, Core tier)	**Issuance Fee:** Free virtual, $50 fee (physical, Core tier)
+# F crypto-card-for-latin-america.md
+**Issuance fee:** First physical card free; Core tier $40 refundable deposit	**Issuance fee:** Core tier $50 fee
+# V best-crypto-card-south-africa.md
+**Issuance**: Free virtual card, $40 refundable deposit (Core tier physical)	**Issuance**: Core members in South Africa pay a $10 fee per virtual card (regional pricing), $50 fee (Core tier physical)
+# T will-opening-a-second-crypto-card-hurt-my-credit-score.md
+**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP (ether.fi)	**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included (ether.fi)
+# F crypto-card-for-asia-travel.md
+**Card replacement**: $40 refundable deposit for physical card (Core tier).	**Card replacement**: $50 fee for physical card (Core tier).
+# F crypto-card-for-multi-currency.md
+**Issuance fee:** $40 refundable deposit (physical card), free virtual card	**Issuance fee:** $50 fee (physical card), free virtual card
+# F crypto-card-cost-vs-reward-calculator.md
+**Physical card cost:** $40 refundable deposit (ether.fi) or free (virtual)	**Physical card cost:** $50 fee (ether.fi) or free (virtual)
+# T best-stablecoin-card.md
+It also charges no issuance fee for the virtual card or Core physical tier.	It also charges no issuance fee for the virtual card; the Core physical card costs $50.
+# F best-crypto-card-europe.md
+Request the physical card (€0 or $40 refundable deposit depending on tier).	Request the physical card ($50 fee on Core; Luxe first physical card free, then $100).
+# A best-crypto-card-dubai.md
+ Over 12 months, that's $720, more than enough to justify the $40 deposit.	
+# F best-crypto-card-spain.md
+**Card issuance:** Virtual card free, physical card $40 refundable deposit	**Card issuance:** Virtual card free, physical card $50 fee
+# F crypto-card-for-thailand-travel.md
+**Issuance fee:** $40 refundable deposit (Core tier); free on higher tiers	**Issuance fee:** $50 (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F best-crypto-card-no-foreign-transaction-fee.md
+**Issuance fee:** Free for eligible tiers; $40 refundable deposit for Core	**Issuance fee:** $50 for Core; Luxe first physical card free, then $100; Pinnacle two free, then $100
+# T can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply.md
+**Issuance fee:** physical card $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP	**Issuance fee:** physical card $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included
+# F best-crypto-card-2026.md
+**Physical card:** Free first issuance, $40 refundable deposit (Core tier)	**Physical card:** $50 fee (Core tier)
+# T is-there-a-fee-to-open-an-account.md
+The physical card fees are $50 Core, $100 Luxe, $100 Pinnacle, and $0 VIP.	The physical card fees are $50 Core, $100 Luxe, $100 Pinnacle, and VIP two physical cards included.
+# F crypto-card-for-onlyfans-creators.md
+Virtual card is free. Physical card has a one-time $40 refundable deposit.	Virtual card is free. Physical card has a one-time $50 fee.
+# F how-to-sign-up-for-gnosis-pay-alternative.md
+**Card issuance:** Free virtual card, $40 refundable deposit for physical	**Card issuance:** Free virtual card, $50 fee for physical
+# F best-crypto-card-for-ethereum.md
+**Card issuance:** Free virtual card; $40 refundable deposit for physical	**Card issuance:** Free virtual card; $50 fee for physical
+# F best-crypto-card-for-daily-spending.md
+**Issuance fee:** $40 refundable deposit for physical card (virtual free)	**Issuance fee:** $50 fee for physical card (virtual free)
+# F crypto-card-no-kyc.md
+**Order physical** (optional): $40 refundable deposit, ships in 2–3 weeks	**Order physical** (optional): $50 fee, ships in 2–3 weeks
+# F best-crypto-card-for-cashback.md
+Physical card: Free for virtual, **$40 refundable** deposit for Core tier	Physical card: Free for virtual, **$50** fee for Core tier
+# T can-i-use-ether-fi-cash-outside-the-us.md
+The fee is $50 for Core, $100 for Luxe, $100 for Pinnacle and $0 for VIP.	The fee is $50 for Core, $100 for Luxe, $100 for Pinnacle and VIP includes two physical cards.
+# F best-crypto-card-with-no-fees.md
+The only cost is a $40 refundable deposit for a physical card (optional).	The only cost is a $50 fee for a physical card (optional).
+# A crypto-card-for-multi-currency.md
+ The card deposit ($40) recovers after approximately $1,300 in spending.	
+# F crypto-card-for-amazon.md
+**$40 refundable deposit** for first physical card (Core tier and above)	**$50 fee** for the physical card (Core tier)
+# V best-crypto-card-argentina.md
+**Card issuance:** $40 refundable deposit (Core tier), free virtual card	**Card issuance:** $50 fee (Core tier), Core members in Argentina pay a $10 fee per virtual card (regional pricing)
+# F crypto-card-for-ecommerce-sellers.md
+**Card issuance:** Virtual instant ($0), Physical $40 refundable deposit	**Card issuance:** Virtual instant ($0), Physical $50 fee
+# V how-to-get-a-crypto-card-in-philippines.md
+**Issuance fee**: Free virtual card; $40 refundable deposit for physical	**Issuance fee**: Core members in the Philippines pay a $10 fee per virtual card (regional pricing); $50 fee on Core for physical
+# F crypto-card-fca-uk.md
+**Issuance fee:** FREE (virtual), \\u00a340 refundable deposit (physical)	**Issuance fee:** FREE (virtual), $50 fee (physical, Core)
+# F best-crypto-card-colorado.md
+**Issuance fee:** Free virtual card, $40 refundable deposit for physical	**Issuance fee:** Free virtual card, $50 fee on Core for physical
+# F best-crypto-card-new-york-city.md
+**Issuance fee:** Free virtual card; $40 refundable deposit for physical	**Issuance fee:** Free virtual card; $50 fee for physical
+# F best-crypto-card-australia.md
+**Issuance:** Free virtual card; $40 AUD refundable deposit for physical	**Issuance:** Free virtual card; $50 fee for physical
+# F crypto-card-to-keep-eth-staked.md
+**Physical card:** Free virtual card; $40 refundable deposit (Core tier)	**Physical card:** Free virtual card; $50 fee (Core tier)
+# F best-crypto-card-with-no-fees.md
+ether.fi fee announcements: FX rates and deposit waivers change monthly.	ether.fi fee announcements: FX rates and fees change monthly.
+# F crypto-card-for-uber.md
+**Issuance fee:** Free first card; refundable deposit on upgraded tiers	**Issuance fee:** Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F best-crypto-card-illinois.md
+**Issuance fee:** Free virtual card, $40 refundable deposit (Core tier)	**Issuance fee:** Free virtual card, $50 fee (Core tier)
+# F crypto-card-for-flights.md
+**Issuance:** First card free, $40 refundable deposit for physical tier	**Issuance:** $50 fee for the physical card (Core)
+# F best-crypto-card-brazil.md
+**Issuance:** Free virtual; $40 refundable deposit (physical Core tier)	**Issuance:** Free virtual; $50 fee (physical Core tier)
+# F crypto-card-for-spotify.md
+**Physical card:** Free (higher tiers) or $40 refundable deposit (Core)	**Physical card:** $50 fee (Core); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# A best-crypto-card-france.md
+The \\u20ac40 Core-tier deposit is refundable, so true friction is low. 	
+# F can-i-withdraw-eth-from-ether-fi-cash.md
+**Core tier:** $2,000/month spend limit (refundable $40 card deposit).	**Core tier:** $2,000/month spend limit ($50 fee).
+# F crypto-card-for-in-game-purchases.md
+**Issuance fee:** $40 refundable deposit (Core tier) for physical card	**Issuance fee:** $50 fee (Core tier) for physical card
+# F crypto-card-for-steam.md
+Core tier is free with a $40 refundable deposit for the physical card.	Core tier is free; the physical card costs $50.
+# T how-long-does-it-take-to-get-a-working-crypto-card.md
+The physical card fee is $50 Core, $100 Luxe, $100 Pinnacle, or $0 VIP	The physical card fee is $50 Core, $100 Luxe, $100 Pinnacle, or VIP two physical cards included
+# F best-crypto-card-uk.md
+ether.fi uses a spend-based tier system starting at Core (£0 deposit).	ether.fi uses a spend-based tier system starting at Core.
+# F best-crypto-card-for-travel.md
+**Card issuance:** Free (virtual), $40 refundable deposit (physical).	**Card issuance:** Free (virtual), $50 fee (physical).
+# F crypto-card-for-asia-travel.md
+**Card issuance:** Virtual instant, physical $40 deposit (refundable)	**Card issuance:** Virtual instant, physical $50 fee
+# F crypto-card-for-atm-withdrawals.md
+**Core tier:** $2k/mo limit, $40 refundable card deposit, 2% ATM fee.	**Core tier:** $2k/mo limit, $50 fee, 2% ATM fee.
+# F how-to-use-eeth-as-collateral.md
+**First physical card:** Free for eligible tiers (deposit refundable)	**Physical card:** Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F best-crypto-card-canada.md
+**Physical card:** $40 refundable deposit (covers shipping to Canada)	**Physical card:** $50 fee (covers shipping to Canada)
+# A crypto-card-for-utility-bills.md
+**Physical card:** free shipping + $40 refundable deposit (Core tier)	**Physical card:** free shipping + $50 fee (Core tier)
+# T how-to-replace-binance-card-europe.md
+Physical card fee: $50 (Core), $100 (Luxe), $100 (Pinnacle), $0 (VIP)	Physical card fee: $50 (Core), $100 (Luxe), $100 (Pinnacle), VIP two physical cards included
+# F best-crypto-card-for-spending.md
+**Card issuance:** Free virtual, $40 refundable deposit for physical	**Card issuance:** Free virtual, $50 fee for physical
+# F best-crypto-card-hong-kong.md
+**Issuance fee:** Free virtual card, $40 refundable physical deposit	**Issuance fee:** Free virtual card, $50 physical card fee
+# F crypto-card-for-amazon.md
+**Issuance**: Free virtual card, $40 refundable deposit for physical	**Issuance**: Free virtual card, $50 fee for physical
+# F best-crypto-card-portugal.md
+**Issuance:** Free virtual card; $40 refundable deposit for physical	**Issuance:** Free virtual card; $50 fee for physical
+# F best-crypto-card-france.md
+**Physical card:** Free first card; Core tier $40 refundable deposit	**Physical card:** Core tier $50 fee
+# V crypto-card-for-argentina-inflation.md
+Start with a virtual card (15 min setup, free) to test the workflow.	Start with a virtual card (15 min setup; Core members in Argentina pay a $10 fee per virtual card, regional pricing) to test the workflow.
+# F crypto-card-fee-comparison-tool.md
+**Annual/issuance fees:** $0–40 refundable (ether.fi physical card)	**Annual/issuance fees:** physical card $50 on Core (ether.fi)
+# F crypto-card-to-keep-eth-staked.md
+**Card issuance:** Free virtual, $40 refundable deposit (physical).	**Card issuance:** Free virtual, $50 fee (physical).
+# F crypto-card-for-charitable-giving.md
+**Core:** $2,000/month, free physical card, $40 refundable deposit.	**Core:** $2,000/month, physical card $50.
+# F nexo-vs-wirex-card.md
+**Deposit:** Free virtual card, $40 refundable deposit for physical	**Card fee:** Free virtual card, $50 fee for physical
+# F best-crypto-card-for-beginners.md
+**Issuance fee:** Free virtual, $40 refundable deposit for physical	**Issuance fee:** Free virtual, $50 fee for physical
+# F crypto-card-for-high-net-worth.md
+**Issuance:** $40 refundable deposit (Core), free (Luxe & Pinnacle)	**Issuance:** $50 fee (Core); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F best-crypto-credit-card.md
+**Physical card cost:** Free (some tiers) to $40 refundable deposit	**Physical card cost:** $50 on Core; Luxe first physical card free, then $100
+# F best-crypto-card-uk.md
+**Card issuance:** Free virtual card, \\u00a30 deposit for physical	**Card issuance:** Free virtual card, physical card $50 on Core
+# F best-crypto-card-for-travel.md
+**Card issuance:** Free virtual, $40 refundable deposit (physical)	**Card issuance:** Free virtual, $50 fee (physical)
+# F crypto-card-declined.md
+**Issuance fee:** Free first physical card, $40 refundable deposit	**Issuance fee:** Core $50
+# F crypto-card-tax-uk.md
+**Issuance:** $40 refundable deposit for physical card (Core tier)	**Issuance:** $50 fee for physical card (Core tier)
+# T do-i-need-to-know-how-to-use-crypto-wallets-to-get-ether-fi.md
+**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP.	**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included.
+# F crypto-card-for-defi-users.md
+**Core**: $40 refundable deposit (returned on closure or upgrade)	**Core**: $50 fee
+# F best-crypto-card-mexico.md
+**Deposit:** $40 refundable (Core tier); waived for Luxe/Pinnacle	**Physical card fee:** $50 (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# F crypto-card-for-charitable-giving.md
+**Issuance fee:** $0\\u2013$40 refundable deposit (tier-dependent)	**Issuance fee:** $50 Core, $100 Luxe and Pinnacle after the free cards (tier-dependent)
+# F crypto-card-for-freelancers.md
+**Issuance fee:** Free (refundable $40 deposit for physical card)	**Issuance fee:** $50 fee for physical card
+# F best-crypto-card-switzerland.md
+**Issuance fee:** Free virtual, $40 refundable deposit (physical)	**Issuance fee:** Free virtual, $50 fee (physical)
+# F best-crypto-card-uae.md
+**Minimum deposit:** $40 refundable for Core tier, no monthly fee	**Physical card fee:** $50 for Core tier, no monthly fee
+# T can-i-use-ether-fi-cash-outside-the-us.md
+**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP	**Physical card fee:** $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included
+# F crypto-card-for-content-creators.md
+Core tier has a $40 refundable deposit and 2% ATM withdrawal fee.	Core tier has a $50 fee and 2% ATM withdrawal fee.
+# F crypto-card-for-steam.md
+**Core:** $2,000/month spend limit, $40 refundable deposit, free	**Core:** $2,000/month spend limit, $50 physical card fee
+# F crypto-card-for-remote-contractors.md
+**Issuance fee:** $40 refundable (Core tier); free Luxe/Pinnacle	**Issuance fee:** $50 (Core tier); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# A best-crypto-card-for-high-spenders.md
+**Physical card:** Free for Luxe+; Core = $40 refundable deposit	**Physical card:** Core $50; Luxe first physical card free, then $100; Pinnacle two free, then $100
+# T can-i-upgrade-or-downgrade-my-tier-later.md
+Physical card fees run from $0 (VIP) to $100 (Luxe and Pinnacle)	Physical card fees run from $50 (Core) to $100 (Luxe and Pinnacle)
+# F crypto-card-for-expats.md
+**Issuance:** Free virtual, $40 refundable deposit for physical	**Issuance:** Free virtual, $50 fee for physical
+# A crypto-card-cashback-calculator.md
+Expedited shipping may incur a fee beyond the deposit. Standard	Standard
+# T do-i-need-to-know-how-to-use-crypto-wallets-to-get-ether-fi.md
+Physical card fees range from $0 (VIP) to $100 (Luxe, Pinnacle)	Physical card fees range from $50 (Core) to $100 (Luxe, Pinnacle)
+# F can-crypto-card-be-used-internationally.md
+**Cost:** $40 refundable deposit to activate the physical card	**Cost:** $50 fee on Core to activate the physical card
+# F crypto-card-for-stablecoin-payroll.md
+**Issuance fee:** free virtual, $40 refundable physical (Core)	**Issuance fee:** free virtual, $50 physical (Core)
+# F does-ether-fi-cash-work-without-eth.md
+**Physical card:** $40 refundable deposit (free for Core tier)	**Physical card:** $50 fee (Core tier)
+# F crypto-card-for-usd-spending.md
+Core-tier baseline (**$2,000/month**) with no deposit required	Core-tier baseline (**$2,000/month**), physical card $50
+# F best-crypto-debit-card.md
+**Ether.fi Cash:** $0 for Core tier, $40 refundable for Luxe.	**Ether.fi Cash:** $50 for Core tier; for Luxe the first physical card is free, then $100.
+# F crypto-card-for-freelance-income.md
+**Issuance fee:** Free (Core); $40 refundable deposit (Luxe+)	**Issuance fee:** $50 (Core); Luxe first physical card free, then $100; Pinnacle two free, then $100
+# T crypto-card-for-sending-money-home.md
+**Luxe:** Up to $10,000/month, waived deposit, same cashback.	**Luxe:** Up to $10,000/month, first physical card free then $100, same cashback.
+# F crypto-card-for-europe-travel.md
+**Physical card:** $40 refundable deposit + free virtual card	**Physical card:** $50 fee + free virtual card
+# F what-is-the-best-crypto-card-for-beginners.md
+For physical, ether.fi charges $40 (refundable); others vary.	For physical, ether.fi charges $50; others vary.
+# A how-to-use-eeth-as-collateral.md
+ That's unique in the market and worth the $40 card deposit.	
+# F ether-fi-cash-review-uk.md
+**Core:** $2,000/month (refundable $40 deposit for physical)	**Core:** $2,000/month ($50 fee for physical)
+# T crypto-card-cashback-top-picks.md
+**Issuance fee:** Core $50, Luxe $100, Pinnacle $100, VIP $0	**Issuance fee:** Core $50, Luxe $100, Pinnacle $100, VIP two physical cards included
+# F crypto-card-vs-traditional-debit-card.md
+**Physical card:** **$40 refundable deposit** for Core tier.	**Physical card:** **$50 fee** for Core tier.
+# F crypto-card-for-usdc-spending.md
+Core tier has a $40 one-time (refundable) physical card fee.	Core tier has a $50 physical card fee.
+# T crypto-card-for-africa.md
+**$0 issuance fee** for the first physical card (Core tier)	**$50 issuance fee** for the physical card (Core tier)
+# F best-crypto-card-pennsylvania.md
+**$40 deposit:** Lowest entry cost. Refundable when closed.	**$50 fee:** Lowest entry cost.
+# T is-ether-fi-cash-available-in-my-country.md
+**Key metric:** $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP.	**Key metric:** $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included.
+# F best-crypto-card-dubai.md
+**Physical card:** Free (Core tier); $40 refundable deposit	**Physical card:** $50 (Core tier)
+# F crypto-com-card-frozen.md
+Core tier: $40 refundable deposit to activate physical card	Core tier: $50 fee to activate physical card
+# F crypto-card-for-hotels.md
+Physical card carries a $40 refundable deposit (Core tier).	Physical card carries a $50 fee (Core tier).
+# F best-crypto-card-wyoming.md
+**Core tier:** up to $2,000/month | $40 refundable deposit	**Core tier:** up to $2,000/month | $50 fee
+# F best-crypto-card-for-daily-spending.md
+**Issuance fee:** $40 refundable deposit for physical card	**Issuance fee:** $50 fee for physical card
+# F crypto-card-cashback-calculator.md
+**Refundable physical-card deposit**: $40 returned anytime	**Physical card fee**: $50 on Core
+# T best-stablecoin-card.md
+VIP charges nothing, while every other tier charges a fee.	Core pays $50; Luxe first physical card free, then $100; Pinnacle two free, then $100; VIP two physical cards included.
+# T which-card-is-best-for-international-travel.md
+**Card fee:** Core $50, Luxe $100, Pinnacle $100, VIP $0.	**Card fee:** Core $50, Luxe $100, Pinnacle $100, VIP two physical cards included.
+# F best-crypto-card-wyoming.md
+**Issuance fee:** $40 refundable deposit (Core tier only)	**Issuance fee:** $50 fee (Core tier only)
+# F best-crypto-card-for-online-shopping.md
+Core requires a $40 refundable deposit for physical card.	Core requires a $50 fee for physical card.
+# A crypto-card-for-europe-travel.md
+ First \\u20ac1,500 spend pays back the $40 card deposit.	
+# F ether-fi-cash-review-uk.md
+**Core tier:** 15+ business days, $40 refundable deposit	**Core tier:** 15+ business days, $50 fee
+# F best-crypto-card-for-travel.md
+**Issuance:** Free virtual, $40 refundable (not locked).	**Issuance:** Free virtual, $50 for a Core physical card.
+# F anonymous-crypto-card.md
+**Physical card deposit:** **$40** on Core (refundable).	**Physical card fee:** **$50** on Core.
+# F crypto-card-for-stablecoin-spending.md
+**Physical card:** $40 refundable deposit for first card	**Physical card:** $50 fee for first card
+# T how-long-does-it-take-to-get-a-working-crypto-card.md
+Core costs $50, Luxe and Pinnacle $100 each, and VIP $0.	Core costs $50, Luxe and Pinnacle $100 each, and VIP two physical cards included.
+# F can-my-crypto-card-be-hacked.md
+**Issuance fee:** $0 Core tier, $40 refundable Pinnacle	**Issuance fee:** $50 Core tier, two physical cards free then $100 Pinnacle
+# F how-to-maximize-crypto-card-cashback.md
+**Physical card:** $40 refundable deposit for Core tier	**Physical card:** $50 fee for Core tier
+# F crypto-card-for-b2b-payments.md
+**Pinnacle:** $50,000/month. $40 physical card deposit.	**Pinnacle:** $50,000/month. Two physical cards free, then $100.
+# F crypto-card-for-daily-spending.md
+The Core tier physical card costs **$40 (refundable)**.	The Core tier physical card costs **$50**.
+# F best-crypto-card-toronto.md
+**Issuance fee:** $40 refundable deposit for Core tier	**Issuance fee:** $50 fee for Core tier
+# F crypto-card-for-airbnb.md
+**Issuance:** $40 refundable deposit for physical card	**Issuance:** $50 fee for physical card
+# F best-crypto-card-colorado.md
+Free virtual card, $40 refundable deposit for physical	Free virtual card, $50 fee on Core for physical
+# F best-crypto-card-no-kyc.md
+**Beginner cost:** $40 refundable deposit + free card	**Beginner cost:** $50 fee + free card
+# F crypto-card-for-ecommerce-sellers.md
+**Physical card in 15 days** ($40 refundable deposit)	**Physical card in 15 days** ($50 fee)
+# F best-crypto-card-for-digital-nomads.md
+**Physical card:** $40 refundable deposit (Core tier)	**Physical card:** $50 per physical card (Core tier)
+# T can-i-use-the-card-before-ordering-a-physical-card.md
+**Fees:** $50 Core, $100 Luxe, $100 Pinnacle, $0 VIP	**Fees:** $50 Core, $100 Luxe, $100 Pinnacle, VIP two physical cards included
+# F are-crypto-card-transactions-taxable.md
+**Issuance fee:** $40 refundable deposit (Core tier)	**Issuance fee:** $50 fee (Core tier)
+# F crypto-card-for-b2b-payments.md
+**Luxe:** $10,000/month. $20 physical card deposit.	**Luxe:** $10,000/month. First physical card free, then $100.
+# A crypto-card-cost-vs-reward-calculator.md
+- ether.fi: (3% − 0.4%) × $24,000 − $40 = **$574**\n	
+# F best-crypto-card-for-stablecoins.md
+Core tier: **$40 refundable deposit** for physical.	Core tier: **$50 fee** for physical.
+# F best-crypto-card-for-beginners.md
+The physical card has a **$40 refundable deposit**.	The physical card has a **$50 fee**.
+# F binance-card-europe-alternative.md
+**Issuance fee:** $40 refundable Core-tier deposit	**Issuance fee:** $50 fee
+# T best-crypto-card-dubai.md
+- Monthly limit: $2,000\n- Physical card cost: Free	- Monthly limit: $2,000\n- Physical card cost: $50
+# F crypto-card-for-charitable-giving.md
+Core tier is free (with a $40 refundable deposit).	Core tier is free; the physical card costs $50.
+# A crypto-card-cost-vs-reward-calculator.md
+- ether.fi: (3% − 0%) × $24,000 − $40 = **$680**\n	
+# F crypto-card-tax-australia.md
+Core-tier users pay a $40 AUD refundable deposit.	Core-tier users pay a $50 fee.
+# F best-stablecoin-card.md
+Physical card: $40 refundable deposit (Core tier)	Physical card: $50 fee (Core tier)
+# F crypto-card-for-content-creators.md
+**Card fee:** $40 refundable deposit (Core tier)	**Card fee:** $50 fee (Core tier)
+# T best-crypto-card-london.md
+**Issuance fee:** Free physical card (Core tier)	**Issuance fee:** $50 physical card (Core tier)
+# F crypto-card-for-steam.md
+Core tier is free with a $40 refundable deposit.	Core tier is free; a physical card costs $50.
+# T best-crypto-card-mexico.md
+No issuance fee for the first card on Core tier.	The Core tier physical card costs $50.
+# T best-crypto-card-wyoming.md
+**Luxe tier:** up to $10,000/month | no deposit	**Luxe tier:** up to $10,000/month | first physical card free, then $100
+# T best-crypto-card-uae.md
+**Physical card:** Free issuance, standard 15+	**Physical card:** standard 15+
+# F best-crypto-card-for-low-fees.md
+**Physical-card cost:** $40 refundable deposit	**Physical-card cost:** $50 fee
+# T best-crypto-card-dubai.md
+- **Issuance:** Free physical card (Core tier)	- **Issuance:** $50 physical card (Core tier)
+# F crypto-card-cashback-calculator.md
+[$40 physical-card deposit](<<AFFILIATE_URL>>)	[$50 physical-card fee](<<AFFILIATE_URL>>)
+# A best-crypto-card-for-online-shopping.md
+ The deposit refunds when you close the card.	
+# F can-i-use-crypto-card-on-amazon.md
+$40 refundable deposit required for Core tier	$50 fee required for Core tier
+# T crypto-card-for-africa.md
+**Issuance fee:** free first card (ether.fi),	**Issuance fee:** $50 for a Core physical card (ether.fi),
+# F best-crypto-card-pennsylvania.md
+**Physical card:** **$40 refundable deposit**	**Physical card:** **$50 fee**
+# F best-crypto-card-italy.md
+Core-tier users pay a $40 refundable deposit.	Core-tier users pay a $50 fee.
+# T crypto-card-for-small-business.md
+Core: $2,000/month limit, free physical card.	Core: $2,000/month limit, physical card $50.
+# A best-crypto-card-pennsylvania.md
+ This recovers the $40 deposit in ~3 months.	
+# A best-crypto-card-for-beginners.md
+ You get it back when you close the account.	
+# F crypto-card-comparison.md
+**Card deposit:** $40 refundable (Core tier)	**Card fee:** $50 (Core tier)
+# F best-crypto-card-canada.md
+**Core tier** (free, $40 refundable deposit)	**Core tier** (free, $50 physical card fee)
+# T best-crypto-card-singapore.md
+**Physical card:** Free for Core tier, ships	**Physical card:** $50 fee on Core tier, ships
+# F best-crypto-card-portugal.md
+Core tier includes a $40 refundable deposit.	Core tier includes a $50 fee.
+# T how-to-get-a-crypto-card-in-dubai.md
+The card itself is free; only gas fees apply	The virtual card is free; only gas fees apply
+# T anonymous-crypto-card.md
+ Luxe and Pinnacle don't require deposits.	
+# T can-i-use-the-card-before-ordering-a-physical-card.md
+The VIP tier lists a $0 physical card fee.	The VIP tier includes two physical cards.
+# F anonymous-crypto-card.md
+The refundable deposit on Core is **$40**.	The physical card fee on Core is **$50**.
+# F best-crypto-card-canada.md
+**Physical card:** $40 refundable deposit	**Physical card:** $50 fee
+# T best-crypto-card-2026.md
+- Physical card: **free** first issuance	- Physical card: **$50** on Core
+# F best-crypto-card-for-high-spenders.md
+Easy KYC, $40 deposit, ships in 15+ days	Easy KYC, $50 fee, ships in 15+ days
+# F crypto-card-cost-vs-reward-calculator.md
+Physical card cost: **$40** (refundable)	Physical card cost: **$50**
+# F can-crypto-card-be-used-internationally.md
+**Cost:** Same $40 deposit (refundable)	**Cost:** Same $50 fee on Core
+# F best-crypto-card-mexico.md
+**Deposit:** $40 refundable (Core tier)	**Physical card fee:** $50 (Core tier)
+# T best-crypto-card-for-spending.md
+- **Physical card:** Free issuance, 15+	- **Physical card:** $50 fee on Core, 15+
+# F best-crypto-card-no-kyc.md
+Physical card: $40 deposit (refundable)	Physical card: $50 fee
+# T crypto-card-for-b2b-payments.md
+solopreneurs. First physical card free.	solopreneurs. Core physical card $50.
+# F can-i-use-ether-fi-cash-without-selling-eth.md
+$40 refundable deposit on higher tiers	$100 fee after the free cards on higher tiers
+# T best-crypto-card-mexico.md
+and the Core tier has no issuance fee.	and the Core physical card costs $50.
+# T bleap-vs-ether-fi-cash.md
+**Physical card:** Free on Core tier;	**Physical card:** $50 on Core tier;
+# T can-i-upgrade-or-downgrade-my-tier-later.md
+**VIP:** physical card fee of **$0**.	**VIP:** two physical cards included.
+# T best-crypto-card-wyoming.md
+- **Physical card:** Free (Core), 1–3	- **Physical card:** $50 (Core), 1–3
+# F crypto-card-for-defi-users.md
+Core users pay once; deposit returns.	Core users pay a $50 physical card fee.
+# T best-crypto-card-dubai.md
+and a free physical card that reaches	and a physical card ($50 on Core) that reaches
+# T best-crypto-card-uae.md
+free setup, first card free, earnings	free setup, earnings
+# F crypto-card-for-b2b-payments.md
+First card free. Deposit refundable.	Core physical card $50.
+# T best-crypto-card-for-online-shopping.md
+Luxe and Pinnacle waive the deposit.	Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# T crypto-card-for-usd-spending.md
+Luxe and Pinnacle require deposits.	Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# F best-crypto-card-with-no-fees.md
+Physical card: **$40** (refundable)	Physical card: **$50**
+# F crypto-card-for-daily-spending.md
+Physical card: Yes ($40 refundable)	Physical card: Yes ($50)
+# A binance-card-europe-alternative.md
+Return the card, get the $40 back. 	
+# F best-crypto-card-uk.md
+Zero deposit required for Core tier	$50 physical card fee for Core tier
+# T best-crypto-card-florida.md
+**Physical card:** Free, ships 15+	**Physical card:** $50 fee on Core, ships 15+
+# T crypto-card-for-students.md
+(**$10,000/month**, still no fee)	(**$10,000/month**)
+# F crypto-card-comparison.md
+**Card deposit:** Varies by tier	**Card fee:** Varies by tier
+# T best-crypto-card-dubai.md
+free physical card, self-custody	physical card $50 on Core, self-custody
+# T how-long-does-it-take-to-get-a-physical-card.md
+**Physical card fee (VIP):** $0	**Physical cards (VIP):** two included
+# T crypto-card-for-africa.md
+- **Card fee:** free first card	- **Card fee:** $50 for a Core physical card
+# T do-i-need-to-know-how-to-use-crypto-wallets-to-get-ether-fi.md
+**$100** Pinnacle, **$0** VIP.	**$100** Pinnacle, VIP two physical cards included.
+# T what-s-the-cheapest-crypto-card-for-travel.md
+**Watch:** VIP shows a $0 fee.	**Watch:** VIP includes two physical cards.
+# T can-i-use-the-card-before-ordering-a-physical-card.md
+**VIP:** $0 physical card fee	**VIP:** physical cards: two physical cards included
+# T crypto-card-for-southeast-asia.md
+Core ($2k/mo, free issuance)	Core ($2k/mo, $50 physical card)
+# F best-crypto-card-australia.md
+$40 AUD refundable deposit.	$50 fee on Core.
+# T anonymous-crypto-card.md
+ None on Luxe or Pinnacle.	 Luxe first physical card free, then $100; Pinnacle two free, then $100.
+# T can-i-use-ether-fi-cash-without-selling-eth.md
+- Issued free on Core tier	- $50 fee on Core tier
+# T crypto-card-for-sending-money-home.md
+physical card (free) ships	physical card ($50 fee on Core) ships
+# A crypto-card-for-b2b-payments.md
+Deposits are refundable. 	
+# T crypto-card-for-euro-spending.md
+Free first physical card.	Physical card $50.
+# T best-crypto-card-usa.md
+ (free for Core/Luxe)	
+# T best-crypto-card-illinois.md
+, free for Core tier)	)
+# T can-i-use-my-ether-fi-card-globally-and-what-fx-fees-apply.md
+, and **$0** on VIP,	, and two physical cards included on VIP,
+# T crypto-card-for-hotels.md
+- No issuance fee.\n	
+# T is-ether-fi-cash-available-in-all-us-states.md
+and **$0** for VIP.	and two physical cards included for VIP.
+# T coinbase-card-review.md
+and VIP (free)—with	and VIP (two physical cards included)—with
+# T coinbase-card-review.md
+it costs nothing.	it includes two physical cards.
+# T ether-fi-cash-review-uk.md
+(lower deposit)	(first physical card free, then $100)
+# T can-i-use-ether-fi-cash-outside-the-us.md
+**VIP:** $0	**VIP:** two physical cards included

@@ -141,18 +141,25 @@ def test_a_count_never_outlives_the_list_it_counted(corpus, table):
 
 def test_ireland_is_removed_from_available_lists_and_kept_in_refusals(corpus,
                                                                      table):
-    """Belgium and Ireland are the issuer's own two crosses.
+    """Belgium and Ireland: the table's refusal wording (E-08), then CCH-AVAIL-03's.
 
     Deleting the name wherever it appears would have deleted it from the one
     sentence that had it right, and left that sentence's false half — five
     countries the issuer does serve — standing.
     """
     ce.apply_table(corpus, table, write=True)
+    # CCH-AVAIL-03 supersedes that sentence: the issuer serves both with a
+    # virtual card (article 758780, 2026-11-24). Apply its rows that fit.
+    later = [r for r in ce.load_table(ROOT / "scripts" / "tables"
+                                      / "virtual-only-2026-11.tsv")
+             if any(r[0] in f.read_text(encoding="utf-8") for f in corpus)]
+    ce.apply_table(corpus, later, write=True)
     page = (corpus[0].parent
             / "mica-compliant-vs-non-compliant-crypto-card.md").read_text(
         encoding="utf-8")
-    assert ("Belgium and Ireland are the two European countries the issuer "
-            "refuses outright.") in page
+    assert ("in Belgium and Ireland a virtual card is issued and a physical "
+            "card is not delivered (as of 2026-11-24).") in page
+    assert "refuses outright" not in page
     assert "France, Germany, Spain, Italy, Ireland, UK" not in page
     ships = (corpus[0].parent / "crypto-card-comparison.md").read_text(
         encoding="utf-8")
@@ -255,4 +262,5 @@ def test_belgium_and_ireland_appear_only_where_they_are_refused():
             or "Ireland" in f.read_text(encoding="utf-8")}
     assert hits == {"best-crypto-card-uk",
                     "does-crypto-com-card-work-in-europe",
+                    "ether-fi-cash-not-working",
                     "mica-compliant-vs-non-compliant-crypto-card"}

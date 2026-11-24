@@ -29,6 +29,12 @@ def _dir() -> Path:
     return Path(os.environ.get("API_BATCH_DIR") or Path.home() / "api-batch")
 
 
+def _test_blocked() -> bool:
+    """CCH-PYTEST-02: under pytest the live ~/api-batch and the real wrapper are off limits
+    unless the test points API_BATCH_DIR somewhere itself."""
+    return "PYTEST_CURRENT_TEST" in os.environ and not os.environ.get("API_BATCH_DIR")
+
+
 def disable() -> None:
     """--dry-run: nothing may be submitted."""
     global _refused
@@ -36,7 +42,7 @@ def disable() -> None:
 
 
 def enabled(job: str) -> bool:
-    if _refused:
+    if _refused or _test_blocked():
         return False
     try:
         return job in (_dir() / "jobs").read_text().split()
@@ -73,6 +79,8 @@ def submit(job: str, item_id: str, ref: dict, system: str, user: str, max_tokens
     """True = the item is on the batch lane (submitted now, or already pending).
     False = refused: the caller runs its subscription path."""
     global _refused
+    if _test_blocked():
+        return False
     st = _state(job)
     if any(item_id in b["items"] for b in st["batches"].values()):
         return True
@@ -101,6 +109,8 @@ def submit(job: str, item_id: str, ref: dict, system: str, user: str, max_tokens
 def collect(job: str, handle) -> int:
     """For every ended batch: handle({custom_id: (ref, text-or-None)}), then clear its state entry.
     A handler that raises leaves the entry for the next tick. Returns the number of batches handled."""
+    if _test_blocked():
+        return 0
     n = 0
     for bid, b in list(_state(job)["batches"].items()):
         common = ["--lane", LANE, "--model", b["model"], "--batch-id", bid]

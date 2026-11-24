@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}#stage{width:1080px;height:1920px;position:relative;overflow:hidden}</style>
+</head><body><div id="stage"></div>
+<script src="engine/defycard-video-styles.js"></script>
+<script>
+window.__renderOverlay=function(o){
+  document.getElementById('stage').innerHTML = window.renderStyle(
+    {index:o.index, hook:o.hook, activeIndex:(o.activeIndex==null?null:o.activeIndex), phase:o.phase||'caption', cta:o.cta||'defycard.com', showFTC:o.showFTC!==false},
+    {guides:false});
+  window.__ready=true;
+};
+</script></body></html>

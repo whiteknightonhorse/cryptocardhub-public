@@ -32,6 +32,9 @@ WHAT IT GUARANTEES
 Usage:
     corpus_edit.py --table scripts/tables/affiliate-2026-09.tsv --expect 15 --diff
     corpus_edit.py --table scripts/tables/affiliate-2026-09.tsv --expect 15 --write
+    corpus_edit.py --table T --expect N --write --keep-verified   # no date bump
+A table row whose `old` starts with `#` is written `\\#...`; an unescaped one
+is refused by load_table (it would be dropped as a comment).
 """
 from __future__ import annotations
 
@@ -49,11 +52,11 @@ CONTENT = ROOT / "seo-site" / "src" / "content" / "pseo"
 TODAY = date.today().isoformat()
 
 
-_ESCAPES = {"n": "\n", "\\": "\\"}
+_ESCAPES = {"n": "\n", "\\": "\\", "#": "#"}
 
 
 def unescape(s: str) -> str:
-    r"""`\n` -> newline, `\\` -> backslash. Nothing else is an escape.
+    r"""`\n` -> newline, `\\` -> backslash, `\#` -> `#`. Nothing else is an escape.
 
     A TSV line cannot hold a real newline, and some replacements are whole
     markdown bullets (E-08 deletes a `- **Hungary**` line). Every other
@@ -73,7 +76,13 @@ def load_table(path: Path) -> list[tuple[str, str]]:
     """
     out: list[tuple[str, str]] = []
     for i, line in enumerate(path.read_text(encoding="utf-8").split("\n"), 1):
-        if not line.strip() or line.lstrip().startswith("#"):
+        if not line.strip():
+            continue
+        if line.lstrip().startswith("#"):
+            if "\t" in line:
+                raise ValueError(
+                    f"{path}:{i}: a row whose first cell starts with # would be "
+                    f"read as a comment and dropped; write the row as \\#...")
             continue
         parts = line.split("\t")
         if len(parts) < 2:
@@ -265,8 +274,12 @@ def apply_watch_table(content_dir: Path, pairs: list[tuple[str, str]],
 def apply_table(files: list[Path], table: list[tuple[str, str]],
                 write: bool = False, expect: int | None = None,
                 tolerance: int | None = None,
-                bump_generated: bool = False) -> dict:
-    """Apply exact replacements. Compute everything, THEN decide to write."""
+                bump_generated: bool = False,
+                keep_verified: bool = False) -> dict:
+    """Apply exact replacements. Compute everything, THEN decide to write.
+
+    `keep_verified` leaves the visible "Last verified" date alone: right for an
+    edit that only removes unsourced figures, wrong after a real issuer check."""
     stat: dict = {"applied": 0, "files": 0, "unused": [], "ambiguous": [],
                   "dated": 0, "refused": None, "changed": [], "diffs": [],
                   "generated_bumped": 0}
@@ -291,12 +304,13 @@ def apply_table(files: list[Path], table: list[tuple[str, str]],
                 used.add(old_raw)
         if after == before:
             continue
-        after, bumped = bump_verified(after)
-        if not bumped:
-            after, added = add_verified(after)
-            stat["dated"] += int(added)
-        else:
-            stat["dated"] += 1
+        if not keep_verified:
+            after, bumped = bump_verified(after)
+            if not bumped:
+                after, added = add_verified(after)
+                stat["dated"] += int(added)
+            else:
+                stat["dated"] += 1
         if bump_generated:
             after, gen_bumped = bump_generated_at(after)
             stat["generated_bumped"] += int(gen_bumped)
@@ -349,6 +363,9 @@ def main() -> int:
                          "changed. Off by default: the date follows a real "
                          "content edit, so only a caller that knows its "
                          "replacement is one may ask.")
+    ap.add_argument("--keep-verified", action="store_true",
+                    help="with --table: do not touch the visible `Last "
+                         "verified` date (the edit is not an issuer check)")
     ap.add_argument("--diff", action="store_true")
     ap.add_argument("--content", type=Path, default=CONTENT,
                     help="corpus directory (a tmp copy, when rehearsing)")
@@ -384,7 +401,7 @@ def main() -> int:
           f"({'WRITE' if a.write else 'dry-run'})")
 
     st = apply_table(files, table, a.write, a.expect, a.tolerance,
-                     a.bump_generated)
+                     a.bump_generated, a.keep_verified)
     print(f"  replacements applied : {st['applied']}")
     print(f"  files changed        : {st['files']}   dated: {st['dated']}"
           f"   generated_at bumped: {st['generated_bumped']}")

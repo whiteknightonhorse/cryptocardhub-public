@@ -18,7 +18,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  publishedCards, jurisdictions, cellFor, availabilityNote, defaultDeny,
+  publishedCards, jurisdictions, cellLabel, availabilityNote, defaultDeny,
 } from '../src/lib/availability.mjs';
 import { resolveAffiliate, primaryPartnerFor } from '../src/lib/affiliates.mjs';
 import { dateModifiedFor } from '../src/lib/freshness.mjs';
@@ -256,10 +256,7 @@ async function buildMatrixMarkdown() {
     L.push(`| Country | ${cards.map((c) => c.name).join(' | ')} |`);
     L.push(`|---|${cards.map(() => '---').join('|')}|`);
     for (const name of countries) {
-      const cells = cards.map((c) => {
-        const v = cellFor(c, name, 'country');
-        return v === null ? 'Not stated' : (v ? 'Available' : 'Not available');
-      });
+      const cells = cards.map((c) => cellLabel(c, name, 'country'));
       L.push(`| ${name} | ${cells.join(' | ')} |`);
     }
     if (usStates.length) {
@@ -270,10 +267,7 @@ async function buildMatrixMarkdown() {
       L.push(`| US state | ${cards.map((c) => c.name).join(' | ')} |`);
       L.push(`|---|${cards.map(() => '---').join('|')}|`);
       for (const name of usStates) {
-        const cells = cards.map((c) => {
-          const v = cellFor(c, name, 'state');
-          return v === null ? 'Not stated' : (v ? 'Available' : 'Not available');
-        });
+        const cells = cards.map((c) => cellLabel(c, name, 'state'));
         L.push(`| ${name} | ${cells.join(' | ')} |`);
       }
     }

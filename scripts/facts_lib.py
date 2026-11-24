@@ -12,6 +12,7 @@ CLI: scripts/facts-render.py.
 """
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -117,6 +118,16 @@ def _format_value(fact: dict[str, Any]) -> str:
     return val
 
 
+_HELP_ARTICLE_RE = re.compile(r"https://help\.ether\.fi/en/articles/(\d+)\S*")
+
+
+def _short_source(url: str) -> str:
+    """help.ether.fi article URLs print as `help.ether.fi/articles/<id>`: the slug
+    is not needed to find the article, and the full URL in every row pushed the
+    block past the writer's 7000-character window (CCH-FACTS-08)."""
+    return _HELP_ARTICLE_RE.sub(r"help.ether.fi/articles/\1", url).removeprefix("https://www.").removeprefix("https://")
+
+
 def render(facts: list[dict[str, Any]]) -> str:
     """Render publishable facts as markdown tables, grouped by class.
 
@@ -147,7 +158,7 @@ def render(facts: list[dict[str, Any]]) -> str:
         for fact in sorted(rows, key=lambda f: f["id"]):
             lines.append(
                 f"| `{fact['id']}` | {_format_value(fact)} | {fact['verified_at']} "
-                f"| {fact['source_url']} |"
+                f"| {_short_source(fact['source_url'])} |"
             )
         lines.append("")
     lines.append(MARKER_END)

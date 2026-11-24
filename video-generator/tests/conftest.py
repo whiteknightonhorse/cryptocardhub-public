@@ -3,12 +3,17 @@ write the live state/ or logs/ of a running channel."""
 from __future__ import annotations
 import json
 import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
 from pipeline import analytics, pattern_selector
+
+# `tests` is a namespace package spanning scripts/tests too (pipeline puts scripts/ on
+# sys.path), so `from tests.conftest import ...` would resolve to the wrong conftest.
+sys.modules.setdefault("tests.conftest", sys.modules[__name__])
 
 
 def write_stub_media(path, seconds: float):
