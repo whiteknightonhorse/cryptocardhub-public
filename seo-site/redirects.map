@@ -108,3 +108,7 @@
 /for/crypto-card-for-travel/	/compare/best-crypto-card-for-travel/
 /for/crypto-card-with-no-foreign-transaction-fee/	/compare/best-crypto-card-no-foreign-transaction-fee/
 /faq/what-is-the-best-crypto-card-with-no-annual-fee/	/compare/best-crypto-card-with-no-annual-fee/
+
+# CCH-SEO-09 — near-duplicate consolidation: weaker page 301s to the stronger.
+# CCH-MONEY-05 - page built on an invented annual tier fee; operator decision 2026-11-25
+/faq/can-i-change-my-card-tier-after-signing-up/	/faq/can-i-upgrade-or-downgrade-my-tier-later/

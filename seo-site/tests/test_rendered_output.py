@@ -192,6 +192,23 @@ def test_no_dead_plasma_host_reaches_the_reader():
             _raw_hits(DEAD_PLASMA_HOST, _sidecars()), MAX_DEAD_PLASMA_HOST)
 
 
+# CCH-MONEY-04b/04b2: ether.fi never described the card fee as a refundable deposit.
+# One page generated after the 04a2 table is owed to the dispatcher (04a2 note,
+# "Found outside scope"); it is named here, not hidden, and the set must shrink to {}.
+REFUNDABLE_DEPOSIT = re.compile(r"\$40\s+refundable")
+OWED_PAGES = {"crypto-card-for-groceries"}
+
+
+def test_no_refundable_card_deposit_on_any_page():
+    """The ether.fi card fee is $50 Core / $100 Luxe / $100 Pinnacle; VIP includes
+    two physical cards. Never a "$40 refundable" deposit. Checked on every built
+    page and sidecar."""
+    assert REFUNDABLE_DEPOSIT.search("a $40 refundable deposit")   # control
+    pages = [f for f in _pages() + _sidecars() if f.parent.name not in OWED_PAGES]
+    assert len(pages) >= 300, f"only {len(pages)} built files"
+    _report("$40 refundable", _raw_hits(REFUNDABLE_DEPOSIT, pages), 0)
+
+
 def test_sidecars_keep_markdown_but_never_a_placeholder():
     """Markdown is the native syntax of a .md sidecar — bold and links there are
     correct and must NOT be 'fixed'. Only an unsubstituted placeholder or the
