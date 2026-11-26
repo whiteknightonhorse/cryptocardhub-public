@@ -3,7 +3,7 @@
     "added": "2026-11-14",
     "bucket": "for",
     "bytes": 122069,
-    "description": "Use ether.fi Cash to spend crypto anonymously without surrendering custody. Up to 3% cashback, non-custodial, Visa in 76 countries.",
+    "description": "Use ether.fi Cash to spend crypto anonymously without surrendering custody. Up to 3% cashback, non-custodial, Visa in the countries on the issuer's list.",
     "image": "/assets/pins/anonymous-crypto-card.jpg",
     "title": "Anonymous Crypto Card for High Net Worth — Self-Custody Spending",
     "url": "https://defycard.com/for/anonymous-crypto-card/"
@@ -133,6 +133,15 @@
     "image": "/assets/pins/credit-card-vs-crypto-card-for-daily-expenses.jpg",
     "title": "Credit Card vs Crypto Card for Daily Expenses: Which Pays More?",
     "url": "https://defycard.com/learn/credit-card-vs-crypto-card-for-daily-expenses/"
+  },
+  "crypto-card-capital-gains": {
+    "added": "2026-11-25",
+    "bucket": "geo",
+    "bytes": 156718,
+    "description": "Learn how crypto cards affect capital gains taxes in the UK and Germany. Compare top crypto cards for tax efficiency and maximize cashback rewards.",
+    "image": "/assets/pins/crypto-card-capital-gains.jpg",
+    "title": "Crypto Card Capital Gains: Tax Guide for UK & Germany",
+    "url": "https://defycard.com/geo/crypto-card-capital-gains/"
   },
   "crypto-card-cashback-top-picks": {
     "added": "2026-10-24",
@@ -287,20 +296,20 @@
     "title": "Crypto Card for Thailand Travel — Live Spending While Staked",
     "url": "https://defycard.com/for/crypto-card-for-thailand-travel/"
   },
-  "crypto-card-for-turkey-lira": {
-    "added": "2026-11-19",
+  "crypto-card-for-usd-spending": {
+    "added": "2026-11-25",
     "bucket": "for",
-    "bytes": 106116,
-    "description": "Compare crypto cards for Turkish Lira in 2026. Top options: Crypto.com, RedotPay, Bybit. Get up to 40% rewards on transactions. KYC & setup guide.",
-    "image": "/assets/pins/crypto-card-for-turkey-lira.jpg",
-    "title": "Best Crypto Cards for Turkish Lira Users (2026)",
-    "url": "https://defycard.com/for/crypto-card-for-turkey-lira/"
+    "bytes": 84657,
+    "description": "Compare crypto cards for USD spending with 0% forex fees and rewards. Find the best non-custodial card for multi-currency spending worldwide.",
+    "image": "/assets/pins/crypto-card-for-usd-spending.jpg",
+    "title": "Crypto Card for USD Spending: 0% FX + 3% Cashback",
+    "url": "https://defycard.com/for/crypto-card-for-usd-spending/"
   },
   "crypto-card-for-usdc-spending": {
     "added": "2026-11-07",
     "bucket": "for",
     "bytes": 125374,
-    "description": "Spend USDC with ether.fi Cash and earn up to 3% cashback instantly. Non-custodial, self-storage, 76+ countries. Get started now.",
+    "description": "Spend USDC with ether.fi Cash and earn up to 3% cashback instantly. Non-custodial, self-storage, the countries on the issuer's list. Get started now.",
     "image": "/assets/pins/crypto-card-for-usdc-spending.jpg",
     "title": "Crypto Card for USDC Spending: Earn While You Spend",
     "url": "https://defycard.com/for/crypto-card-for-usdc-spending/"
@@ -363,7 +372,7 @@
     "added": "2026-11-19",
     "bucket": "for",
     "bytes": 83292,
-    "description": "Find crypto cards with minimal KYC requirements. ether.fi Cash approves in hours via 3 steps: ID, phone, selfie. Non-custodial, 3% cashback, 76 countries.",
+    "description": "Find crypto cards with minimal KYC requirements. ether.fi Cash approves in hours via 3 steps: ID, phone, selfie. Non-custodial, 3% cashback.",
     "image": "/assets/pins/crypto-card-with-low-kyc.jpg",
     "title": "Crypto Card With Low KYC: Fast Approval & High Limits",
     "url": "https://defycard.com/for/crypto-card-with-low-kyc/"
@@ -673,15 +682,6 @@
     "image": "/assets/pins/how-to-get-a-crypto-card-in-eu.jpg",
     "title": "How to Get a Crypto Card in the EU: ether.fi Cash",
     "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-eu/"
-  },
-  "how-to-get-a-crypto-card-in-india": {
-    "added": "2026-11-01",
-    "bucket": "how-to",
-    "bytes": 105880,
-    "description": "Step-by-step guide to getting a crypto card in India, Nigeria & Dubai. ether.fi Cash for UAE/Nigeria, Crypto.com & RedotPay for Indian residents.",
-    "image": "/assets/pins/how-to-get-a-crypto-card-in-india.jpg",
-    "title": "How to Get a Crypto Card in India: Best Regional Options & Alternatives",
-    "url": "https://defycard.com/how-to/how-to-get-a-crypto-card-in-india/"
   },
   "how-to-get-a-crypto-card-in-nigeria": {
     "added": "2026-11-01",
@@ -1168,6 +1168,15 @@
     "image": "/assets/pins/what-is-direct-pay-vs-borrow.jpg",
     "title": "Direct Pay vs. Borrow on Crypto Cards",
     "url": "https://defycard.com/learn/what-is-direct-pay-vs-borrow/"
+  },
+  "what-is-genius-act-stablecoin": {
+    "added": "2026-11-25",
+    "bucket": "learn",
+    "bytes": 169010,
+    "description": "Learn about Genius Act stablecoins, direct pay vs borrow, and on-ramp mechanics for crypto cards. Essential knowledge for self-custody payments.",
+    "image": "/assets/pins/what-is-genius-act-stablecoin.jpg",
+    "title": "What Is Genius Act Stablecoin? Payment Mechanisms Explained",
+    "url": "https://defycard.com/learn/what-is-genius-act-stablecoin/"
   },
   "what-is-on-ramp-on-a-crypto-card": {
     "added": "2026-11-17",

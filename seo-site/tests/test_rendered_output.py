@@ -516,3 +516,21 @@ def test_faq_jsonld_escapes_lt():
             if "<" in body:
                 bad.append(str(f.parent.relative_to(DIST)))
     assert not bad, f"{len(bad)} pages: {bad[:5]}"
+
+
+def test_no_fx_eur_beta_marker_reaches_the_reader():
+    """CCH-FX-02b: the issuer no longer marks 0% FX on EUR as beta (article 304414)."""
+    bad = [str(f.parent.relative_to(DIST)) for f in _pages()
+           if re.search(r"FX on EUR \(beta\)", f.read_text(encoding="utf-8"))]
+    bad += [n for n in ("llms-full.txt", "llms.txt")
+            if (DIST / n).exists()
+            and re.search(r"FX on EUR \(beta\)", (DIST / n).read_text(encoding="utf-8"))]
+    assert not bad, f"{len(bad)} pages: {bad[:5]}"
+
+
+def test_no_eur_only_fx_scope_claim_reaches_the_reader():
+    """CCH-FACTS-09: the issuer (article 304414) puts USD on the 0% line; no page may say our file lacks it."""
+    rx = re.compile(r"does not verify a 0% line for USD|no longer print that claim for USD|fact file supports|EUR only in our fact file")
+    bad = [str(f.relative_to(DIST)) for f in _pages() + _sidecars()
+           if rx.search(f.read_text(encoding="utf-8"))]
+    assert not bad, f"{len(bad)} files: {bad[:5]}"

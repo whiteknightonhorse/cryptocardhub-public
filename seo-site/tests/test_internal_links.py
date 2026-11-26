@@ -73,6 +73,10 @@ EXPECTED_REDIRECTS = {
     "/news/ether-fi-expansion/": "/geo/availability-matrix/",
     "/learn/crypto-card-security/": "/learn/are-crypto-cards-safe/",
     "/learn/staking-rewards-explained/": "/learn/what-is-liquid-staking/",
+    # CCH-REDOTPAY-05 - pages built on a false availability or custody premise, operator decision 2026-11-25.
+    "/for/crypto-card-for-turkey-lira/": "/geo/best-crypto-card-turkey/",
+    "/how-to/how-to-get-a-crypto-card-in-india/": "/geo/best-crypto-card-india/",
+    "/reviews/redotpay-complaints/": "/reviews/is-redotpay-legit/",
     # CCH-MONEY-05 - page built on an invented annual tier fee, operator decision 2026-11-25.
     "/faq/can-i-change-my-card-tier-after-signing-up/": "/faq/can-i-upgrade-or-downgrade-my-tier-later/",
     "/compare/crypto-card-cashback/": "/hub/crypto-card-cashback-top-picks/",

@@ -61,7 +61,7 @@ def _write_facts(tmp_path: Path, facts: list[dict]) -> Path:
 
 def test_the_real_facts_file_loads_and_validates():
     facts = fl.load()
-    assert len(facts) == 49
+    assert len(facts) == 50
     ids = [f["id"] for f in facts]
     assert len(ids) == len(set(ids)), "duplicate ids"
 
@@ -476,6 +476,12 @@ def test_fee_and_fx_facts_follow_the_2026_11_24_issuer_pages():
         assert f["value"] == fee and "304368" in f["source_url"]
     assert "etherfi.fee.physical_card.vip" not in facts
     assert facts["etherfi.rate.fx_eur_zero"]["status"] == "current"
+    usd = facts["etherfi.rate.fx_usd_zero"]
+    assert usd["status"] == "current" and usd["value"] == 0
+    assert usd["applies_to"] == {"currency": "USD"}
+    capture = (fl.ROOT / "taskloop/logs/CCH-FACTS-06/etherfi-304414-2026-11-24.html").read_text(encoding="utf-8")
+    assert "in a currency other than USD or EUR" in capture
+    assert usd["source_quote"] == "Foreign exchange (FX) rates apply when you make a transaction in a currency other than USD or EUR."
     assert facts["etherfi.rate.fx_added_fee.core"]["value"] == 0.5
     for f in facts.values():
         assert "376356" not in f["source_url"], f["id"]

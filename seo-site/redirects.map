@@ -112,3 +112,9 @@
 # CCH-SEO-09 — near-duplicate consolidation: weaker page 301s to the stronger.
 # CCH-MONEY-05 - page built on an invented annual tier fee; operator decision 2026-11-25
 /faq/can-i-change-my-card-tier-after-signing-up/	/faq/can-i-upgrade-or-downgrade-my-tier-later/
+
+# CCH-SEO-09 — near-duplicate consolidation: weaker page 301s to the stronger.
+# CCH-REDOTPAY-05 - pages built on a false availability or custody premise; operator decision 2026-11-25
+/for/crypto-card-for-turkey-lira/	/geo/best-crypto-card-turkey/
+/how-to/how-to-get-a-crypto-card-in-india/	/geo/best-crypto-card-india/
+/reviews/redotpay-complaints/	/reviews/is-redotpay-legit/
